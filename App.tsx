@@ -12,7 +12,14 @@ import ProgressScreen from './src/screens/ProgressScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import { ThemeProvider, useThemeMode } from './src/context/ThemeContext';
-import { LanguageProvider } from './src/context/LanguageContext';
+import { LanguageProvider, useLanguage } from './src/context/LanguageContext';
+import {
+  requestNotificationPermission,
+  scheduleStreakReminder,
+  scheduleEveningCheckIn,
+  scheduleMilestoneNotifications,
+  cancelAllNotifications,
+} from './src/services/notifications';
 
 const TAB_SCREENS: ScreenType[] = ['Home', 'Progress', 'Stats', 'Profile'];
 
@@ -21,6 +28,7 @@ const AppContent = () => {
   const currentScreenRef = React.useRef(currentScreen);
   useEffect(() => { currentScreenRef.current = currentScreen; }, [currentScreen]);
   const { isDark } = useThemeMode();
+  const { lang } = useLanguage();
   const [session, setSession] = useState<any>(null);
   const [journey, setJourney] = useState<any>(null);
   const [showCraving, setShowCraving] = useState(false);
@@ -49,6 +57,7 @@ const AppContent = () => {
         }
         // For TOKEN_REFRESHED, just silently update the session, no navigation
       } else {
+        cancelAllNotifications();
         setJourney(null);
         setLoading(false);
         reset('Welcome');
@@ -68,8 +77,20 @@ const AppContent = () => {
     setLoading(false);
     if (!data) {
       navigate('Onboarding');
-    } else if (currentScreenRef.current === 'Welcome' || currentScreenRef.current === 'Onboarding') {
-      navigate('Home');
+    } else {
+      // Schedule notifications for the journey
+      if (Platform.OS !== 'web') {
+        requestNotificationPermission().then(granted => {
+          if (granted && data?.quit_date) {
+            scheduleStreakReminder(lang);
+            scheduleEveningCheckIn(lang);
+            scheduleMilestoneNotifications(data.quit_date, lang);
+          }
+        });
+      }
+      if (currentScreenRef.current === 'Welcome' || currentScreenRef.current === 'Onboarding') {
+        navigate('Home');
+      }
     }
   };
 
