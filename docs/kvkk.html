@@ -3,131 +3,207 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KVKK Aydınlatma Metni - Smoke App</title>
+  <title>KVKK Aydınlatma Metni — Smoke</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0A0A14; color: #E0E0E8; line-height: 1.7; }
-    .topbar { background: linear-gradient(135deg, #6C63FF, #4B44CC); padding: 20px; text-align: center; }
-    .topbar a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; }
-    .topbar a:hover { color: #fff; }
-    .container { max-width: 800px; margin: 0 auto; padding: 48px 24px 80px; }
-    h1 { font-size: 32px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-    .updated { font-size: 13px; color: #9E9EBF; margin-bottom: 40px; }
-    h2 { font-size: 20px; font-weight: 600; color: #fff; margin: 36px 0 12px; border-left: 3px solid #6C63FF; padding-left: 12px; }
-    h3 { font-size: 16px; font-weight: 600; color: #C0C0D8; margin: 20px 0 8px; }
-    p { margin-bottom: 14px; color: #C0C0D8; }
-    ul { margin: 12px 0 16px 24px; }
-    li { margin-bottom: 8px; color: #C0C0D8; }
-    .highlight { background: #1A1A2E; border: 1px solid #2D2D4E; border-radius: 12px; padding: 20px 24px; margin: 20px 0; }
-    .highlight strong { color: #6C63FF; }
-    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-    th { background: #1A1A2E; padding: 12px 16px; text-align: left; color: #fff; font-size: 14px; border: 1px solid #2D2D4E; }
-    td { padding: 12px 16px; border: 1px solid #2D2D4E; font-size: 14px; color: #C0C0D8; }
-    tr:nth-child(even) td { background: #12121F; }
-    .contact-box { background: linear-gradient(135deg, #6C63FF22, #4B44CC22); border: 1px solid #6C63FF44; border-radius: 16px; padding: 24px; margin-top: 40px; }
-    .contact-box h2 { border: none; padding: 0; margin-top: 0; }
-    footer { text-align: center; padding: 32px; color: #6B6B8A; font-size: 13px; border-top: 1px solid #2D2D4E; }
-    footer a { color: #6C63FF; text-decoration: none; }
+    body { background: #0A0A1A; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+    .header { padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 800; color: #fff; text-decoration: none; }
+    .logo-icon { font-size: 28px; }
+    .lang-toggle { display: flex; gap: 8px; }
+    .lang-btn { padding: 6px 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: rgba(255,255,255,0.6); cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+    .lang-btn.active { background: #7C3AED; border-color: #7C3AED; color: #fff; }
+    .container { max-width: 760px; margin: 0 auto; padding: 40px 24px 80px; }
+    h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; color: #fff; }
+    .subtitle { color: #A3A3C2; font-size: 14px; margin-bottom: 32px; }
+    .card { background: rgba(18,18,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+    h2 { font-size: 16px; font-weight: 700; color: #8B5CF6; margin-bottom: 12px; }
+    p { color: #A3A3C2; line-height: 1.7; font-size: 14px; margin-bottom: 10px; }
+    ul { color: #A3A3C2; line-height: 1.7; font-size: 14px; padding-left: 20px; }
+    li { margin-bottom: 6px; }
+    a { color: #7C3AED; text-decoration: none; }
+    a:hover { color: #8B5CF6; }
+    .contact-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3); border-radius: 12px; padding: 12px 20px; color: #8B5CF6; font-weight: 600; font-size: 14px; margin-top: 8px; }
+    .footer { text-align: center; color: #5A5A7A; font-size: 12px; padding: 24px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 40px; }
+    .back-link { color: #A3A3C2; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+    .back-link:hover { color: #fff; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+    th { background: rgba(124,58,237,0.15); padding: 10px 14px; text-align: left; color: #8B5CF6; font-weight: 700; border: 1px solid rgba(255,255,255,0.08); }
+    td { padding: 10px 14px; border: 1px solid rgba(255,255,255,0.08); color: #A3A3C2; }
+    tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <a href="index.html">← Ana Sayfa</a>
-  </div>
+  <header class="header">
+    <a href="index.html" class="logo"><span class="logo-icon">🚭</span>Smoke</a>
+    <div class="lang-toggle">
+      <button class="lang-btn" id="btn-tr" onclick="switchLang('tr')">🇹🇷 TR</button>
+      <button class="lang-btn" id="btn-en" onclick="switchLang('en')">🇬🇧 EN</button>
+    </div>
+  </header>
 
   <div class="container">
-    <h1>KVKK Aydınlatma Metni</h1>
-    <p class="updated">Son güncelleme: 14 Haziran 2026</p>
 
-    <div class="highlight">
-      <p><strong>Smoke</strong> uygulaması olarak, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında veri sorumlusu sıfatıyla sizleri aydınlatmak isteriz.</p>
+    <!-- TURKISH CONTENT -->
+    <div class="tr-content">
+      <a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
+      <br><br>
+      <h1>KVKK Aydınlatma Metni</h1>
+      <p class="subtitle">Son güncelleme: Haziran 2025</p>
+
+      <div class="card">
+        <h2>1. Veri Sorumlusu</h2>
+        <p>Bu uygulama kapsamında kişisel verileriniz, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) uyarınca <strong style="color:#fff">Smoke Uygulaması</strong> tarafından işlenmektedir.</p>
+        <div class="contact-badge">📧 <a href="mailto:ozgeee.od@gmail.com">ozgeee.od@gmail.com</a></div>
+      </div>
+
+      <div class="card">
+        <h2>2. Toplanan Kişisel Veriler</h2>
+        <table>
+          <tr><th>Veri Kategorisi</th><th>Veri Türü</th><th>Zorunluluk</th></tr>
+          <tr><td>Kimlik</td><td>Ad soyad (isteğe bağlı), e-posta adresi</td><td>Zorunlu</td></tr>
+          <tr><td>Sağlık Davranışı</td><td>Sigara bırakma tarihi, günlük sigara miktarı, sigara markası</td><td>Zorunlu</td></tr>
+          <tr><td>Aktivite</td><td>Uygulama kullanım verileri, sigara içme isteği kayıtları</td><td>Zorunlu</td></tr>
+          <tr><td>Finansal (Hesaplama)</td><td>Sigara paket fiyatı (sunucuya yüklenmez)</td><td>Zorunlu</td></tr>
+          <tr><td>Cihaz</td><td>Cihaz kimliği, işletim sistemi, bildirim tokeni</td><td>Opsiyonel</td></tr>
+          <tr><td>Konum</td><td>Sigara isteği sırasında manuel girilen konum</td><td>Opsiyonel</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>3. Veri İşleme Amacı</h2>
+        <ul>
+          <li>Sigarayı bırakma sürecinin takibi ve kişisel istatistiklerin oluşturulması</li>
+          <li>Uygulama hesabının oluşturulması ve kimlik doğrulaması</li>
+          <li>Kişiselleştirilmiş deneyim sunulması</li>
+          <li>Bildirim ve hatırlatma hizmetlerinin sağlanması</li>
+          <li>Teknik hata takibi ve uygulama iyileştirmesi</li>
+          <li>Anonim istatistiksel analizler (kişisel kimlik bilgisi içermeyen)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>4. Veri Saklama</h2>
+        <ul>
+          <li>Hesap verileri: Hesap silinene kadar</li>
+          <li>Sağlık davranış verileri: Hesap silinene kadar veya tarafınızdan silinene kadar</li>
+          <li>Teknik log verileri: 90 gün</li>
+          <li>Anonim istatistiksel veriler: Süresiz (kişisel kimlik içermez)</li>
+        </ul>
+        <p style="margin-top:10px">Tüm veriler Supabase altyapısında güvenli olarak saklanmaktadır. SSL/TLS şifrelemesi ve Row Level Security (RLS) uygulanmaktadır.</p>
+      </div>
+
+      <div class="card">
+        <h2>5. Kullanıcı Hakları (KVKK Madde 11)</h2>
+        <p>KVKK Madde 11 kapsamında aşağıdaki haklara sahipsiniz:</p>
+        <ul>
+          <li>Kişisel veri işlenip işlenmediğini öğrenme</li>
+          <li>Kişisel veriler işlenmişse buna ilişkin bilgi talep etme</li>
+          <li>Kişisel verilerin eksik veya yanlış işlenmesi halinde düzeltilmesini isteme</li>
+          <li>Kişisel verilerin silinmesini veya yok edilmesini isteme</li>
+          <li>İşlenen veriler aleyhine sonuç doğuran otomatik analizlere itiraz etme</li>
+          <li>Kanuna aykırı işleme nedeniyle uğranılan zararın giderilmesini talep etme</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>6. İletişim</h2>
+        <p>KVKK kapsamındaki haklarınıza ilişkin taleplerinizi aşağıdaki e-posta adresi aracılığıyla iletebilirsiniz. Talepler 30 gün içinde yanıtlanır.</p>
+        <div class="contact-badge">📧 <a href="mailto:ozgeee.od@gmail.com">ozgeee.od@gmail.com</a></div>
+        <p style="margin-top:14px">Talebiniz reddedilirse veya yanıt tatmin edici bulunmazsa Kişisel Verileri Koruma Kurumu'na (KVKK) şikayet hakkınız mevcuttur.</p>
+      </div>
     </div>
 
-    <h2>1. Veri Sorumlusu</h2>
-    <p>Bu uygulama kapsamında kişisel verileriniz;<br>
-    <strong>Veri Sorumlusu:</strong> Rıza UZUNKAYA<br>
-    <strong>E-posta:</strong> descanpo2@gmail.com<br>
-    tarafından işlenecektir.</p>
+    <!-- ENGLISH CONTENT -->
+    <div class="en-content" style="display:none">
+      <a href="index.html" class="back-link">← Back to Home</a>
+      <br><br>
+      <h1>KVKK Privacy Disclosure</h1>
+      <p class="subtitle">Last updated: June 2025</p>
 
-    <h2>2. İşlenen Kişisel Veriler</h2>
-    <table>
-      <tr>
-        <th>Veri Kategorisi</th>
-        <th>Veri Türü</th>
-        <th>Zorunluluk</th>
-      </tr>
-      <tr><td>Kimlik</td><td>Ad soyad (isteğe bağlı), e-posta adresi</td><td>Zorunlu</td></tr>
-      <tr><td>Sağlık Davranışı</td><td>Sigara bırakma tarihi, günlük sigara miktarı, sigara markası</td><td>Zorunlu</td></tr>
-      <tr><td>Aktivite</td><td>Uygulama kullanım verileri, sigara içme isteği kayıtları</td><td>Zorunlu</td></tr>
-      <tr><td>Finansal (Hesaplama)</td><td>Sigara paket fiyatı (sunucuda yükleme yapılmaz)</td><td>Zorunlu</td></tr>
-      <tr><td>Cihaz</td><td>Cihaz kimliği, işletim sistemi, bildirim tokeni</td><td>Opsiyonel</td></tr>
-      <tr><td>Konum</td><td>Sigara isteği sırasında manuel girilen konum</td><td>Opsiyonel</td></tr>
-    </table>
+      <div class="card">
+        <h2>1. Data Controller</h2>
+        <p>Your personal data is processed by <strong style="color:#fff">Smoke App</strong> as the data controller under Turkish Personal Data Protection Law No. 6698 (KVKK).</p>
+        <div class="contact-badge">📧 <a href="mailto:ozgeee.od@gmail.com">ozgeee.od@gmail.com</a></div>
+      </div>
 
-    <h2>3. Kişisel Verilerin İşlenme Amaçları</h2>
-    <ul>
-      <li>Sigarayı bırakma sürecinin takibi ve kişisel istatistiklerin oluşturulması</li>
-      <li>Uygulama hesabının oluşturulması ve kimlik doğrulaması</li>
-      <li>Bildirim ve hatırlatma hizmetlerinin sunulması</li>
-      <li>Topluluk özelliği aracılığıyla anonimleştirilmiş paylaşımlar</li>
-      <li>Anonim istatistiksel analizler (kişisel kimlik bilgisi içermeyen)</li>
-      <li>Teknik hata takibi ve uygulama iyileştirmesi</li>
-    </ul>
+      <div class="card">
+        <h2>2. Personal Data Collected</h2>
+        <table>
+          <tr><th>Category</th><th>Data Type</th><th>Required</th></tr>
+          <tr><td>Identity</td><td>Full name (optional), email address</td><td>Required</td></tr>
+          <tr><td>Health Behavior</td><td>Quit date, daily cigarette count, cigarette brand</td><td>Required</td></tr>
+          <tr><td>Activity</td><td>App usage data, craving records</td><td>Required</td></tr>
+          <tr><td>Financial (Calculation)</td><td>Cigarette pack price (not stored on server)</td><td>Required</td></tr>
+          <tr><td>Device</td><td>Device ID, operating system, notification token</td><td>Optional</td></tr>
+          <tr><td>Location</td><td>Manually entered location during craving</td><td>Optional</td></tr>
+        </table>
+      </div>
 
-    <h2>4. Kişisel Verilerin İşlenmesinin Hukuki Sebebi</h2>
-    <ul>
-      <li><strong>KVKK Madde 5/2-c:</strong> Bir sözleşmenin kurulması veya ifasıyla doğrudan ilgili olması (hizmet sözleşmesi)</li>
-      <li><strong>KVKK Madde 5/2-ç:</strong> İlgili kişinin temel hak ve özgürlüklerine zarar vermemek kaydıyla, veri sorumlusunun meşru menfaatleri için veri işlenmesinin zorunlu olması</li>
-      <li><strong>KVKK Madde 5/1:</strong> Açık rıza gerektiren hallerde açık rızanız</li>
-    </ul>
+      <div class="card">
+        <h2>3. Purpose of Processing</h2>
+        <ul>
+          <li>Tracking the quit-smoking journey and generating personal statistics</li>
+          <li>Creating and authenticating user accounts</li>
+          <li>Providing a personalized in-app experience</li>
+          <li>Delivering notifications and reminders</li>
+          <li>Technical error tracking and app improvement</li>
+          <li>Anonymous statistical analysis (no personal identifiers)</li>
+        </ul>
+      </div>
 
-    <h2>5. Kişisel Verilerin Aktarılması</h2>
-    <p>Kişisel verileriniz aşağıdaki altyapı sağlayıcılara KVKK Madde 8 ve 9 kapsamında aktarılmaktadır:</p>
-    <table>
-      <tr><th>Alıcı</th><th>Amacu00e7</th><th>Konum</th></tr>
-      <tr><td>Supabase Inc.</td><td>Veritabanı ve kimlik doğrulama</td><td>Singapur (ap-southeast-1)</td></tr>
-      <tr><td>Expo / EAS</td><td>Uygulama dağıtımı ve güncellemeler</td><td>ABD</td></tr>
-      <tr><td>Apple / Google</td><td>Uygulama mağazası ve bildirimler</td><td>ABD</td></tr>
-    </table>
-    <p>Yurt dışına veri aktarımı KVKK Madde 9 kapsamında, ilgili ülkelerin yeterli koruma sağlaması veya yeterli korumanın bulunmaması halinde açık rızanız alınarak yapılmaktadır.</p>
+      <div class="card">
+        <h2>4. Data Retention</h2>
+        <ul>
+          <li>Account data: Until account deletion</li>
+          <li>Health behavior data: Until account deletion or manual deletion by user</li>
+          <li>Technical log data: 90 days</li>
+          <li>Anonymous statistical data: Indefinitely (no personal identifiers)</li>
+        </ul>
+        <p style="margin-top:10px">All data is securely stored on Supabase infrastructure with SSL/TLS encryption and Row Level Security (RLS).</p>
+      </div>
 
-    <h2>6. Kişisel Verilerin Saklanması</h2>
-    <ul>
-      <li>Hesap verileri: Hesap silinene kadar</li>
-      <li>Sağlık davranış verileri: Hesap silinene kadar veya tarafınızdan silinene kadar</li>
-      <li>Teknik log verileri: 90 gün</li>
-      <li>Anonim istatistiksel veriler: Süresiz (kişisel kimlik içermez)</li>
-    </ul>
+      <div class="card">
+        <h2>5. User Rights (KVKK Article 11)</h2>
+        <p>Under KVKK Article 11, you have the following rights:</p>
+        <ul>
+          <li>To learn whether your personal data is being processed</li>
+          <li>To request information if your personal data has been processed</li>
+          <li>To request correction of incomplete or incorrect data</li>
+          <li>To request deletion or destruction of your personal data</li>
+          <li>To object to automated analysis that produces results against you</li>
+          <li>To claim compensation for damages arising from unlawful processing</li>
+        </ul>
+      </div>
 
-    <h2>7. Kişisel Veri Sahibinin Hakları (KVKK Madde 11)</h2>
-    <p>KVKK Madde 11 kapsamında aşağıdaki haklara sahipsiniz:</p>
-    <ul>
-      <li>Kişisel veri işlenip işlenmediğini öğrenme</li>
-      <li>Kişisel veriler işlenmisse buna ilişkin bilgi talep etme</li>
-      <li>Kişisel verilerin işlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme</li>
-      <li>Yurt içinde veya yurt dışında kişisel verilerin aktarıldığı üçüncü kişileri bilme</li>
-      <li>Kişisel verilerin eksik veya yanlış işlenmesi halinde bunların düzeltirilmesini talep etme</li>
-      <li>KVKK Madde 7'de öngörülen şartlar çerçevesinde kişisel verilerin silinmesini veya yok edilmesini isteme</li>
-      <li>Kişisel verilerin düzeltiilmesi, silinmesi veya yok edilmesine ilişkin işlemlerin kişisel verilerin aktarıldığı üçüncü kişilere bildirilmesini isteme</li>
-      <li>Otomatik sistemler vasıtasıyla analiz edilmesi suretiyle kişinin kendisi aleyhine bir sonucun ortaya çıkmasına itiraz etme</li>
-      <li>Kişisel verilerin kanuna aykırı olarak işlenmesi sebebiyle zarara uğraması halinde zararın giderilmesini talep etme</li>
-    </ul>
-
-    <div class="contact-box">
-      <h2>Başvuru ve İletişim</h2>
-      <p>KVKK kapsamındaki haklara ilişkin taleplerinizi aşağıdaki kanallar aracılığıyla iletebilirsiniz:</p>
-      <ul>
-        <li><strong>E-posta:</strong> descanpo2@gmail.com</li>
-        <li><strong>Konu:</strong> KVKK Başvuru - Smoke App</li>
-        <li><strong>Yanıt Süresi:</strong> 30 gün içinde yanıtlanır</li>
-      </ul>
-      <p style="margin-top: 12px">Talebiniz reddedilirse veya yanıt tatmin edici bulunmaz ise Kişisel Verileri Koruma Kurumu'na (KVKK) şikayet hakkınız mevcuttur.</p>
+      <div class="card">
+        <h2>6. Contact</h2>
+        <p>You may submit your KVKK-related requests via the email address below. Requests are responded to within 30 days.</p>
+        <div class="contact-badge">📧 <a href="mailto:ozgeee.od@gmail.com">ozgeee.od@gmail.com</a></div>
+        <p style="margin-top:14px">If your request is rejected or the response is unsatisfactory, you have the right to file a complaint with the Personal Data Protection Authority (KVKK).</p>
+      </div>
     </div>
+
   </div>
 
-  <footer>
-    <p>&copy; 2026 Smoke App &bull; <a href="mailto:descanpo2@gmail.com">descanpo2@gmail.com</a></p>
-    <p style="margin-top: 8px"><a href="index.html">Ana Sayfa</a> &bull; <a href="privacy.html">Gizlilik</a> &bull; <a href="terms.html">Koşullar</a></p>
+  <footer class="footer">
+    <p>© 2025 Smoke App. Tüm hakları saklıdır. / All rights reserved.</p>
+    <p style="margin-top:6px"><a href="mailto:ozgeee.od@gmail.com">ozgeee.od@gmail.com</a></p>
+    <p style="margin-top:10px"><a href="index.html">Ana Sayfa</a> &bull; <a href="privacy.html">Gizlilik / Privacy</a> &bull; <a href="terms.html">Koşullar / Terms</a></p>
   </footer>
+
+  <script>
+    function switchLang(lang) {
+      document.querySelectorAll('.tr-content').forEach(el => el.style.display = lang === 'tr' ? 'block' : 'none');
+      document.querySelectorAll('.en-content').forEach(el => el.style.display = lang === 'en' ? 'block' : 'none');
+      document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('btn-' + lang).classList.add('active');
+      localStorage.setItem('smoke_legal_lang', lang);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('smoke_legal_lang') || 'tr';
+      switchLang(saved);
+    });
+  </script>
 </body>
 </html>

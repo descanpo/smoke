@@ -3,89 +3,229 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gizlilik Politikası - Smoke App</title>
+  <title>Gizlilik Politikası / Privacy Policy — Smoke</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0A0A14; color: #C0C0D8; line-height: 1.7; }
-    .topbar { background: linear-gradient(135deg, #6C63FF, #4B44CC); padding: 20px; text-align: center; }
-    .topbar a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; }
-    .container { max-width: 800px; margin: 0 auto; padding: 48px 24px 80px; }
-    h1 { font-size: 32px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-    .updated { font-size: 13px; color: #9E9EBF; margin-bottom: 40px; }
-    h2 { font-size: 20px; font-weight: 600; color: #fff; margin: 36px 0 12px; border-left: 3px solid #6C63FF; padding-left: 12px; }
-    p { margin-bottom: 14px; }
-    ul { margin: 12px 0 16px 24px; }
-    li { margin-bottom: 8px; }
-    .badge { display: inline-block; background: #4CAF5022; border: 1px solid #4CAF50; border-radius: 20px; padding: 4px 14px; font-size: 13px; color: #4CAF50; margin-bottom: 20px; }
-    footer { text-align: center; padding: 32px; color: #6B6B8A; font-size: 13px; border-top: 1px solid #2D2D4E; }
-    footer a { color: #6C63FF; text-decoration: none; }
+    body { background: #0A0A1A; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+    .header { padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 800; color: #fff; text-decoration: none; }
+    .logo-icon { font-size: 28px; }
+    .lang-toggle { display: flex; gap: 8px; }
+    .lang-btn { padding: 6px 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: rgba(255,255,255,0.6); cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+    .lang-btn.active { background: #7C3AED; border-color: #7C3AED; color: #fff; }
+    .container { max-width: 760px; margin: 0 auto; padding: 40px 24px 80px; }
+    h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; color: #fff; }
+    .subtitle { color: #A3A3C2; font-size: 14px; margin-bottom: 32px; }
+    .card { background: rgba(18,18,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+    h2 { font-size: 16px; font-weight: 700; color: #8B5CF6; margin-bottom: 12px; }
+    h3 { font-size: 14px; font-weight: 700; color: #C4B5FD; margin: 14px 0 8px; }
+    p { color: #A3A3C2; line-height: 1.7; font-size: 14px; margin-bottom: 10px; }
+    ul { color: #A3A3C2; line-height: 1.7; font-size: 14px; padding-left: 20px; }
+    li { margin-bottom: 6px; }
+    a { color: #7C3AED; text-decoration: none; }
+    a:hover { color: #8B5CF6; }
+    .contact-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3); border-radius: 12px; padding: 12px 20px; color: #8B5CF6; font-weight: 600; font-size: 14px; margin-top: 8px; }
+    .footer { text-align: center; color: #5A5A7A; font-size: 12px; padding: 24px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 40px; }
+    .back-link { color: #A3A3C2; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+    .back-link:hover { color: #fff; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(76,175,80,0.12); border: 1px solid rgba(76,175,80,0.3); border-radius: 20px; padding: 4px 14px; font-size: 12px; color: #4CAF50; margin-bottom: 24px; }
   </style>
 </head>
 <body>
-  <div class="topbar"><a href="index.html">← Ana Sayfa</a></div>
+  <header class="header">
+    <a href="index.html" class="logo"><span class="logo-icon">🚭</span>Smoke</a>
+    <div class="lang-toggle">
+      <button class="lang-btn" id="btn-tr" onclick="switchLang('tr')">🇹🇷 TR</button>
+      <button class="lang-btn" id="btn-en" onclick="switchLang('en')">🇬🇧 EN</button>
+    </div>
+  </header>
 
   <div class="container">
-    <h1>Gizlilik Politikası</h1>
-    <p class="updated">Son güncelleme: 14 Haziran 2026</p>
-    <span class="badge">✅ KVKK Uyumlu</span>
 
-    <p>Smoke uygulaması olarak gizliliğinize önem veriyoruz. Bu politika, hangi verileri topladığımızı, nasıl kullandığımızı ve nasıl koruduğumuzu açıklar.</p>
+    <!-- TURKISH CONTENT -->
+    <div class="tr-content">
+      <a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
+      <br><br>
+      <h1>Gizlilik Politikası</h1>
+      <p class="subtitle">Son güncelleme: Haziran 2025</p>
+      <span class="badge">✅ KVKK Uyumlu</span>
 
-    <h2>1. Topladığımız Veriler</h2>
-    <h3>Zorunlu Veriler</h3>
-    <ul>
-      <li><strong>Hesap bilgileri:</strong> E-posta adresi, şifre (hashlenmiş)</li>
-      <li><strong>Profil bilgileri:</strong> Kullanıcı adı (isteğe bağlı)</li>
-      <li><strong>Yolculuk verileri:</strong> Sigarayı bırakma tarihi, günlük sigara sayısı, paket fiyatı</li>
-    </ul>
-    <h3>Opsiyonel Veriler</h3>
-    <ul>
-      <li><strong>Craving kayıtları:</strong> İstek tarihi, yoğunluk, tetikleyici (siz girmezseniz toplanmaz)</li>
-      <li><strong>Topluluk paylaşımları:</strong> Anonim veya isimli paylaşımlar (tercihine göre)</li>
-      <li><strong>Günlük kontrol:</strong> Ruh hali ve enerji seviyesi kaydı</li>
-      <li><strong>Nefes egzersizi:</strong> Tamamlanan egzersiz süresi</li>
-    </ul>
-    <h3>Otomatik Toplanan Veriler</h3>
-    <ul>
-      <li>Cihaz türü ve işletim sistemi</li>
-      <li>Uygulama kullanım süresi (anonim)</li>
-      <li>Hata raporları (kişisel veri içermez)</li>
-    </ul>
+      <div class="card">
+        <p>Smoke uygulaması olarak gizliliğinize önem veriyoruz. Bu politika, hangi verileri topladığımızı, nasıl kullandığımızı ve nasıl koruduğumuzu açıklar.</p>
+      </div>
 
-    <h2>2. Verilerinizi Nasıl Kullanıyoruz</h2>
-    <ul>
-      <li>Sigarayı bırakma sürecini takip etmek ve kişisel istatistikler sunmak</li>
-      <li>Hesabınızı doğrulamak ve güvende tutmak</li>
-      <li>Kilometre taşı ve rozet bildirimleri göndermek</li>
-      <li>Uygulamayı geliştirmek (anonim, toplu verilerle)</li>
-    </ul>
+      <div class="card">
+        <h2>1. Topladığımız Veriler</h2>
+        <h3>Zorunlu Veriler</h3>
+        <ul>
+          <li><strong style="color:#fff">Hesap bilgileri:</strong> E-posta adresi, şifre (hashlenmiş)</li>
+          <li><strong style="color:#fff">Profil bilgileri:</strong> Kullanıcı adı (isteğe bağlı)</li>
+          <li><strong style="color:#fff">Yolculuk verileri:</strong> Sigarayı bırakma tarihi, günlük sigara sayısı, paket fiyatı</li>
+        </ul>
+        <h3>Opsiyonel Veriler</h3>
+        <ul>
+          <li><strong style="color:#fff">Craving kayıtları:</strong> İstek tarihi, yoğunluk, tetikleyici (siz girmezseniz toplanmaz)</li>
+          <li><strong style="color:#fff">Topluluk paylaşımları:</strong> Anonim veya isimli paylaşımlar (tercihine göre)</li>
+          <li><strong style="color:#fff">Günlük kontrol:</strong> Ruh hali ve enerji seviyesi kaydı</li>
+          <li><strong style="color:#fff">Nefes egzersizi:</strong> Tamamlanan egzersiz süresi</li>
+        </ul>
+        <h3>Otomatik Toplanan Veriler</h3>
+        <ul>
+          <li>Cihaz türü ve işletim sistemi</li>
+          <li>Uygulama kullanım süresi (anonim)</li>
+          <li>Hata raporları (kişisel veri içermez)</li>
+        </ul>
+      </div>
 
-    <h2>3. Veri Paylaşımı</h2>
-    <p>• Verileriniz <strong>hiçbir reklam network'une</strong> satılmaz veya paylaşılmaz.<br>
-    • Verileriniz <strong>yasal zorunluluk</strong> dışında üçüncü taraflarla paylaşılmaz.<br>
-    • Uygulamanın teknik altyapısı Supabase (Singapore) üzerinde çalışmaktadır.</p>
+      <div class="card">
+        <h2>2. Verilerinizi Nasıl Kullanıyoruz</h2>
+        <ul>
+          <li>Sigarayı bırakma sürecini takip etmek ve kişisel istatistikler sunmak</li>
+          <li>Hesabınızı doğrulamak ve güvende tutmak</li>
+          <li>Kilometre taşı ve rozet bildirimleri göndermek</li>
+          <li>Uygulamayı geliştirmek (anonim, toplu verilerle)</li>
+          <li>Kişiselleştirilmiş deneyim sunmak</li>
+        </ul>
+      </div>
 
-    <h2>4. Veri Güvenliği</h2>
-    <ul>
-      <li>Tüm veriler SSL/TLS şifrelemesi ile iletilir</li>
-      <li>Şifreler bcrypt ile hashlenerek saklanır, hiçbir zaman düzce metin olarak tutulmaz</li>
-      <li>Veritabanı Row Level Security (RLS) ile korunmaktadır; her kullanıcı yalnızca kendi verilerine erişebilir</li>
-      <li>API anahtarları cihazda güvenli depolama (Secure Store) ile saklanır</li>
-    </ul>
+      <div class="card">
+        <h2>3. Veri Paylaşımı</h2>
+        <ul>
+          <li>Verileriniz hiçbir reklam ağına satılmaz veya paylaşılmaz.</li>
+          <li>Verileriniz yasal zorunluluk dışında üçüncü taraflarla paylaşılmaz.</li>
+          <li>Uygulamanın teknik altyapısı Supabase (Singapur) üzerinde çalışmaktadır.</li>
+        </ul>
+      </div>
 
-    <h2>5. Çocukların Gizliliği</h2>
-    <p>Smoke uygulaması 18 yaşını doldurmuş bireyler için tasarlanmıştır. 18 yaşın altındaki kişilerden bilerek veri toplamayız.</p>
+      <div class="card">
+        <h2>4. Veri Güvenliği</h2>
+        <ul>
+          <li>Tüm veriler SSL/TLS şifrelemesi ile iletilir</li>
+          <li>Şifreler bcrypt ile hashlenerek saklanır, düz metin olarak tutulmaz</li>
+          <li>Veritabanı Row Level Security (RLS) ile korunur; her kullanıcı yalnızca kendi verilerine erişebilir</li>
+          <li>API anahtarları cihazda güvenli depolama (Secure Store) ile saklanır</li>
+        </ul>
+      </div>
 
-    <h2>6. Hesabınızı Silme</h2>
-    <p>Uygulamadan <strong>Profil &gt; Hesabı Sil</strong> seçeneği ile tüm verilerinizi kalıcı olarak silebilirsiniz. Ya da descanpo2@gmail.com adresine e-posta göndererek 30 gün içinde silme talebinizi işleme koymamızı isteyebilirsiniz.</p>
+      <div class="card">
+        <h2>5. Çocukların Gizliliği</h2>
+        <p>Smoke uygulaması 18 yaşını doldurmuş bireyler için tasarlanmıştır. 18 yaşın altındaki kişilerden bilerek veri toplamayız.</p>
+      </div>
 
-    <h2>7. İletişim</h2>
-    <p>Gizlilik hakkında sorularınız için: <strong>descanpo2@gmail.com</strong></p>
+      <div class="card">
+        <h2>6. Hesabınızı Silme</h2>
+        <p>Uygulamadan <strong style="color:#fff">Profil &gt; Hesabı Sil</strong> seçeneği ile tüm verilerinizi kalıcı olarak silebilirsiniz. Ayrıca aşağıdaki e-posta adresine yazarak 30 gün içinde silme talebinizi işleme koymamızı isteyebilirsiniz.</p>
+      </div>
+
+      <div class="card">
+        <h2>7. İletişim</h2>
+        <p>Gizlilik hakkında sorularınız için:</p>
+        <div class="contact-badge">📧 <a href="mailto:ozgeee.od@gmail.com">ozgeee.od@gmail.com</a></div>
+      </div>
+    </div>
+
+    <!-- ENGLISH CONTENT -->
+    <div class="en-content" style="display:none">
+      <a href="index.html" class="back-link">← Back to Home</a>
+      <br><br>
+      <h1>Privacy Policy</h1>
+      <p class="subtitle">Last updated: June 2025</p>
+      <span class="badge">✅ KVKK Compliant</span>
+
+      <div class="card">
+        <p>At Smoke, we value your privacy. This policy explains what data we collect, how we use it, and how we protect it.</p>
+      </div>
+
+      <div class="card">
+        <h2>1. Data We Collect</h2>
+        <h3>Required Data</h3>
+        <ul>
+          <li><strong style="color:#fff">Account information:</strong> Email address, password (hashed)</li>
+          <li><strong style="color:#fff">Profile information:</strong> Username (optional)</li>
+          <li><strong style="color:#fff">Journey data:</strong> Quit date, daily cigarette count, pack price</li>
+        </ul>
+        <h3>Optional Data</h3>
+        <ul>
+          <li><strong style="color:#fff">Craving records:</strong> Date, intensity, trigger (only if you enter it)</li>
+          <li><strong style="color:#fff">Community posts:</strong> Anonymous or named sharing (your choice)</li>
+          <li><strong style="color:#fff">Daily check-in:</strong> Mood and energy level</li>
+          <li><strong style="color:#fff">Breathing exercises:</strong> Completed exercise duration</li>
+        </ul>
+        <h3>Automatically Collected Data</h3>
+        <ul>
+          <li>Device type and operating system</li>
+          <li>App usage duration (anonymous)</li>
+          <li>Error reports (no personal data)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>2. How We Use Your Data</h2>
+        <ul>
+          <li>To track your quit-smoking journey and provide personal statistics</li>
+          <li>To verify and secure your account</li>
+          <li>To send milestone and badge notifications</li>
+          <li>To improve the app using anonymous, aggregated data</li>
+          <li>To provide a personalized in-app experience</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>3. Data Sharing</h2>
+        <ul>
+          <li>Your data is never sold or shared with any advertising networks.</li>
+          <li>Your data is not shared with third parties except as required by law.</li>
+          <li>The app's technical infrastructure runs on Supabase (Singapore).</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>4. Data Security</h2>
+        <ul>
+          <li>All data is transmitted with SSL/TLS encryption</li>
+          <li>Passwords are hashed with bcrypt and never stored in plain text</li>
+          <li>The database is protected with Row Level Security (RLS); each user can only access their own data</li>
+          <li>API keys are stored on-device using Secure Store</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>5. Children's Privacy</h2>
+        <p>Smoke is designed for individuals aged 18 and over. We do not knowingly collect data from anyone under 18.</p>
+      </div>
+
+      <div class="card">
+        <h2>6. Deleting Your Account</h2>
+        <p>You can permanently delete all your data via <strong style="color:#fff">Profile &gt; Delete Account</strong> in the app. You may also contact us at the email below to request deletion within 30 days.</p>
+      </div>
+
+      <div class="card">
+        <h2>7. Contact</h2>
+        <p>For privacy-related questions:</p>
+        <div class="contact-badge">📧 <a href="mailto:ozgeee.od@gmail.com">ozgeee.od@gmail.com</a></div>
+      </div>
+    </div>
+
   </div>
 
-  <footer>
-    <p>&copy; 2026 Smoke App &bull; <a href="mailto:descanpo2@gmail.com">descanpo2@gmail.com</a></p>
-    <p style="margin-top: 8px"><a href="index.html">Ana Sayfa</a> &bull; <a href="kvkk.html">KVKK</a> &bull; <a href="terms.html">Koşullar</a></p>
+  <footer class="footer">
+    <p>© 2025 Smoke App. Tüm hakları saklıdır. / All rights reserved.</p>
+    <p style="margin-top:6px"><a href="mailto:ozgeee.od@gmail.com">ozgeee.od@gmail.com</a></p>
+    <p style="margin-top:10px"><a href="index.html">Ana Sayfa</a> &bull; <a href="kvkk.html">KVKK</a> &bull; <a href="terms.html">Koşullar / Terms</a></p>
   </footer>
+
+  <script>
+    function switchLang(lang) {
+      document.querySelectorAll('.tr-content').forEach(el => el.style.display = lang === 'tr' ? 'block' : 'none');
+      document.querySelectorAll('.en-content').forEach(el => el.style.display = lang === 'en' ? 'block' : 'none');
+      document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('btn-' + lang).classList.add('active');
+      localStorage.setItem('smoke_legal_lang', lang);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('smoke_legal_lang') || 'tr';
+      switchLang(saved);
+    });
+  </script>
 </body>
 </html>

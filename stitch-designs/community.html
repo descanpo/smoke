@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Topluluk - Smoke</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&amp;family=Inter:wght@400;500&amp;family=Public+Sans:wght@400;500&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        background: {
+                            DEFAULT: "#0A0A1A",
+                            secondary: "#0F0F1F",
+                            tertiary: "#12122A"
+                        },
+                        primary: {
+                            DEFAULT: "#7C3AED",
+                            light: "#8B5CF6"
+                        },
+                        secondary: {
+                            DEFAULT: "#06B6D4"
+                        },
+                        success: {
+                            DEFAULT: "#10B981"
+                        },
+                        warning: {
+                            DEFAULT: "#F59E0B"
+                        },
+                        text: {
+                            primary: "#FFFFFF",
+                            secondary: "#A3A3C2"
+                        }
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans", "sans-serif"],
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Public Sans", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0A0A1A;
+            color: #FFFFFF;
+        }
+        
+        /* Glassmorphism utility classes */
+        .glass-card {
+            background: rgba(18, 18, 42, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        .glass-nav {
+            background: rgba(18, 18, 42, 0.8);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gradient-border-top {
+            position: relative;
+        }
+        .gradient-border-top::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #7C3AED, #06B6D4);
+            border-top-left-radius: inherit;
+            border-top-right-radius: inherit;
+        }
+
+        /* Hide scrollbar for horizontal scrolling */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body min-h-screen pb-24 relative overflow-x-hidden">
+<!-- Decorative Background Elements -->
+<div class="fixed top-[-10%] left-[-10%] w-96 h-96 bg-primary/20 rounded-full blur-[100px] pointer-events-none z-0"></div>
+<div class="fixed bottom-[20%] right-[-10%] w-80 h-80 bg-secondary/10 rounded-full blur-[80px] pointer-events-none z-0"></div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 backdrop-blur-xl bg-[#0A0A1A]/60 flex justify-between items-center px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#7C3AED]" data-icon="smoke_free">smoke_free</span>
+<h1 class="text-2xl font-headline font-extrabold tracking-tighter text-white">Smoke</h1>
+</div>
+<button class="text-[#A3A3C2] hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="pt-24 px-6 relative z-10 max-w-2xl mx-auto">
+<!-- Header Section -->
+<div class="flex justify-between items-start mb-8">
+<div>
+<h2 class="font-headline font-bold text-3xl tracking-tight mb-1 text-white">Topluluk</h2>
+<p class="text-text-secondary">Birlikte daha güçlüsünüz 💪</p>
+</div>
+<button class="bg-gradient-to-r from-primary to-primary-light text-white font-medium py-2 px-4 rounded-full shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity active:scale-95 flex items-center gap-1 text-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                Paylaşım Yap
+            </button>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-3 overflow-x-auto no-scrollbar pb-4 mb-6 -mx-6 px-6">
+<button class="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap">Tümü</button>
+<button class="glass-card text-text-secondary hover:text-white px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border border-white/5">Motivasyon</button>
+<button class="glass-card text-text-secondary hover:text-white px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border border-white/5">Kilometre Taşı</button>
+<button class="glass-card text-text-secondary hover:text-white px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border border-white/5">İpucu</button>
+<button class="glass-card text-text-secondary hover:text-white px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border border-white/5">Hikaye</button>
+</div>
+<!-- Feed List -->
+<div class="space-y-6">
+<!-- Card 1 -->
+<article class="glass-card rounded-xl p-5 gradient-border-top relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-bold text-white shrink-0 shadow-lg shadow-primary/30">
+                        AY
+                    </div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-bold font-headline">Ayşe Y.</h3>
+<span class="text-xs text-text-secondary">3 Gün</span>
+</div>
+<div class="mb-3">
+<span class="inline-block bg-primary/10 text-primary-light text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full mb-2 border border-primary/20">Motivasyon</span>
+<p class="text-sm leading-relaxed">21 günü geçtim! Artık nefes almak çok daha kolay 🎉</p>
+</div>
+<div class="flex gap-4 text-text-secondary">
+<button class="flex items-center gap-1.5 hover:text-primary transition-colors text-sm">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+                                24
+                            </button>
+<button class="flex items-center gap-1.5 hover:text-secondary transition-colors text-sm">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+                                8
+                            </button>
+</div>
+</div>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="glass-card rounded-xl p-5 relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-background-secondary flex items-center justify-center text-text-secondary shrink-0 border border-white/10">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-bold font-headline text-text-secondary">Anonim</h3>
+<span class="text-xs text-text-secondary">5 Saat</span>
+</div>
+<div class="mb-3">
+<span class="inline-block bg-secondary/10 text-secondary text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full mb-2 border border-secondary/20">İpucu</span>
+<p class="text-sm leading-relaxed">Sigara içme isteği geldiğinde hemen su için. Gerçekten işe yarıyor!</p>
+</div>
+<div class="flex gap-4 text-text-secondary">
+<button class="flex items-center gap-1.5 hover:text-primary transition-colors text-sm">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+                                12
+                            </button>
+<button class="flex items-center gap-1.5 hover:text-secondary transition-colors text-sm">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+                                3
+                            </button>
+</div>
+</div>
+</div>
+</article>
+<!-- Card 3 -->
+<article class="glass-card rounded-xl p-5 gradient-border-top relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-[#1e1e38] flex items-center justify-center font-bold text-white shrink-0 border border-white/10">
+                        MT
+                    </div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-bold font-headline">Mehmet T.</h3>
+<span class="text-xs text-text-secondary">1 Gün</span>
+</div>
+<div class="mb-3">
+<span class="inline-block bg-success/10 text-success text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full mb-2 border border-success/20">Kilometre Taşı</span>
+<p class="text-sm leading-relaxed">Bugün 1 aylık oldum! ₺3,780 tasarruf ettim 💰</p>
+</div>
+<div class="flex gap-4 text-text-secondary">
+<button class="flex items-center gap-1.5 text-primary hover:opacity-80 transition-opacity text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">favorite</span>
+                                47
+                            </button>
+<button class="flex items-center gap-1.5 hover:text-secondary transition-colors text-sm">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+                                15
+                            </button>
+</div>
+</div>
+</div>
+</article>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md rounded-full z-50 backdrop-blur-2xl bg-[#12122A]/80 border border-white/10 shadow-2xl shadow-purple-500/10 flex justify-around items-center py-3 px-2 md:hidden">
+<button class="flex flex-col items-center justify-center text-[#A3A3C2] hover:text-white transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label text-[10px] font-medium uppercase tracking-wider">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#A3A3C2] hover:text-white transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined mb-1" data-icon="query_stats">query_stats</span>
+<span class="font-label text-[10px] font-medium uppercase tracking-wider">Progress</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#A3A3C2] hover:text-white transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined mb-1" data-icon="leaderboard">leaderboard</span>
+<span class="font-label text-[10px] font-medium uppercase tracking-wider">Stats</span>
+</button>
+<!-- Active Tab: Community (Topluluk context maps here) -->
+<button class="flex flex-col items-center justify-center text-[#8B5CF6] font-bold hover:text-white transition-colors active:scale-90 duration-200 relative">
+<div class="absolute inset-0 bg-primary/20 rounded-full blur-md -z-10 w-12 h-12 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+<span class="material-symbols-outlined mb-1" data-icon="group" data-weight="fill" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-label text-[10px] uppercase tracking-wider">Community</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#A3A3C2] hover:text-white transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label text-[10px] font-medium uppercase tracking-wider">Profile</span>
+</button>
+</nav>
+<!-- Web Nav (Hidden on Mobile) -->
+<nav class="hidden md:flex fixed top-0 right-24 h-[72px] items-center gap-6 z-50">
+<button class="text-[#A3A3C2] hover:text-white transition-colors text-sm font-medium">Home</button>
+<button class="text-[#A3A3C2] hover:text-white transition-colors text-sm font-medium">Progress</button>
+<button class="text-[#A3A3C2] hover:text-white transition-colors text-sm font-medium">Stats</button>
+<button class="text-[#8B5CF6] font-bold text-sm">Community</button>
+<button class="text-[#A3A3C2] hover:text-white transition-colors text-sm font-medium">Profile</button>
+</nav>
+</body></html>

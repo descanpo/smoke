@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>Smoke — Sigarayı Bırak</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { height: 100%; width: 100%; background: #0A0A14; overflow: hidden; }
+      #app-root { height: 100%; width: 100%; max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; }
+    </style>
+  </head>
+  <body>
+    <div id="app-root"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+      }
+    </script>
+    <script type="module" src="/index.web.js"></script>
+  </body>
+</html>

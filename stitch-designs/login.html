@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Smoke - Sigarayı Bırakmanın En Akıllı Yolu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&amp;family=Inter:wght@400;500&amp;family=Public+Sans:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#7C3AED",
+          "background-light": "#f7f6f8",
+          "background-dark": "#171121",
+          navy: {
+              900: '#0A0A1A',
+              800: '#12122A'
+          },
+          accent: {
+              purple: '#7C3AED',
+              violet: '#8B5CF6',
+              cyan: '#06B6D4'
+          },
+          muted: '#A3A3C2'
+        },
+        fontFamily: {
+          "display": ["Public Sans"],
+          "headline": ["Plus Jakarta Sans", "sans-serif"],
+          "body": ["Inter", "sans-serif"],
+          "label": ["Public Sans", "sans-serif"]
+        },
+        borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+      },
+    },
+  }
+</script>
+<style>
+        body {
+            background-color: #0A0A1A;
+            color: #FFFFFF;
+        }
+        .glass-card {
+            background: rgba(18, 18, 42, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glass-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .glass-input:focus {
+            border-color: #7C3AED;
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.2);
+            outline: none;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .glow-button {
+            background: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%);
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+            transition: all 0.3s ease;
+        }
+        .glow-button:hover {
+            box-shadow: 0 6px 25px rgba(124, 58, 237, 0.6);
+            transform: translateY(-2px);
+        }
+        .glow-button:active {
+            transform: translateY(1px);
+        }
+        
+        /* Blurred background orbs */
+        .bg-orb-1 {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, rgba(10, 10, 26, 0) 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .bg-orb-2 {
+            position: fixed;
+            bottom: -20%;
+            right: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, rgba(10, 10, 26, 0) 70%);
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            pointer-events: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body min-h-screen flex flex-col items-center justify-center relative overflow-x-hidden antialiased selection:bg-accent-purple/30 bg-background-dark">
+<!-- Decorative Background -->
+<div class="bg-orb-1"></div>
+<div class="bg-orb-2"></div>
+<main class="w-full max-w-md px-6 py-12 flex flex-col gap-8 z-10">
+<!-- Header Section -->
+<div class="flex flex-col items-center text-center space-y-4">
+<div class="relative w-24 h-24 flex items-center justify-center">
+<div class="absolute inset-0 bg-primary/20 rounded-full filter blur-xl animate-pulse"></div>
+<span class="text-6xl relative z-10">🚭</span>
+</div>
+<div class="space-y-1">
+<h1 class="font-headline font-extrabold text-[40px] tracking-tight text-white leading-none">Smoke</h1>
+<p class="font-body text-muted text-sm font-medium">Sigarayı bırakmanın en akıllı yolu</p>
+</div>
+</div>
+<!-- Feature Cards -->
+<div class="flex flex-col gap-3">
+<div class="glass-card rounded-xl p-4 flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-accent-cyan/10 flex items-center justify-center shrink-0">
+<span class="text-xl">💰</span>
+</div>
+<p class="font-body text-sm text-gray-200">Türk Lirası tasarruf hesabı</p>
+</div>
+<div class="glass-card rounded-xl p-4 flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-[#10B981]/10 flex items-center justify-center shrink-0">
+<span class="text-xl">❤️</span>
+</div>
+<p class="font-body text-sm text-gray-200">Sağlık iyileşme zaman çizelgesi</p>
+</div>
+<div class="glass-card rounded-xl p-4 flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10">
+<span class="text-xl">🇹🇷</span>
+</div>
+<p class="font-body text-sm text-gray-200">KVKK uyumlu</p>
+</div>
+</div>
+<!-- Auth Section -->
+<div class="glass-card rounded-2xl p-6 flex flex-col gap-6 w-full">
+<!-- Auth Toggle -->
+<div class="flex p-1 bg-navy-900/50 rounded-full border border-white/5 relative">
+<!-- Active Indicator Background -->
+<div class="absolute w-[calc(50%-4px)] h-[calc(100%-8px)] bg-white/10 rounded-full shadow-sm transition-transform duration-300 left-1 top-1"></div>
+<button class="flex-1 py-2 text-sm font-medium font-label rounded-full text-white z-10 relative">Giriş Yap</button>
+<button class="flex-1 py-2 text-sm font-medium font-label rounded-full text-muted hover:text-white transition-colors z-10 relative">Kayıt Ol</button>
+</div>
+<!-- Social Login -->
+<button class="w-full bg-white text-gray-900 rounded-full py-3.5 flex items-center justify-center gap-3 font-medium hover:bg-gray-100 transition-colors shadow-sm">
+<svg class="w-5 h-5" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.63 16.88 16.8 15.71 17.58V20.34H19.28C21.36 18.42 22.56 15.6 22.56 12.25Z" fill="#4285F4"></path>
+<path d="M12 23C14.97 23 17.46 22.02 19.28 20.34L15.71 17.58C14.73 18.24 13.48 18.64 12 18.64C9.13 18.64 6.7 16.7 5.84 14.1H2.15V16.96C3.96 20.55 7.69 23 12 23Z" fill="#34A853"></path>
+<path d="M5.84 14.1C5.62 13.44 5.5 12.74 5.5 12C5.5 11.26 5.62 10.56 5.84 9.9V7.04H2.15C1.4 8.54 1 10.22 1 12C1 13.78 1.4 15.46 2.15 16.96L5.84 14.1Z" fill="#FBBC05"></path>
+<path d="M12 5.36C13.62 5.36 15.06 5.92 16.2 7.01L19.35 3.86C17.45 2.09 14.97 1 12 1C7.69 1 3.96 3.45 2.15 7.04L5.84 9.9C6.7 7.3 9.13 5.36 12 5.36Z" fill="#EA4335"></path>
+</svg>
+                Google ile Giriş Yap
+            </button>
+<!-- Divider -->
+<div class="flex items-center gap-4">
+<div class="h-px bg-white/10 flex-1"></div>
+<span class="text-xs font-label text-muted uppercase tracking-wider">veya</span>
+<div class="h-px bg-white/10 flex-1"></div>
+</div>
+<!-- Form -->
+<form class="flex flex-col gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted text-[20px]">mail</span>
+<input class="w-full glass-input rounded-xl py-3.5 pl-12 pr-4 text-sm font-body placeholder:text-muted/70 block w-full focus:ring-0" placeholder="E-posta" type="email"/>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted text-[20px]">lock</span>
+<input class="w-full glass-input rounded-xl py-3.5 pl-12 pr-12 text-sm font-body placeholder:text-muted/70 block w-full focus:ring-0" placeholder="Şifre" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-white transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+<div class="flex justify-end">
+<a class="text-xs text-accent-cyan hover:text-white transition-colors font-medium" href="#">Şifremi unuttum</a>
+</div>
+<button class="glow-button w-full rounded-full py-4 text-white font-headline font-bold text-sm tracking-wide flex items-center justify-center gap-2 mt-2" type="submit">
+                    Giriş Yap
+                    <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</form>
+</div>
+<!-- Footer -->
+<div class="text-center">
+<p class="text-[10px] text-muted/60 font-body leading-relaxed max-w-[280px] mx-auto">
+                Giriş yaparak veya kayıt olarak <a class="underline hover:text-white" href="#">Kullanım Şartları</a>'nı ve <a class="underline hover:text-white" href="#">Gizlilik Politikası</a>'nı kabul etmiş olursunuz. KVKK aydınlatma metnine <a class="underline hover:text-white" href="#">buradan</a> ulaşabilirsiniz.
+            </p>
+</div>
+</main>
+</body></html>
