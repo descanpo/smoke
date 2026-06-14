@@ -1,36 +1,78 @@
-# Smoke - Sigarayı Bırakma Uygulaması
+# 🚭 Smoke - Sigarayı Bırakma Uygulaması
 
-Smoke, sigarayı bırakmak isteyenler için geliştirilmiş kapsamlı bir React Native mobil uygulamasıdır.
+> Türkiye'nin ilk KVKK uyumlu, Türkçe-first sigarayı bırakma uygulaması.
 
-## Özellikler
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-aktif-brightgreen)](https://descanpo.github.io/smoke/)
 
-- Sigarasız geçen süreyi takip et
-- Tasarruf edilen parayı hesapla
-- Sağlık iyileşme kilometre taşlarını görüntüle
-- Sigara içme isteği günlüğü tut
-- Nefes egzersizleri yap
-- Topluluk ile deneyimlerini paylaş
-- Rozetler ve başarılar kazan
-- Detaylı istatistikler ve grafikler
+## ✨ Özellikler
 
-## Teknoloji
+| Özellik | Detay |
+|---------|-------|
+| ⏱ Sayac | Gün/saat/dakika bazlı sigarasız süre |
+| 💰 TL Tasarruf | Türk Lirası cinsinden gerçek zamanlı hesap |
+| ❤️ Sağlık İlerlemesi | 14 bilimsel kilometre taşı |
+| 🔥 İstek Takibi | Tetikleyici analizi ve direnç oranı |
+| 🌬️ Nefes Egzersizi | Kutu, 4-7-8, Derin nefes |
+| 👥 Topluluk | Anonim/isimli paylaşım |
+| 🏅 Rozetler | 20+ başarı rozeti |
+| 📊 statistikler | Haftalık grafik ve tetikleyici analizi |
+| 🔒 KVKK Uyumlu | 6698 Sayılı Kanun uyumlu |
 
-- React Native (Expo SDK 52)
-- Expo Router v4
-- Supabase (Backend + Auth + Database)
-- TypeScript
-- Zustand (State Management)
-- TanStack Query
+## 🚀 Rakiplerden Farkımız
 
-## Kurulum
+| Özellik | Smoke Free | QuitNow! | **Smoke** |
+|---------|-----------|----------|-----------|
+| Türkçe-first | ❌ | ❌ | ✅ |
+| TL desteği | ❌ | ❌ | ✅ |
+| KVKK uyumu | ❌ | ❌ | ✅ |
+| Ücretsiz tam özellik | ❌ | ❌ | ✅ |
+| Anonim kullanım | ❌ | ❌ | ✅ |
+
+## 🛠️ Teknoloji Stack
+
+- **React Native** (Expo SDK 52)
+- **Expo Router v4** (file-based navigation)
+- **Supabase** (Auth + PostgreSQL + Realtime)
+- **TypeScript** + **Zustand** + **TanStack Query**
+- **React Native Reanimated** (animasyonlar)
+
+## 🗄️ Veritabanı
+
+Supabase `smoke` projesi üzerinde:
+
+| Tablo | Açıklama |
+|-------|----------|
+| `profiles` | Kullanıcı profilleri |
+| `quit_journeys` | Sigarayı bırakma yolculukları |
+| `craving_logs` | Sigara içme isteği günlüğü |
+| `smoke_logs` | Sigara içme kayıtları |
+| `health_milestones` | 14 sağlık kilometre taşı |
+| `achievements` | 20+ başarı rozeti tanımları |
+| `user_achievements` | Kazanılan rozetler |
+| `community_posts` | Topluluk paylaşımları |
+| `daily_check_ins` | Günlük ruh hali kaydı |
+| `breathing_exercise_logs` | Nefes egzersizi geçmişi |
+| `motivational_quotes` | Motivasyon alıntıları |
+
+## 📱 Kurulum
 
 ```bash
+# Bağımlılıkları yükle
 npm install
+
+# .env dosyasını oluştur
+cp .env.example .env
+
+# Expo başlat
 npx expo start
 ```
 
-## Gizlilik
+## 🔒 Yasal
 
-[KVKK Aydınlatma Metni](https://descanpo.github.io/smoke/kvkk.html)
-[Gizlilik Politikası](https://descanpo.github.io/smoke/privacy.html)
-[Kullanım Koşulları](https://descanpo.github.io/smoke/terms.html)
+- 🔗 [KVKK Aydınlatma Metni](https://descanpo.github.io/smoke/kvkk.html)
+- 🔗 [Gizlilik Politikası](https://descanpo.github.io/smoke/privacy.html)
+- 🔗 [Kullanım Koşulları](https://descanpo.github.io/smoke/terms.html)
+
+---
+
+**Geliştirici:** Rıza UZUNKAYA · descanpo2@gmail.com
