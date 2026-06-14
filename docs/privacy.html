@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gizlilik Politikası - Smoke App</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0A0A14; color: #C0C0D8; line-height: 1.7; }
+    .topbar { background: linear-gradient(135deg, #6C63FF, #4B44CC); padding: 20px; text-align: center; }
+    .topbar a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; }
+    .container { max-width: 800px; margin: 0 auto; padding: 48px 24px 80px; }
+    h1 { font-size: 32px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .updated { font-size: 13px; color: #9E9EBF; margin-bottom: 40px; }
+    h2 { font-size: 20px; font-weight: 600; color: #fff; margin: 36px 0 12px; border-left: 3px solid #6C63FF; padding-left: 12px; }
+    p { margin-bottom: 14px; }
+    ul { margin: 12px 0 16px 24px; }
+    li { margin-bottom: 8px; }
+    .badge { display: inline-block; background: #4CAF5022; border: 1px solid #4CAF50; border-radius: 20px; padding: 4px 14px; font-size: 13px; color: #4CAF50; margin-bottom: 20px; }
+    footer { text-align: center; padding: 32px; color: #6B6B8A; font-size: 13px; border-top: 1px solid #2D2D4E; }
+    footer a { color: #6C63FF; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="topbar"><a href="index.html">← Ana Sayfa</a></div>
+
+  <div class="container">
+    <h1>Gizlilik Politikası</h1>
+    <p class="updated">Son güncelleme: 14 Haziran 2026</p>
+    <span class="badge">✅ KVKK Uyumlu</span>
+
+    <p>Smoke uygulaması olarak gizliliğinize önem veriyoruz. Bu politika, hangi verileri topladığımızı, nasıl kullandığımızı ve nasıl koruduğumuzu açıklar.</p>
+
+    <h2>1. Topladığımız Veriler</h2>
+    <h3>Zorunlu Veriler</h3>
+    <ul>
+      <li><strong>Hesap bilgileri:</strong> E-posta adresi, şifre (hashlenmiş)</li>
+      <li><strong>Profil bilgileri:</strong> Kullanıcı adı (isteğe bağlı)</li>
+      <li><strong>Yolculuk verileri:</strong> Sigarayı bırakma tarihi, günlük sigara sayısı, paket fiyatı</li>
+    </ul>
+    <h3>Opsiyonel Veriler</h3>
+    <ul>
+      <li><strong>Craving kayıtları:</strong> İstek tarihi, yoğunluk, tetikleyici (siz girmezseniz toplanmaz)</li>
+      <li><strong>Topluluk paylaşımları:</strong> Anonim veya isimli paylaşımlar (tercihine göre)</li>
+      <li><strong>Günlük kontrol:</strong> Ruh hali ve enerji seviyesi kaydı</li>
+      <li><strong>Nefes egzersizi:</strong> Tamamlanan egzersiz süresi</li>
+    </ul>
+    <h3>Otomatik Toplanan Veriler</h3>
+    <ul>
+      <li>Cihaz türü ve işletim sistemi</li>
+      <li>Uygulama kullanım süresi (anonim)</li>
+      <li>Hata raporları (kişisel veri içermez)</li>
+    </ul>
+
+    <h2>2. Verilerinizi Nasıl Kullanıyoruz</h2>
+    <ul>
+      <li>Sigarayı bırakma sürecini takip etmek ve kişisel istatistikler sunmak</li>
+      <li>Hesabınızı doğrulamak ve güvende tutmak</li>
+      <li>Kilometre taşı ve rozet bildirimleri göndermek</li>
+      <li>Uygulamayı geliştirmek (anonim, toplu verilerle)</li>
+    </ul>
+
+    <h2>3. Veri Paylaşımı</h2>
+    <p>• Verileriniz <strong>hiçbir reklam network'une</strong> satılmaz veya paylaşılmaz.<br>
+    • Verileriniz <strong>yasal zorunluluk</strong> dışında üçüncü taraflarla paylaşılmaz.<br>
+    • Uygulamanın teknik altyapısı Supabase (Singapore) üzerinde çalışmaktadır.</p>
+
+    <h2>4. Veri Güvenliği</h2>
+    <ul>
+      <li>Tüm veriler SSL/TLS şifrelemesi ile iletilir</li>
+      <li>Şifreler bcrypt ile hashlenerek saklanır, hiçbir zaman düzce metin olarak tutulmaz</li>
+      <li>Veritabanı Row Level Security (RLS) ile korunmaktadır; her kullanıcı yalnızca kendi verilerine erişebilir</li>
+      <li>API anahtarları cihazda güvenli depolama (Secure Store) ile saklanır</li>
+    </ul>
+
+    <h2>5. Çocukların Gizliliği</h2>
+    <p>Smoke uygulaması 18 yaşını doldurmuş bireyler için tasarlanmıştır. 18 yaşın altındaki kişilerden bilerek veri toplamayız.</p>
+
+    <h2>6. Hesabınızı Silme</h2>
+    <p>Uygulamadan <strong>Profil &gt; Hesabı Sil</strong> seçeneği ile tüm verilerinizi kalıcı olarak silebilirsiniz. Ya da descanpo2@gmail.com adresine e-posta göndererek 30 gün içinde silme talebinizi işleme koymamızı isteyebilirsiniz.</p>
+
+    <h2>7. İletişim</h2>
+    <p>Gizlilik hakkında sorularınız için: <strong>descanpo2@gmail.com</strong></p>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Smoke App &bull; <a href="mailto:descanpo2@gmail.com">descanpo2@gmail.com</a></p>
+    <p style="margin-top: 8px"><a href="index.html">Ana Sayfa</a> &bull; <a href="kvkk.html">KVKK</a> &bull; <a href="terms.html">Koşullar</a></p>
+  </footer>
+</body>
+</html>

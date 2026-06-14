@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smoke App - Yasal Belgeler</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0A0A14; color: #fff; min-height: 100vh; }
+    .hero { background: linear-gradient(135deg, #6C63FF, #4B44CC); padding: 80px 20px; text-align: center; }
+    .hero-logo { font-size: 64px; margin-bottom: 16px; }
+    .hero h1 { font-size: 42px; font-weight: 700; margin-bottom: 12px; }
+    .hero p { font-size: 18px; opacity: 0.85; max-width: 500px; margin: 0 auto; }
+    .container { max-width: 800px; margin: 0 auto; padding: 60px 20px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 40px; }
+    .card { background: #1A1A2E; border: 1px solid #2D2D4E; border-radius: 16px; padding: 32px 24px; text-decoration: none; color: inherit; transition: transform 0.2s, border-color 0.2s; }
+    .card:hover { transform: translateY(-4px); border-color: #6C63FF; }
+    .card-icon { font-size: 40px; margin-bottom: 16px; }
+    .card h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+    .card p { font-size: 14px; color: #9E9EBF; line-height: 1.5; }
+    .features { margin-top: 60px; }
+    .features h2 { font-size: 28px; font-weight: 700; margin-bottom: 32px; text-align: center; }
+    .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .feature { background: #12121F; border-radius: 12px; padding: 20px; border: 1px solid #2D2D4E; }
+    .feature-icon { font-size: 28px; margin-bottom: 12px; }
+    .feature h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .feature p { font-size: 13px; color: #9E9EBF; line-height: 1.4; }
+    footer { text-align: center; padding: 40px 20px; color: #6B6B8A; font-size: 13px; border-top: 1px solid #2D2D4E; }
+    footer a { color: #6C63FF; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="hero-logo">🚭</div>
+    <h1>Smoke</h1>
+    <p>Türkiye'nin en kapsamlı sigarayı bırakma uygulaması</p>
+  </div>
+
+  <div class="container">
+    <div class="cards">
+      <a href="kvkk.html" class="card">
+        <div class="card-icon">🔒</div>
+        <h2>KVKK Aydınlatma</h2>
+        <p>Kişisel verilerinizin nasıl işlendiğini öğrenin</p>
+      </a>
+      <a href="privacy.html" class="card">
+        <div class="card-icon">📧</div>
+        <h2>Gizlilik Politikası</h2>
+        <p>Verilerinizin gizliliği ve güvenliği hakkında</p>
+      </a>
+      <a href="terms.html" class="card">
+        <div class="card-icon">📄</div>
+        <h2>Kullanım Koşulları</h2>
+        <p>Uygulama kullanım şartları ve koşulları</p>
+      </a>
+    </div>
+
+    <div class="features">
+      <h2>Uygulama Özellikleri</h2>
+      <div class="feature-grid">
+        <div class="feature">
+          <div class="feature-icon">⏱️</div>
+          <h3>Sigarasız Sayacı</h3>
+          <p>Gün, saat ve dakika bazlı sayac ile ilerlemenizi görün</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">💰</div>
+          <h3>Para Tasarrufu</h3>
+          <p>Türk Lirası cinsinden biriktirdiğiniz parayı takip edin</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">❤️</div>
+          <h3>Sağlık İlerlemesi</h3>
+          <p>Vücudunuzdaki iyileşmeleri bilimsel kaynaklarla takip edin</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🔥</div>
+          <h3>İstek Takibi</h3>
+          <p>Sigara içme isteklerinizi kaydedip analiz edin</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🌬️</div>
+          <h3>Nefes Egzersizleri</h3>
+          <p>Kutu nefesi, 4-7-8 ve derin nefes teknikleri</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">👥</div>
+          <h3>Topluluk</h3>
+          <p>Diğer kullanıcılarla deneyimlerinizi paylaşın</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🏅</div>
+          <h3>Başarı Rozetleri</h3>
+          <p>Hedeflere ulaştıkça özel rozetler kazanın</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">📊</div>
+          <h3>Detaylı statistikler</h3>
+          <p>Haftalık ve aylık analizlerle ilerlemenizi ölçün</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Smoke App &bull; <a href="mailto:descanpo2@gmail.com">descanpo2@gmail.com</a></p>
+    <p style="margin-top: 8px">
+      <a href="kvkk.html">KVKK</a> &bull;
+      <a href="privacy.html">Gizlilik</a> &bull;
+      <a href="terms.html">Koşullar</a>
+    </p>
+  </footer>
+</body>
+</html>
