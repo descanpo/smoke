@@ -1,19 +1,31 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform,
+  ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Linking,
 } from 'react-native';
 import { supabase } from '../services/supabase';
 import { Theme } from '../theme/Theme';
 
 type Mode = 'login' | 'register';
 
+const TEST_EMAIL = 'test@smoke.app';
+const TEST_PASSWORD = 'Test1234!';
+
+function openURL(url: string) {
+  if (Platform.OS === 'web') {
+    (window as any).location.href = url;
+  } else {
+    Linking.openURL(url);
+  }
+}
+
 export default function WelcomeScreen() {
   const [mode, setMode] = useState<Mode>('login');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(TEST_EMAIL);
+  const [password, setPassword] = useState(TEST_PASSWORD);
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -35,6 +47,26 @@ export default function WelcomeScreen() {
       else setSuccess('Hesabınız oluşturuldu! E-postasınızı doğrulayın.');
     }
     setLoading(false);
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError(''); setGoogleLoading(true);
+    const redirectTo = Platform.OS === 'web'
+      ? (window as any).location.origin
+      : 'smoke://auth/callback';
+
+    const { data, error: e } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo, queryParams: { prompt: 'select_account' } },
+    });
+
+    if (e) {
+      setError('Google girişi başarısız: ' + e.message);
+      setGoogleLoading(false);
+    } else if (data?.url && Platform.OS !== 'web') {
+      openURL(data.url);
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -59,12 +91,27 @@ export default function WelcomeScreen() {
           ))}
         </View>
 
+        <TouchableOpacity style={s.googleBtn} onPress={handleGoogleSignIn} disabled={googleLoading} activeOpacity={0.85}>
+          {googleLoading ? (
+            <ActivityIndicator color={Theme.colors.text} size="small" />
+          ) : (
+            <>
+              <View style={s.googleIcon}><Text style={s.googleG}>G</Text></View>
+              <Text style={s.googleBtnText}>Google ile Giriş Yap</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        <View style={s.divider}>
+          <View style={s.dividerLine} />
+          <Text style={s.dividerText}>veya e-posta ile</Text>
+          <View style={s.dividerLine} />
+        </View>
+
         <View style={s.toggle}>
           {(['login', 'register'] as Mode[]).map(m => (
-            <TouchableOpacity
-              key={m} style={[s.toggleBtn, mode === m && s.toggleBtnActive]}
-              onPress={() => { setMode(m); setError(''); setSuccess(''); }}
-            >
+            <TouchableOpacity key={m} style={[s.toggleBtn, mode === m && s.toggleBtnActive]}
+              onPress={() => { setMode(m); setError(''); setSuccess(''); }}>
               <Text style={[s.toggleText, mode === m && s.toggleTextActive]}>
                 {m === 'login' ? 'Giriş Yap' : 'Kayıt Ol'}
               </Text>
@@ -74,23 +121,21 @@ export default function WelcomeScreen() {
 
         <View style={s.form}>
           {mode === 'register' && (
-            <TextInput
-              style={s.input} placeholder="Ad Soyad"
+            <TextInput style={s.input} placeholder="Ad Soyad"
               placeholderTextColor={Theme.colors.textTertiary}
-              value={displayName} onChangeText={setDisplayName} autoCapitalize="words"
-            />
+              value={displayName} onChangeText={setDisplayName} autoCapitalize="words" />
           )}
-          <TextInput
-            style={s.input} placeholder="E-posta"
+          <View style={s.inputWrapper}>
+            <TextInput style={s.input} placeholder="E-posta"
+              placeholderTextColor={Theme.colors.textTertiary}
+              value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+            {email === TEST_EMAIL && (
+              <View style={s.testBadge}><Text style={s.testBadgeText}>TEST</Text></View>
+            )}
+          </View>
+          <TextInput style={s.input} placeholder="Şifre"
             placeholderTextColor={Theme.colors.textTertiary}
-            value={email} onChangeText={setEmail}
-            keyboardType="email-address" autoCapitalize="none"
-          />
-          <TextInput
-            style={s.input} placeholder="Şifre (en az 6 karakter)"
-            placeholderTextColor={Theme.colors.textTertiary}
-            value={password} onChangeText={setPassword} secureTextEntry
-          />
+            value={password} onChangeText={setPassword} secureTextEntry />
 
           {!!error && <Text style={s.errorText}>{error}</Text>}
           {!!success && <Text style={s.successText}>{success}</Text>}
@@ -101,6 +146,14 @@ export default function WelcomeScreen() {
               : <Text style={s.btnText}>{mode === 'login' ? 'Giriş Yap →' : 'Hesap Oluştur →'}</Text>
             }
           </TouchableOpacity>
+
+          {mode === 'login' && email === TEST_EMAIL && (
+            <View style={s.testHint}>
+              <Text style={s.testHintText}>
+                🧪 Test kullanıcısı otomatik dolduruldu. Direkt giriş yapabilirsin.
+              </Text>
+            </View>
+          )}
         </View>
 
         <Text style={s.legal}>
@@ -108,7 +161,7 @@ export default function WelcomeScreen() {
           <Text style={{ color: Theme.colors.primary }}>Kullanım Koşulları</Text>
           {' '}ve{' '}
           <Text style={{ color: Theme.colors.primary }}>KVKK Aydınlatma Metni</Text>
-          'ni kabul etmiş olursunuz.
+          {"\'ni kabul etmiş olursunuz."}
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -118,40 +171,36 @@ export default function WelcomeScreen() {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: Theme.colors.background },
   content: { padding: 24, paddingTop: 56, paddingBottom: 40 },
-  hero: { alignItems: 'center', marginBottom: 32 },
-  heroIcon: { fontSize: 72, marginBottom: 12 },
-  appName: { fontSize: 40, fontWeight: '800', color: Theme.colors.text, letterSpacing: 3, marginBottom: 8 },
-  tagline: { fontSize: 15, color: Theme.colors.textSecondary, textAlign: 'center' },
-  features: { marginBottom: 28, gap: 8 },
-  featureRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: Theme.colors.card, borderRadius: Theme.rounded.md,
-    borderWidth: 1, borderColor: Theme.colors.border, padding: 12,
-  },
-  featureIcon: { fontSize: 20 },
+  hero: { alignItems: 'center', marginBottom: 28 },
+  heroIcon: { fontSize: 64, marginBottom: 10 },
+  appName: { fontSize: 40, fontWeight: '800', color: Theme.colors.text, letterSpacing: 3, marginBottom: 6 },
+  tagline: { fontSize: 14, color: Theme.colors.textSecondary, textAlign: 'center' },
+  features: { marginBottom: 24, gap: 8 },
+  featureRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: Theme.colors.card, borderRadius: Theme.rounded.md, borderWidth: 1, borderColor: Theme.colors.border, padding: 11 },
+  featureIcon: { fontSize: 18 },
   featureText: { fontSize: 13, color: Theme.colors.textSecondary, flex: 1 },
-  toggle: {
-    flexDirection: 'row', backgroundColor: Theme.colors.card,
-    borderRadius: Theme.rounded.lg, padding: 4, marginBottom: 20,
-    borderWidth: 1, borderColor: Theme.colors.border,
-  },
-  toggleBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
+  googleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: Theme.colors.card, borderRadius: Theme.rounded.md, borderWidth: 1.5, borderColor: Theme.colors.borderLight, padding: 14, marginBottom: 16, ...Platform.select({ web: { cursor: 'pointer' } as any }) },
+  googleIcon: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
+  googleG: { fontSize: 14, fontWeight: '800', color: '#4285F4' },
+  googleBtnText: { fontSize: 15, fontWeight: '600', color: Theme.colors.text },
+  divider: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: Theme.colors.border },
+  dividerText: { fontSize: 12, color: Theme.colors.textTertiary },
+  toggle: { flexDirection: 'row', backgroundColor: Theme.colors.card, borderRadius: Theme.rounded.lg, padding: 4, marginBottom: 16, borderWidth: 1, borderColor: Theme.colors.border },
+  toggleBtn: { flex: 1, paddingVertical: 9, borderRadius: 10, alignItems: 'center' },
   toggleBtnActive: { backgroundColor: Theme.colors.primary, ...Theme.shadows.glow },
   toggleText: { fontSize: 14, fontWeight: '600', color: Theme.colors.textSecondary },
   toggleTextActive: { color: '#fff' },
-  form: { gap: 12, marginBottom: 24 },
-  input: {
-    backgroundColor: Theme.colors.card, borderRadius: Theme.rounded.md,
-    borderWidth: 1, borderColor: Theme.colors.border,
-    padding: 14, fontSize: 15, color: Theme.colors.text,
-    ...Platform.select({ web: { outlineStyle: 'none' } as any }),
-  },
-  errorText: { color: Theme.colors.error, fontSize: 14, textAlign: 'center' },
-  successText: { color: Theme.colors.success, fontSize: 14, textAlign: 'center' },
-  btn: {
-    backgroundColor: Theme.colors.primary, borderRadius: Theme.rounded.md,
-    padding: 16, alignItems: 'center', marginTop: 4, ...Theme.shadows.glow,
-  },
+  form: { gap: 10, marginBottom: 20 },
+  inputWrapper: { position: 'relative' },
+  input: { backgroundColor: Theme.colors.card, borderRadius: Theme.rounded.md, borderWidth: 1, borderColor: Theme.colors.border, padding: 14, fontSize: 15, color: Theme.colors.text, ...Platform.select({ web: { outlineStyle: 'none' } as any }) },
+  testBadge: { position: 'absolute', right: 10, top: 0, bottom: 0, justifyContent: 'center' },
+  testBadgeText: { fontSize: 9, fontWeight: '800', color: Theme.colors.warning, backgroundColor: Theme.colors.warning + '22', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, letterSpacing: 0.5 },
+  errorText: { color: Theme.colors.error, fontSize: 13, textAlign: 'center' },
+  successText: { color: Theme.colors.success, fontSize: 13, textAlign: 'center' },
+  btn: { backgroundColor: Theme.colors.primary, borderRadius: Theme.rounded.md, padding: 15, alignItems: 'center', marginTop: 2, ...Theme.shadows.glow },
   btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  legal: { textAlign: 'center', fontSize: 12, color: Theme.colors.textTertiary, lineHeight: 18 },
+  testHint: { backgroundColor: Theme.colors.warning + '18', borderRadius: Theme.rounded.md, padding: 10, borderWidth: 1, borderColor: Theme.colors.warning + '44' },
+  testHintText: { fontSize: 12, color: Theme.colors.warning, textAlign: 'center', lineHeight: 18 },
+  legal: { textAlign: 'center', fontSize: 11, color: Theme.colors.textTertiary, lineHeight: 17 },
 });
