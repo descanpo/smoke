@@ -18,10 +18,25 @@ function calcStats(journey: any) {
 
 function openURL(url: string) {
   if (Platform.OS === 'web') {
-    (window as any).open(url, '_blank');
+    (window as any).open(url, '_blank', 'noopener,noreferrer');
   } else {
     Linking.openURL(url).catch(() => {});
   }
+}
+
+const MOTIVATION_LABELS: Record<string, { tr: string; en: string }> = {
+  health:   { tr: '❤️ Sağlık', en: '❤️ Health' },
+  money:    { tr: '💰 Para', en: '💰 Money' },
+  family:   { tr: '👨‍👩‍👧 Aile', en: '👨‍👩‍👧 Family' },
+  sports:   { tr: '🏃 Spor', en: '🏃 Sports' },
+  smell:    { tr: '🌸 Koku', en: '🌸 Smell' },
+  freedom:  { tr: '🦋 Özgürlük', en: '🦋 Freedom' },
+};
+
+function getMotivationLabel(key: string, l: string): string {
+  const m = MOTIVATION_LABELS[key];
+  if (!m) return key;
+  return l === 'tr' ? m.tr : m.en;
 }
 
 export default function ProfileScreen({
@@ -149,7 +164,7 @@ export default function ProfileScreen({
               },
               { icon: '🚬', label: t.dailyCigs, value: `${journey.cigarettes_per_day} ${lang === 'tr' ? 'adet' : 'pcs'}` },
               { icon: '💰', label: t.packPrice, value: `₺${journey.cost_per_pack}` },
-              journey.motivation && { icon: '🎯', label: t.motivation, value: journey.motivation },
+              journey.motivation && { icon: '🎯', label: t.motivation, value: getMotivationLabel(journey.motivation, lang) },
             ].filter(Boolean).map((row: any, i, arr) => (
               <View key={i} style={[s.infoRow, i < arr.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
                 <Text style={s.infoIcon}>{row.icon}</Text>

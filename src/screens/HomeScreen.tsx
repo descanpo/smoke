@@ -7,6 +7,16 @@ import { getColors } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 
+const BADGES = [
+  { id: 'first_day',    icon: '🌟', minutesNeeded: 1440,    nameTr: 'İlk Gün',         nameEn: 'First Day',      descTr: '1 gün temiz',    descEn: '1 day clean' },
+  { id: 'one_week',     icon: '💪', minutesNeeded: 10080,   nameTr: 'İlk Hafta',       nameEn: 'First Week',     descTr: '7 gün temiz',    descEn: '7 days clean' },
+  { id: 'two_weeks',    icon: '🏃', minutesNeeded: 20160,   nameTr: '2 Hafta',         nameEn: '2 Weeks',        descTr: '14 gün temiz',   descEn: '14 days clean' },
+  { id: 'one_month',    icon: '🫁', minutesNeeded: 43200,   nameTr: 'Bir Ay',          nameEn: 'One Month',      descTr: '30 gün temiz',   descEn: '30 days clean' },
+  { id: 'three_months', icon: '🧠', minutesNeeded: 131400,  nameTr: 'Üç Ay',           nameEn: 'Three Months',   descTr: '90 gün temiz',   descEn: '90 days clean' },
+  { id: 'six_months',   icon: '🛡️', minutesNeeded: 262800,  nameTr: 'Altı Ay',         nameEn: 'Six Months',     descTr: '180 gün temiz',  descEn: '180 days clean' },
+  { id: 'one_year',     icon: '🏆', minutesNeeded: 525600,  nameTr: 'Yıllık Kahraman', nameEn: 'Year Hero',      descTr: '365 gün temiz',  descEn: '365 days clean' },
+];
+
 const HEALTH_MILESTONES = [
   { minutes: 20, title: 'Nabız Normale Döndü', icon: '💓' },
   { minutes: 480, title: 'Kan Oksijeni Arttı', icon: '🩸' },
@@ -115,7 +125,6 @@ export default function HomeScreen({
   const [elapsed, setElapsed] = useState(0);
   const [cravingCount, setCravingCount] = useState(0);
   const [resistedCount, setResistedCount] = useState(0);
-  const [badgeCount, setBadgeCount] = useState(0);
   const [quote] = useState(quotes[Math.floor(Math.random() * quotes.length)]);
   const timerRef = useRef<any>(null);
 
@@ -131,7 +140,6 @@ export default function HomeScreen({
   useEffect(() => {
     if (!session?.user?.id || !journey?.id) return;
     fetchCravingStats();
-    fetchBadges();
   }, [session?.user?.id, journey?.id]);
 
   const fetchCravingStats = async () => {
@@ -143,13 +151,6 @@ export default function HomeScreen({
       setCravingCount(data.length);
       setResistedCount(data.filter((c: any) => c.resisted).length);
     }
-  };
-
-  const fetchBadges = async () => {
-    const { count } = await supabase.from('user_achievements')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', session.user.id);
-    setBadgeCount(count ?? 0);
   };
 
   if (!journey) {
@@ -262,7 +263,7 @@ export default function HomeScreen({
           <View style={[s.statCard, glassCard]}>
             <View style={[s.accentBar, { backgroundColor: '#7C3AED' }]} />
             <Text style={[s.statValue, { color: '#7C3AED' }]}>
-              {badgeCount}
+              {BADGES.filter(b => (elapsed / 60000) >= b.minutesNeeded).length}
             </Text>
             <Text style={[s.statLabel, { color: colors.textSecondary }]}>
               {lang === 'tr' ? 'ROZET' : 'BADGES'}
@@ -271,6 +272,38 @@ export default function HomeScreen({
               {lang === 'tr' ? 'Kazanıldı' : 'Earned'}
             </Text>
           </View>
+        </View>
+
+        {/* Badge Row */}
+        <View style={{ marginBottom: 16 }}>
+          <Text style={{ fontSize: 13, fontWeight: '700', color: colors.textTertiary, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
+            {lang === 'tr' ? 'ROZETLER' : 'BADGES'}
+          </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -20 }} contentContainerStyle={{ paddingHorizontal: 20, gap: 10 }}>
+            {BADGES.map(badge => {
+              const earned = (elapsed / 60000) >= badge.minutesNeeded;
+              const name = lang === 'tr' ? badge.nameTr : badge.nameEn;
+              const desc = lang === 'tr' ? badge.descTr : badge.descEn;
+              return (
+                <View key={badge.id} style={{
+                  width: 90,
+                  backgroundColor: earned
+                    ? (isDark ? 'rgba(124,58,237,0.15)' : 'rgba(124,58,237,0.1)')
+                    : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)'),
+                  borderRadius: 16,
+                  borderWidth: 1,
+                  borderColor: earned ? 'rgba(124,58,237,0.4)' : colors.border,
+                  padding: 12,
+                  alignItems: 'center',
+                  opacity: earned ? 1 : 0.5,
+                }}>
+                  <Text style={{ fontSize: 28, marginBottom: 4 }}>{earned ? badge.icon : '🔒'}</Text>
+                  <Text style={{ fontSize: 11, fontWeight: '700', color: earned ? colors.primary : colors.textSecondary, textAlign: 'center' }}>{name}</Text>
+                  <Text style={{ fontSize: 9, color: colors.textTertiary, textAlign: 'center', marginTop: 2 }}>{desc}</Text>
+                </View>
+              );
+            })}
+          </ScrollView>
         </View>
 
         {/* Milestone */}

@@ -18,6 +18,8 @@ const TAB_SCREENS: ScreenType[] = ['Home', 'Progress', 'Stats', 'Profile'];
 
 const AppContent = () => {
   const { currentScreen, navigate, reset } = useNavigation();
+  const currentScreenRef = React.useRef(currentScreen);
+  useEffect(() => { currentScreenRef.current = currentScreen; }, [currentScreen]);
   const { isDark } = useThemeMode();
   const [session, setSession] = useState<any>(null);
   const [journey, setJourney] = useState<any>(null);
@@ -38,7 +40,14 @@ const AppContent = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       if (s) {
-        fetchJourney(s.user.id);
+        // Don't re-navigate if already on a main screen (avoids stale closure nav bug)
+        const TAB_SCREENS_SET = new Set(['Home', 'Progress', 'Stats', 'Profile']);
+        if (!TAB_SCREENS_SET.has(currentScreenRef.current)) {
+          fetchJourney(s.user.id);
+        } else if (event === 'SIGNED_IN') {
+          fetchJourney(s.user.id);
+        }
+        // For TOKEN_REFRESHED, just silently update the session, no navigation
       } else {
         setJourney(null);
         setLoading(false);
@@ -59,7 +68,7 @@ const AppContent = () => {
     setLoading(false);
     if (!data) {
       navigate('Onboarding');
-    } else if (currentScreen === 'Welcome' || currentScreen === 'Onboarding') {
+    } else if (currentScreenRef.current === 'Welcome' || currentScreenRef.current === 'Onboarding') {
       navigate('Home');
     }
   };
