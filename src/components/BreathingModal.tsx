@@ -184,12 +184,24 @@ export default function BreathingModal({
     inputRange: [0, 1],
     outputRange: [130, 200],
   });
+  // Outer glow ring scales slightly more than the core orb (purely presentational, derived from same Animated value).
+  const haloSize = circleAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [220, 320],
+  });
+  const haloOpacity = circleAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.35, 0.7],
+  });
 
-  const currentColor = done ? '#10B981' : running ? phase.color : (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)');
+  const currentColor = done ? '#10B981' : running ? phase.color : (isDark ? 'rgba(255,255,255,0.45)' : 'rgba(124,58,237,0.55)');
+  const orbActive = done || running;
 
-  const sheetBg = isDark ? '#0F0F1F' : '#FFFFFF';
-  const cardBg = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)';
-  const cardBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+  const sheetBg = isDark ? '#0B0B16' : '#FBFAFF';
+  const ambientTop = isDark ? '#1A1330' : '#F1ECFF';
+  const cardBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(124,58,237,0.05)';
+  const cardBorder = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(124,58,237,0.12)';
+  const cycleLabel = lang === 'tr' ? `Döngü ${cycle + 1} / ${ex.cycles}` : `Cycle ${cycle + 1} / ${ex.cycles}`;
 
   return (
     <TouchableOpacity
@@ -197,38 +209,94 @@ export default function BreathingModal({
       activeOpacity={1}
       onPress={() => { stop(); onClose(); }}
     >
-      <TouchableOpacity activeOpacity={1} style={[s.sheet, { backgroundColor: sheetBg, borderColor: colors.border }]} onPress={() => {}}>
+      <TouchableOpacity
+        activeOpacity={1}
+        style={[
+          s.sheet,
+          { backgroundColor: sheetBg, borderColor: colors.border },
+          Platform.select({
+            web: {
+              backgroundImage: isDark
+                ? `linear-gradient(180deg, ${ambientTop} 0%, ${sheetBg} 55%)`
+                : `linear-gradient(180deg, ${ambientTop} 0%, ${sheetBg} 60%)`,
+            } as any,
+            default: {},
+          }),
+        ]}
+        onPress={() => {}}
+      >
+        {/* Ambient blurred orbs */}
+        <View pointerEvents="none" style={[s.ambientOrb, s.ambientOrbA]} />
+        <View pointerEvents="none" style={[s.ambientOrb, s.ambientOrbB]} />
+
         {/* Drag handle */}
-        <View style={[s.dragHandle, { backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }]} />
+        <View style={[s.dragHandle, { backgroundColor: isDark ? 'rgba(255,255,255,0.22)' : 'rgba(124,58,237,0.25)' }]} />
 
         <SafeAreaView>
-          <Text style={[s.title, { color: colors.text }]}>🌬️ {t.breathingTitle}</Text>
+          <View style={s.header}>
+            <Text style={[s.eyebrow, { color: '#06B6D4' }]}>
+              {lang === 'tr' ? 'NEFES MOLASI' : 'BREATHE'}
+            </Text>
+            <Text style={[s.title, { color: colors.text }]}>{t.breathingTitle}</Text>
+          </View>
 
           {/* Exercise selector */}
           {!running && !done && (
             <View style={s.exList}>
-              {EXERCISES.map((e, i) => (
-                <TouchableOpacity
-                  key={e.key}
-                  style={[s.exCard, {
-                    backgroundColor: exIdx === i ? 'rgba(124,58,237,0.12)' : cardBg,
-                    borderColor: exIdx === i ? '#7C3AED' : cardBorder,
-                  }]}
-                  onPress={() => setExIdx(i)}
-                  activeOpacity={0.75}
-                >
-                  <View style={{ flex: 1 }}>
-                    <Text style={[s.exName, { color: exIdx === i ? '#8B5CF6' : colors.text }]}>{e.name}</Text>
-                    <Text style={[s.exDesc, { color: colors.textSecondary }]}>{e.desc}</Text>
-                  </View>
-                  {exIdx === i && <Text style={{ color: '#7C3AED', fontSize: 16 }}>✓</Text>}
-                </TouchableOpacity>
-              ))}
+              {EXERCISES.map((e, i) => {
+                const selected = exIdx === i;
+                return (
+                  <TouchableOpacity
+                    key={e.key}
+                    style={[
+                      s.exCard,
+                      {
+                        backgroundColor: selected ? 'rgba(124,58,237,0.14)' : cardBg,
+                        borderColor: selected ? '#7C3AED' : cardBorder,
+                      },
+                      selected && Platform.select({
+                        web: { boxShadow: '0 8px 28px rgba(124,58,237,0.18)' } as any,
+                        default: {
+                          shadowColor: '#7C3AED',
+                          shadowOpacity: 0.22,
+                          shadowRadius: 12,
+                          shadowOffset: { width: 0, height: 6 },
+                          elevation: 3,
+                        },
+                      }),
+                    ]}
+                    onPress={() => setExIdx(i)}
+                    activeOpacity={0.8}
+                  >
+                    <View style={[s.exDot, { backgroundColor: selected ? '#7C3AED' : 'transparent', borderColor: selected ? '#7C3AED' : cardBorder }]}>
+                      {selected && <Text style={s.exDotCheck}>✓</Text>}
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[s.exName, { color: selected ? (isDark ? '#C4B5FD' : '#6D28D9') : colors.text }]}>{e.name}</Text>
+                      <Text style={[s.exDesc, { color: colors.textSecondary }]}>{e.desc}</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           )}
 
-          {/* Animated circle */}
+          {/* Animated breathing orb */}
           <View style={s.circleArea}>
+            {/* Soft outer halo — concentric ring driven by the same Animated value */}
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                s.halo,
+                {
+                  width: haloSize,
+                  height: haloSize,
+                  opacity: orbActive ? haloOpacity : 0.28,
+                  backgroundColor: currentColor + '1A',
+                  borderColor: currentColor + '33',
+                },
+              ]}
+            />
             <Animated.View style={[
               s.circle,
               {
@@ -237,10 +305,27 @@ export default function BreathingModal({
                 borderColor: currentColor,
                 backgroundColor: currentColor + '22',
               },
+              Platform.select({
+                web: {
+                  backgroundImage: `radial-gradient(circle at 35% 30%, ${currentColor}3D, ${currentColor}14 70%)`,
+                  boxShadow: orbActive
+                    ? `0 0 60px ${currentColor}66, inset 0 0 30px ${currentColor}33`
+                    : `0 0 30px ${currentColor}33`,
+                } as any,
+                default: {
+                  shadowColor: currentColor,
+                  shadowOpacity: 0.5,
+                  shadowRadius: 24,
+                  shadowOffset: { width: 0, height: 0 },
+                  elevation: 8,
+                },
+              }),
             ]}>
+              {/* Inner ring for depth */}
+              <View style={[s.innerRing, { borderColor: currentColor + '44' }]} />
               {done ? (
                 <>
-                  <Text style={{ fontSize: 36 }}>🏆</Text>
+                  <Text style={s.orbEmoji}>🏆</Text>
                   <Text style={[s.phaseLabel, { color: '#10B981' }]}>{t.complete}</Text>
                 </>
               ) : running ? (
@@ -249,12 +334,19 @@ export default function BreathingModal({
                   <Text style={[s.countdown, { color: phase.color }]}>{countdown}</Text>
                 </>
               ) : (
-                <Text style={{ fontSize: 44 }}>🌬️</Text>
+                <Text style={s.orbEmojiIdle}>🌬️</Text>
               )}
             </Animated.View>
-            {running && (
-              <Text style={[s.cycleText, { color: colors.textSecondary }]}>
-                {lang === 'tr' ? `Döngü ${cycle + 1}/${ex.cycles}` : `Cycle ${cycle + 1}/${ex.cycles}`}
+
+            {running ? (
+              <View style={[s.cyclePill, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+                <Text style={[s.cycleText, { color: colors.textSecondary }]}>{cycleLabel}</Text>
+              </View>
+            ) : (
+              <Text style={[s.hint, { color: colors.textSecondary }]}>
+                {done
+                  ? (lang === 'tr' ? 'Harika iş. Daha sakin hissettin mi?' : 'Well done. Feeling calmer?')
+                  : (lang === 'tr' ? 'Rahat bir pozisyon al ve orbu takip et' : 'Settle in and follow the orb')}
               </Text>
             )}
           </View>
@@ -262,8 +354,8 @@ export default function BreathingModal({
           {/* Controls */}
           <View style={s.controls}>
             {!running && !done && (
-              <TouchableOpacity style={s.startBtn} onPress={start} activeOpacity={0.85}>
-                <Text style={s.startBtnText}>{t.start} ▶</Text>
+              <TouchableOpacity style={s.startBtn} onPress={start} activeOpacity={0.88}>
+                <Text style={s.startBtnText}>{t.start}  ▶</Text>
               </TouchableOpacity>
             )}
             {running && (
@@ -272,7 +364,7 @@ export default function BreathingModal({
                 onPress={stop}
                 activeOpacity={0.85}
               >
-                <Text style={[s.stopBtnText, { color: colors.text }]}>{t.stop} ⏹</Text>
+                <Text style={[s.stopBtnText, { color: colors.text }]}>{t.stop}  ⏹</Text>
               </TouchableOpacity>
             )}
             {done && (
@@ -288,11 +380,11 @@ export default function BreathingModal({
                   activeOpacity={0.85}
                 >
                   <Text style={[s.stopBtnText, { color: colors.text }]}>
-                    {lang === 'tr' ? 'Tekrar 🔄' : 'Again 🔄'}
+                    {lang === 'tr' ? 'Tekrar  🔄' : 'Again  🔄'}
                   </Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={s.startBtn} onPress={onClose} activeOpacity={0.85}>
-                  <Text style={s.startBtnText}>{lang === 'tr' ? 'Tamam ✔' : 'Done ✔'}</Text>
+                <TouchableOpacity style={s.startBtn} onPress={onClose} activeOpacity={0.88}>
+                  <Text style={s.startBtnText}>{lang === 'tr' ? 'Tamam  ✔' : 'Done  ✔'}</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -315,83 +407,146 @@ export default function BreathingModal({
 const s = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(6,4,18,0.78)',
     justifyContent: 'flex-end',
   },
   sheet: {
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
     borderWidth: 1,
-    padding: 24,
-    paddingBottom: 8,
+    paddingHorizontal: 24,
+    paddingTop: 14,
+    paddingBottom: 14,
+    overflow: 'hidden',
+  },
+  ambientOrb: {
+    position: 'absolute',
+    borderRadius: 9999,
+    ...Platform.select({
+      web: { filter: 'blur(60px)' } as any,
+      default: { opacity: 0.45 },
+    }),
+  },
+  ambientOrbA: {
+    width: 260,
+    height: 260,
+    top: -90,
+    right: -70,
+    backgroundColor: 'rgba(124,58,237,0.35)',
+  },
+  ambientOrbB: {
+    width: 220,
+    height: 220,
+    bottom: -60,
+    left: -60,
+    backgroundColor: 'rgba(6,182,212,0.28)',
   },
   dragHandle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
+    width: 42,
+    height: 5,
+    borderRadius: 3,
     alignSelf: 'center',
-    marginBottom: 20,
+    marginBottom: 18,
   },
-  title: { fontSize: 20, fontWeight: '700', marginBottom: 16 },
-  exList: { gap: 8, marginBottom: 16 },
+  header: { alignItems: 'center', marginBottom: 18 },
+  eyebrow: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 2.5,
+    marginBottom: 4,
+  },
+  title: { fontSize: 24, fontWeight: '800', letterSpacing: -0.4 },
+  exList: { gap: 10, marginBottom: 8 },
   exCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
     borderWidth: 1,
-    borderRadius: 14,
-    padding: 12,
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
   },
-  exName: { fontSize: 15, fontWeight: '600' },
-  exDesc: { fontSize: 12, marginTop: 2 },
-  circleArea: { alignItems: 'center', paddingVertical: 20 },
+  exDot: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  exDotCheck: { color: '#fff', fontSize: 12, fontWeight: '800' },
+  exName: { fontSize: 15.5, fontWeight: '700' },
+  exDesc: { fontSize: 12.5, marginTop: 3 },
+  circleArea: { alignItems: 'center', justifyContent: 'center', paddingVertical: 34, minHeight: 280 },
+  halo: {
+    position: 'absolute',
+    borderRadius: 9999,
+    borderWidth: 1,
+  },
   circle: {
     borderRadius: 9999,
-    borderWidth: 3,
+    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 130,
     minHeight: 130,
   },
-  phaseLabel: { fontSize: 14, fontWeight: '600' },
-  countdown: { fontSize: 48, fontWeight: '800', lineHeight: 52 },
-  cycleText: { fontSize: 13, marginTop: 10 },
-  controls: { flexDirection: 'row', gap: 10, marginBottom: 8 },
+  innerRing: {
+    position: 'absolute',
+    width: '78%',
+    height: '78%',
+    borderRadius: 9999,
+    borderWidth: 1,
+  },
+  orbEmoji: { fontSize: 38 },
+  orbEmojiIdle: { fontSize: 46, opacity: 0.9 },
+  phaseLabel: { fontSize: 15, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase' },
+  countdown: { fontSize: 54, fontWeight: '800', lineHeight: 60, marginTop: 2 },
+  cyclePill: {
+    marginTop: 22,
+    paddingVertical: 7,
+    paddingHorizontal: 16,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  cycleText: { fontSize: 13, fontWeight: '600', letterSpacing: 0.3 },
+  hint: { fontSize: 13.5, marginTop: 22, textAlign: 'center', maxWidth: 260, lineHeight: 19 },
+  controls: { flexDirection: 'row', gap: 12, marginTop: 14, marginBottom: 6 },
   startBtn: {
     flex: 1,
     backgroundColor: '#7C3AED',
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 18,
+    paddingVertical: 16,
     alignItems: 'center',
     ...Platform.select({
       web: {
-        background: 'linear-gradient(135deg, #7C3AED, #8B5CF6)',
-        boxShadow: '0 0 20px rgba(124,58,237,0.4)',
+        backgroundImage: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 55%, #06B6D4 140%)',
+        boxShadow: '0 10px 30px rgba(124,58,237,0.45)',
       } as any,
       default: {
         shadowColor: '#7C3AED',
-        shadowOpacity: 0.4,
-        shadowRadius: 10,
-        shadowOffset: { width: 0, height: 0 },
-        elevation: 5,
+        shadowOpacity: 0.45,
+        shadowRadius: 14,
+        shadowOffset: { width: 0, height: 8 },
+        elevation: 6,
       },
     }),
   },
-  startBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  startBtnText: { color: '#fff', fontWeight: '800', fontSize: 15.5, letterSpacing: 0.3 },
   stopBtn: {
     flex: 1,
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 18,
+    paddingVertical: 16,
     alignItems: 'center',
     borderWidth: 1,
   },
-  stopBtnText: { fontWeight: '600', fontSize: 15 },
+  stopBtnText: { fontWeight: '700', fontSize: 15 },
   closeBtn: {
     flex: 1,
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 18,
+    paddingVertical: 16,
     alignItems: 'center',
     borderWidth: 1,
   },
-  closeBtnText: { fontWeight: '600' },
+  closeBtnText: { fontWeight: '700' },
 });

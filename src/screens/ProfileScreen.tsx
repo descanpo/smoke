@@ -1,12 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  Linking, Platform, Alert, SafeAreaView,
+  Linking, Platform, Alert, SafeAreaView, Switch, Modal, TextInput, ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../services/supabase';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { getColors } from '../theme/Theme';
+
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
+
+const ACCENT = '#8B5CF6';
+const CYAN = '#06B6D4';
+const SUCCESS = '#10B981';
+const WARNING = '#F59E0B';
+const ERROR = '#EF4444';
 
 function calcStats(journey: any) {
   const mins = (Date.now() - new Date(journey.quit_date).getTime()) / 60000;
@@ -25,12 +34,12 @@ function openURL(url: string) {
 }
 
 const MOTIVATION_LABELS: Record<string, { tr: string; en: string }> = {
-  health:   { tr: '❤️ Sağlık', en: '❤️ Health' },
-  money:    { tr: '💰 Para', en: '💰 Money' },
-  family:   { tr: '👨‍👩‍👧 Aile', en: '👨‍👩‍👧 Family' },
-  sports:   { tr: '🏃 Spor', en: '🏃 Sports' },
-  smell:    { tr: '🌸 Koku', en: '🌸 Smell' },
-  freedom:  { tr: '🦋 Özgürlük', en: '🦋 Freedom' },
+  health:   { tr: 'Sağlık', en: 'Health' },
+  money:    { tr: 'Para', en: 'Money' },
+  family:   { tr: 'Aile', en: 'Family' },
+  sports:   { tr: 'Spor', en: 'Sports' },
+  smell:    { tr: 'Koku', en: 'Smell' },
+  freedom:  { tr: 'Özgürlük', en: 'Freedom' },
 };
 
 function getMotivationLabel(key: string, l: string): string {
@@ -39,18 +48,59 @@ function getMotivationLabel(key: string, l: string): string {
   return l === 'tr' ? m.tr : m.en;
 }
 
+type EditField = 'quit_date' | 'cigarettes_per_day' | 'cost_per_pack' | 'motivation';
+
 export default function ProfileScreen({
   session,
   journey,
   onJourneyReset,
+  onJourneyUpdate,
 }: {
   session: any;
   journey: any;
   onJourneyReset: () => void;
+  onJourneyUpdate?: () => void;
 }) {
   const { mode, isDark, toggleTheme } = useThemeMode();
   const { lang, t, setLang } = useLanguage();
   const colors = getColors(mode);
+
+  const [editField, setEditField] = useState<EditField | null>(null);
+  const [draft, setDraft] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const openEdit = (field: EditField) => {
+    if (!journey) return;
+    if (field === 'quit_date') {
+      setDraft(new Date(journey.quit_date).toISOString().slice(0, 10));
+    } else if (field === 'motivation') {
+      setDraft(journey.motivation ?? '');
+    } else {
+      setDraft(String(journey[field] ?? ''));
+    }
+    setEditField(field);
+  };
+
+  const saveEdit = async () => {
+    if (!editField || !journey) return;
+    let value: any;
+    if (editField === 'quit_date') {
+      const d = new Date(draft);
+      if (isNaN(d.getTime())) return;
+      value = d.toISOString();
+    } else if (editField === 'cigarettes_per_day') {
+      value = Math.max(0, parseInt(draft, 10) || 0);
+    } else if (editField === 'cost_per_pack') {
+      value = Math.max(0, parseFloat(draft.replace(',', '.')) || 0);
+    } else {
+      value = draft;
+    }
+    setSaving(true);
+    await supabase.from('quit_journeys').update({ [editField]: value }).eq('id', journey.id);
+    setSaving(false);
+    setEditField(null);
+    onJourneyUpdate?.();
+  };
 
   const stats = journey ? calcStats(journey) : { days: 0, avoided: 0, saved: 0 };
   const displayName = session.user?.user_metadata?.display_name ?? 'Kahraman';
@@ -89,13 +139,65 @@ export default function ProfileScreen({
     }
   };
 
-  const glassCardStyle = {
-    backgroundColor: isDark ? 'rgba(18,18,42,0.6)' : colors.card,
-    borderRadius: 20,
+  // ---- Canonical card (mirrors HomeScreen) ----
+  const card = {
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    ...Platform.select({ web: isDark ? { backdropFilter: 'blur(20px)' } as any : {} }),
+    ...Platform.select({
+      web: {
+        boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 6px 20px rgba(17,17,40,0.06)',
+      } as any,
+      default: {
+        shadowColor: isDark ? '#000' : '#111128',
+        shadowOpacity: isDark ? 0.3 : 0.06,
+        shadowRadius: 16,
+        shadowOffset: { width: 0, height: 8 },
+        elevation: 3,
+      },
+    }),
   };
+
+  const dividerColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
+
+  // Icon well — accent-tinted, mirrors HomeScreen stat/milestone wells
+  const well = (accent: string) => ({
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    backgroundColor: accent + (isDark ? '1A' : '14'),
+  });
+
+  // YOLCULUK BİLGİLERİ — editable info rows
+  const journeyRows: { field: EditField; icon: IconName; accent: string; label: string; value: string }[] = [
+    { field: 'quit_date', icon: 'calendar-outline', accent: ACCENT, label: t.quitDate,
+      value: journey ? new Date(journey.quit_date).toLocaleDateString(lang === 'tr' ? 'tr-TR' : 'en-US', {
+        day: 'numeric', month: 'long', year: 'numeric',
+      }) : '' },
+    { field: 'cigarettes_per_day', icon: 'flame-outline', accent: WARNING, label: t.dailyCigs, value: journey ? `${journey.cigarettes_per_day}` : '' },
+    { field: 'cost_per_pack', icon: 'wallet-outline', accent: SUCCESS, label: t.packPrice, value: journey ? `₺${journey.cost_per_pack}` : '' },
+    { field: 'motivation', icon: 'heart-outline', accent: ERROR, label: t.motivation,
+      value: journey && journey.motivation ? getMotivationLabel(journey.motivation, lang) : (lang === 'tr' ? 'Seçilmedi' : 'Not set') },
+  ];
+
+  // DESTEK — link rows
+  const supportRows: { icon: IconName; accent: string; label: string; url: string; external?: boolean }[] = [
+    { icon: 'call-outline', accent: SUCCESS, label: t.quitHelpline, url: 'tel:171', external: true },
+    { icon: 'document-text-outline', accent: colors.textSecondary, label: t.termsLink, url: 'https://descanpo.github.io/smoke/terms.html' },
+    { icon: 'shield-checkmark-outline', accent: CYAN, label: t.kvkkLink, url: 'https://descanpo.github.io/smoke/kvkk.html' },
+  ];
+
+  // Stat chips — uses calcStats data
+  const statChips: { accent: string; icon: IconName; value: string; label: string }[] = [
+    { accent: ACCENT, icon: 'calendar-clear-outline', value: `${stats.days}`, label: t.daysClean },
+    { accent: CYAN, icon: 'wallet-outline', value: `₺${stats.saved.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}`, label: t.savings },
+    { accent: WARNING, icon: 'ban-outline', value: stats.avoided.toLocaleString('tr-TR'), label: t.avoided },
+  ];
+
+  // Strip leading emoji/symbol prefix from reset label (no new t. keys)
+  const resetLabel = t.resetJourney.replace(/^[^\p{L}]+/u, '').trim();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
@@ -104,358 +206,425 @@ export default function ProfileScreen({
         contentContainerStyle={s.content}
         showsVerticalScrollIndicator={false}
       >
-
-        {/* Header */}
-        <View style={s.pageHeader}>
-          <Text style={[s.pageTitle, { color: colors.text }]}>{t.profile}</Text>
-          <TouchableOpacity
-            style={[s.settingsBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', borderColor: colors.border }]}
-            activeOpacity={0.7}
-          >
-            <Text style={{ fontSize: 20 }}>⚙️</Text>
-          </TouchableOpacity>
+        {/* TopAppBar: centered logo + settings */}
+        <View style={s.topBar}>
+          <View style={s.topBarSide} />
+          <Text style={[s.logo, { color: ACCENT }]}>Smoke</Text>
+          <View style={[s.topBarSide, { alignItems: 'flex-end' }]}>
+            <Ionicons name="settings-outline" size={22} color={colors.textSecondary} />
+          </View>
         </View>
 
-        {/* Avatar Card */}
-        <View style={[glassCardStyle, s.avatarCard]}>
-          <View style={s.avatarCircle}>
-            <Text style={s.avatarText}>{initials}</Text>
+        {/* User identity — centered avatar with gradient ring */}
+        <View style={s.identity}>
+          <View style={s.avatarRing}>
+            <View style={[s.avatarInner, { borderColor: colors.background }]}>
+              <Text style={s.avatarText}>{initials}</Text>
+            </View>
           </View>
           <Text style={[s.displayName, { color: colors.text }]}>{displayName}</Text>
-          <Text style={[s.email, { color: colors.textSecondary }]}>{email}</Text>
-          {journey && (
-            <View style={s.memberBadge}>
-              <Text style={s.memberBadgeText}>🚭 {stats.days} {t.daysClean}</Text>
-            </View>
-          )}
+          <Text style={[s.email, { color: colors.textSecondary }]} numberOfLines={1}>{email}</Text>
         </View>
 
-        {/* Quick Stats Row */}
-        <View style={s.statsRow}>
-          <View style={[glassCardStyle, s.statPill]}>
-            <Text style={[s.statValue, { color: '#10B981' }]}>
-              ₺{stats.saved.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}
-            </Text>
-            <Text style={[s.statLabel, { color: colors.textTertiary }]}>{t.savings}</Text>
-          </View>
-          <View style={[glassCardStyle, s.statPill]}>
-            <Text style={[s.statValue, { color: '#7C3AED' }]}>
-              {stats.avoided.toLocaleString('tr-TR')}
-            </Text>
-            <Text style={[s.statLabel, { color: colors.textTertiary }]}>{t.avoided}</Text>
-          </View>
-          <View style={[glassCardStyle, s.statPill]}>
-            <Text style={[s.statValue, { color: '#06B6D4' }]}>{stats.days}</Text>
-            <Text style={[s.statLabel, { color: colors.textTertiary }]}>{t.day ?? 'Gün'}</Text>
-          </View>
-        </View>
-
-        {/* Journey Info Card */}
+        {/* Stat chips card */}
         {journey && (
-          <View style={[glassCardStyle, s.glassCard]}>
-            <Text style={[s.sectionTitle, { color: colors.textTertiary }]}>{t.journeyInfo}</Text>
-            {[
-              {
-                icon: '📅',
-                label: t.quitDate,
-                value: new Date(journey.quit_date).toLocaleDateString(lang === 'tr' ? 'tr-TR' : 'en-US', {
-                  day: 'numeric', month: 'long', year: 'numeric',
-                }),
-              },
-              { icon: '🚬', label: t.dailyCigs, value: `${journey.cigarettes_per_day} ${lang === 'tr' ? 'adet' : 'pcs'}` },
-              { icon: '💰', label: t.packPrice, value: `₺${journey.cost_per_pack}` },
-              journey.motivation && { icon: '🎯', label: t.motivation, value: getMotivationLabel(journey.motivation, lang) },
-            ].filter(Boolean).map((row: any, i, arr) => (
-              <View key={i} style={[s.infoRow, i < arr.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
-                <Text style={s.infoIcon}>{row.icon}</Text>
-                <Text style={[s.infoLabel, { color: colors.textSecondary }]}>{row.label}</Text>
-                <Text style={[s.infoValue, { color: colors.text }]}>{row.value}</Text>
-              </View>
+          <View style={[s.chipsCard, card]}>
+            {statChips.map((chip, i) => (
+              <React.Fragment key={chip.label}>
+                {i > 0 && <View style={[s.chipSep, { backgroundColor: dividerColor }]} />}
+                <View style={s.statChip}>
+                  <Ionicons name={chip.icon} size={20} color={chip.accent} style={{ marginBottom: 5 }} />
+                  <Text style={[s.chipValue, { color: colors.text }]} numberOfLines={1}>{chip.value}</Text>
+                  <Text style={[s.chipLabel, { color: colors.textTertiary }]}>{chip.label}</Text>
+                </View>
+              </React.Fragment>
             ))}
           </View>
         )}
 
-        {/* Support & Links Card */}
-        <View style={[glassCardStyle, s.glassCard]}>
-          <Text style={[s.sectionTitle, { color: colors.textTertiary }]}>{t.supportLinks}</Text>
-
-          <TouchableOpacity
-            style={[s.supportRow, { borderBottomWidth: 1, borderBottomColor: colors.border }]}
-            onPress={() => openURL('tel:171')}
-            activeOpacity={0.7}
-          >
-            <Text style={s.infoIcon}>🆘</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={[s.supportLabel, { color: '#06B6D4' }]}>{t.quitHelpline}</Text>
-              <Text style={[s.supportSub, { color: colors.textTertiary }]}>{lang === 'tr' ? 'Ücretsiz 7/24' : 'Free 24/7'}</Text>
-            </View>
-            <Text style={[s.chevron, { color: colors.textTertiary }]}>›</Text>
-          </TouchableOpacity>
-
-          {[
-            { icon: '🔒', label: t.privacyPolicy, url: 'https://descanpo.github.io/smoke/privacy.html' },
-            { icon: '📄', label: t.termsLink, url: 'https://descanpo.github.io/smoke/terms.html' },
-            { icon: '🇹🇷', label: t.kvkkLink, url: 'https://descanpo.github.io/smoke/kvkk.html' },
-          ].map((item, i, arr) => (
-            <TouchableOpacity
-              key={item.label}
-              style={[s.supportRow, i < arr.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border }]}
-              onPress={() => openURL(item.url)}
-              activeOpacity={0.7}
-            >
-              <Text style={s.infoIcon}>{item.icon}</Text>
-              <Text style={[s.supportLabel, { color: colors.text }]}>{item.label}</Text>
-              <Text style={[s.chevron, { color: colors.textTertiary }]}>›</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Settings Card */}
-        <View style={[glassCardStyle, s.glassCard]}>
-          <Text style={[s.sectionTitle, { color: colors.textTertiary }]}>{t.settings}</Text>
-
-          {/* Theme Toggle Row */}
-          <View style={[s.settingsRow, { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
-            <Text style={s.infoIcon}>{isDark ? '🌙' : '☀️'}</Text>
-            <Text style={[s.settingsRowLabel, { color: colors.text }]}>
-              {isDark ? t.darkMode : t.lightMode}
-            </Text>
-            <TouchableOpacity
-              onPress={toggleTheme}
-              activeOpacity={0.8}
-              style={[
-                s.togglePill,
-                { backgroundColor: isDark ? '#7C3AED' : 'rgba(0,0,0,0.12)' },
-              ]}
-            >
-              <View style={[
-                s.toggleCircle,
-                { transform: [{ translateX: isDark ? 20 : 0 }] },
-              ]} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Language Toggle Row */}
-          <View style={s.settingsRow}>
-            <Text style={s.infoIcon}>🌐</Text>
-            <Text style={[s.settingsRowLabel, { color: colors.text }]}>{t.language}</Text>
-            <View style={s.langPillRow}>
-              {(['tr', 'en'] as const).map(l => (
+        {/* YOLCULUK BİLGİLERİ */}
+        {journey && (
+          <View style={s.section}>
+            <Text style={[s.eyebrow, { color: colors.textTertiary }]}>{t.journeyInfo}</Text>
+            <View style={[s.groupCard, card]}>
+              {journeyRows.map((row, i) => (
                 <TouchableOpacity
-                  key={l}
-                  onPress={() => setLang(l)}
-                  activeOpacity={0.75}
-                  style={[
-                    s.langPill,
-                    lang === l
-                      ? { backgroundColor: '#7C3AED', borderColor: '#7C3AED' }
-                      : { backgroundColor: 'transparent', borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' },
-                  ]}
+                  key={row.label}
+                  style={[s.row, i < journeyRows.length - 1 && { borderBottomWidth: 1, borderBottomColor: dividerColor }]}
+                  onPress={() => openEdit(row.field)}
+                  activeOpacity={0.6}
                 >
-                  <Text style={[
-                    s.langPillText,
-                    { color: lang === l ? '#fff' : colors.textSecondary },
-                  ]}>
-                    {l === 'tr' ? 'TR' : 'EN'}
-                  </Text>
+                  <View style={well(row.accent)}>
+                    <Ionicons name={row.icon} size={20} color={row.accent} />
+                  </View>
+                  <Text style={[s.rowLabel, { color: colors.text, flex: 1 }]} numberOfLines={1}>{row.label}</Text>
+                  <Text style={[s.rowValue, { color: colors.textSecondary }]} numberOfLines={1}>{row.value}</Text>
+                  <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} style={{ marginLeft: 4 }} />
                 </TouchableOpacity>
               ))}
             </View>
           </View>
+        )}
+
+        {/* AYARLAR */}
+        <View style={s.section}>
+          <Text style={[s.eyebrow, { color: colors.textTertiary }]}>{t.settings}</Text>
+          <View style={[s.groupCard, card]}>
+            {/* Dark mode toggle */}
+            <View style={[s.row, { borderBottomWidth: 1, borderBottomColor: dividerColor }]}>
+              <View style={well('#6366F1')}>
+                <Ionicons name="moon-outline" size={20} color="#818CF8" />
+              </View>
+              <Text style={[s.rowLabel, { color: colors.text, flex: 1 }]}>{t.darkMode}</Text>
+              <Switch
+                value={isDark}
+                onValueChange={toggleTheme}
+                trackColor={{ false: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)', true: ACCENT }}
+                thumbColor="#fff"
+                ios_backgroundColor={isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}
+                {...Platform.select({ web: { activeThumbColor: '#fff' } as any, default: {} })}
+              />
+            </View>
+
+            {/* Language segmented control */}
+            <View style={s.row}>
+              <View style={well(CYAN)}>
+                <Ionicons name="language-outline" size={20} color={CYAN} />
+              </View>
+              <Text style={[s.rowLabel, { color: colors.text, flex: 1 }]}>{t.language}</Text>
+              <View style={[s.langSegment, {
+                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+              }]}>
+                {(['tr', 'en'] as const).map(l => (
+                  <TouchableOpacity
+                    key={l}
+                    onPress={() => setLang(l)}
+                    activeOpacity={0.8}
+                    style={[s.langSegBtn, lang === l && s.langSegBtnActive]}
+                  >
+                    <Text style={[
+                      s.langSegText,
+                      { color: lang === l ? '#fff' : colors.textSecondary },
+                    ]}>
+                      {l === 'tr' ? 'TR' : 'EN'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </View>
         </View>
 
-        {/* Danger Zone */}
-        <Text style={[s.dangerSectionTitle, { color: colors.textTertiary }]}>{t.account}</Text>
+        {/* DESTEK */}
+        <View style={s.section}>
+          <Text style={[s.eyebrow, { color: colors.textTertiary }]}>{lang === 'tr' ? 'DESTEK' : 'SUPPORT'}</Text>
+          <View style={[s.groupCard, card]}>
+            {supportRows.map((row, i) => (
+              <TouchableOpacity
+                key={row.label}
+                style={[s.row, i < supportRows.length - 1 && { borderBottomWidth: 1, borderBottomColor: dividerColor }]}
+                onPress={() => openURL(row.url)}
+                activeOpacity={0.6}
+              >
+                <View style={well(row.accent)}>
+                  <Ionicons name={row.icon} size={20} color={row.accent} />
+                </View>
+                <Text style={[s.rowLabel, { color: colors.text, flex: 1 }]} numberOfLines={1}>{row.label}</Text>
+                <Ionicons
+                  name={row.external ? 'open-outline' : 'chevron-forward'}
+                  size={18}
+                  color={colors.textTertiary}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
-        <TouchableOpacity style={s.resetBtn} onPress={newJourney} activeOpacity={0.8}>
-          <Text style={s.resetBtnText}>{t.resetJourney}</Text>
-        </TouchableOpacity>
+        {/* HESAP */}
+        <View style={s.section}>
+          <Text style={[s.eyebrow, { color: colors.textTertiary }]}>{t.account}</Text>
 
-        <TouchableOpacity
-          style={[s.signOutBtn, { borderColor: colors.border, backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }]}
-          onPress={signOut}
-          activeOpacity={0.8}
-        >
-          <Text style={[s.signOutText, { color: colors.textSecondary }]}>{t.signOut}</Text>
-        </TouchableOpacity>
+          {/* Reset (destructive) */}
+          <TouchableOpacity
+            style={[s.resetBtn, card]}
+            onPress={newJourney}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="trash-outline" size={20} color={ERROR} />
+            <Text style={[s.resetText, { color: ERROR }]}>{resetLabel}</Text>
+          </TouchableOpacity>
 
-        <Text style={[s.version, { color: colors.textTertiary }]}>Smoke v1.0.0 · ozgeee.od@gmail.com</Text>
+          {/* Sign out */}
+          <TouchableOpacity
+            style={[s.signOutBtn, {
+              backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+              borderColor: colors.border,
+            }]}
+            onPress={signOut}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="log-out-outline" size={20} color={colors.text} />
+            <Text style={[s.signOutText, { color: colors.text }]}>{t.signOut}</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
+
+      {/* Edit modal */}
+      <Modal visible={editField !== null} transparent animationType="fade" onRequestClose={() => setEditField(null)}>
+        <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setEditField(null)}>
+          <TouchableOpacity activeOpacity={1} style={[s.modalCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[s.modalTitle, { color: colors.text }]}>
+              {editField === 'quit_date' ? t.quitDate
+                : editField === 'cigarettes_per_day' ? t.dailyCigs
+                : editField === 'cost_per_pack' ? t.packPrice
+                : editField === 'motivation' ? t.motivation : ''}
+            </Text>
+
+            {editField === 'motivation' ? (
+              <View style={s.motivationGrid}>
+                {Object.entries(MOTIVATION_LABELS).map(([key, m]) => {
+                  const active = draft === key;
+                  return (
+                    <TouchableOpacity
+                      key={key}
+                      onPress={() => setDraft(key)}
+                      activeOpacity={0.8}
+                      style={[s.motivationChip, {
+                        backgroundColor: active ? ACCENT : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                        borderColor: active ? ACCENT : colors.border,
+                      }]}
+                    >
+                      <Text style={{ color: active ? '#fff' : colors.text, fontWeight: '600', fontSize: 14 }}>
+                        {lang === 'tr' ? m.tr : m.en}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            ) : (
+              <>
+                <TextInput
+                  style={[s.modalInput, {
+                    color: colors.text,
+                    borderColor: colors.border,
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                  }]}
+                  value={draft}
+                  onChangeText={setDraft}
+                  keyboardType={editField === 'quit_date' ? 'default' : 'decimal-pad'}
+                  placeholder={editField === 'quit_date' ? 'YYYY-AA-GG' : ''}
+                  placeholderTextColor={colors.textTertiary}
+                  autoFocus
+                />
+                {editField === 'quit_date' && (
+                  <Text style={[s.modalHint, { color: colors.textTertiary }]}>
+                    {lang === 'tr' ? 'Biçim: Yıl-Ay-Gün (örn. 2026-06-18)' : 'Format: Year-Month-Day (e.g. 2026-06-18)'}
+                  </Text>
+                )}
+              </>
+            )}
+
+            <View style={s.modalActions}>
+              <TouchableOpacity
+                style={[s.modalBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]}
+                onPress={() => setEditField(null)}
+                activeOpacity={0.7}
+              >
+                <Text style={{ color: colors.textSecondary, fontWeight: '700' }}>{t.cancel}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[s.modalBtn, s.modalSave]}
+                onPress={saveEdit}
+                disabled={saving}
+                activeOpacity={0.85}
+              >
+                {saving ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff', fontWeight: '800' }}>{t.save}</Text>}
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
 
 const s = StyleSheet.create({
-  content: { padding: 20, paddingTop: 16, paddingBottom: 120 },
+  content: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 120 },
 
-  // Page header
-  pageHeader: {
+  // TopAppBar
+  topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    paddingVertical: 12,
+    marginBottom: 12,
   },
-  pageTitle: { fontSize: 26, fontWeight: '800' },
-  settingsBtn: {
-    width: 42, height: 42, borderRadius: 21,
-    borderWidth: 1,
-    alignItems: 'center', justifyContent: 'center',
-  },
+  topBarSide: { width: 32, justifyContent: 'center' },
+  logo: { fontSize: 24, fontWeight: '800', letterSpacing: -0.8 },
 
-  // Avatar card
-  avatarCard: {
-    alignItems: 'center',
-    padding: 28,
-    marginBottom: 16,
-  },
-  avatarCircle: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+  // User identity
+  identity: { alignItems: 'center', marginTop: 12, marginBottom: 36 },
+  avatarRing: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
-    backgroundColor: '#7C3AED',
+    marginBottom: 16,
+    padding: 4,
     ...Platform.select({
-      web: {
-        background: 'linear-gradient(135deg, #7C3AED, #8B5CF6)',
-        boxShadow: '0 0 30px rgba(124,58,237,0.5)',
-      } as any,
-      default: {
-        shadowColor: '#7C3AED',
-        shadowOpacity: 0.5,
-        shadowRadius: 16,
-        shadowOffset: { width: 0, height: 0 },
-        elevation: 6,
-      },
+      web: { backgroundImage: 'linear-gradient(135deg, #8B5CF6, #06B6D4)' } as any,
+      default: { backgroundColor: ACCENT },
     }),
   },
-  avatarText: { fontSize: 32, fontWeight: '800', color: '#fff' },
-  displayName: { fontSize: 20, fontWeight: '700', marginBottom: 4 },
-  email: { fontSize: 13, marginBottom: 12 },
-  memberBadge: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 9999,
-    backgroundColor: 'rgba(16,185,129,0.2)',
-    borderWidth: 1,
-    borderColor: 'rgba(16,185,129,0.3)',
-  },
-  memberBadgeText: { fontSize: 12, fontWeight: '600', color: '#10B981' },
-
-  // Stats row
-  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
-  statPill: {
-    flex: 1,
-    borderRadius: 20,
-    paddingVertical: 14,
-    paddingHorizontal: 8,
+  avatarInner: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
     alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 4,
+    backgroundColor: ACCENT,
   },
-  statValue: { fontSize: 18, fontWeight: '800', marginBottom: 2 },
-  statLabel: { fontSize: 10, fontWeight: '500', textAlign: 'center' },
+  avatarText: { fontSize: 30, fontWeight: '700', color: '#fff', letterSpacing: -0.5 },
+  displayName: { fontSize: 24, fontWeight: '700', letterSpacing: -0.4, marginBottom: 4 },
+  email: { fontSize: 13, fontWeight: '500', maxWidth: '90%' },
 
-  // Glass card
-  glassCard: {
-    padding: 16,
-    marginBottom: 14,
+  // Stat chips card
+  chipsCard: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    borderRadius: 28,
+    paddingVertical: 20,
+    marginBottom: 36,
+    overflow: 'hidden',
   },
-  sectionTitle: {
-    fontSize: 11,
-    textTransform: 'uppercase',
+  statChip: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  chipSep: { width: 1, alignSelf: 'stretch' },
+  chipValue: { fontSize: 20, fontWeight: '800', letterSpacing: -0.5, marginBottom: 3 },
+  chipLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    textAlign: 'center',
     letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+
+  // Sections
+  section: { marginBottom: 32 },
+  eyebrow: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
     marginBottom: 12,
-    fontWeight: '600',
+    marginLeft: 8,
   },
 
-  // Info rows
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 10,
+  // Grouped cards
+  groupCard: {
+    borderRadius: 28,
+    paddingHorizontal: 16,
+    overflow: 'hidden',
   },
-  infoIcon: { fontSize: 16, width: 22, textAlign: 'center' },
-  infoLabel: { flex: 1, fontSize: 13 },
-  infoValue: { fontSize: 13, fontWeight: '600' },
 
-  // Support rows
-  supportRow: {
+  // Rows
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingVertical: 12,
+    gap: 16,
+    paddingVertical: 16,
     ...Platform.select({ web: { cursor: 'pointer' } as any }),
   },
-  supportLabel: { flex: 1, fontSize: 14, fontWeight: '500' },
-  supportSub: { fontSize: 11, marginTop: 1 },
-  chevron: { fontSize: 20 },
+  rowLabel: { fontSize: 14, fontWeight: '500' },
+  rowValue: { fontSize: 14, fontWeight: '500', maxWidth: '46%', textAlign: 'right' },
 
-  // Settings rows
-  settingsRow: {
+  // Language segmented control
+  langSegment: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 12,
-  },
-  settingsRowLabel: { flex: 1, fontSize: 14, fontWeight: '500' },
-
-  // Toggle pill (theme switch)
-  togglePill: {
-    width: 44,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: 'center',
-    paddingHorizontal: 2,
-  },
-  toggleCircle: {
-    width: 20,
-    height: 20,
     borderRadius: 10,
-    backgroundColor: '#fff',
-    ...Platform.select({
-      web: { boxShadow: '0 1px 4px rgba(0,0,0,0.3)' } as any,
-      default: { shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 2, shadowOffset: { width: 0, height: 1 }, elevation: 2 },
-    }),
+    padding: 4,
+    gap: 2,
   },
-
-  // Language pills
-  langPillRow: { flexDirection: 'row', gap: 6 },
-  langPill: {
+  langSegBtn: {
     paddingHorizontal: 12,
     paddingVertical: 5,
-    borderRadius: 9999,
-    borderWidth: 1,
+    borderRadius: 7,
   },
-  langPillText: { fontSize: 12, fontWeight: '700' },
+  langSegBtnActive: {
+    backgroundColor: ACCENT,
+  },
+  langSegText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.5 },
 
-  // Danger zone
-  dangerSectionTitle: {
-    fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 10,
-    fontWeight: '600',
-  },
+  // Reset (destructive)
   resetBtn: {
-    borderRadius: 20,
-    padding: 15,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
-    borderWidth: 1.5,
-    borderColor: 'rgba(239,68,68,0.5)',
-    backgroundColor: 'rgba(239,68,68,0.06)',
+    justifyContent: 'center',
+    gap: 12,
+    borderRadius: 28,
+    paddingVertical: 18,
+    marginBottom: 12,
   },
-  resetBtnText: { color: '#EF4444', fontWeight: '600', fontSize: 14 },
+  resetText: { fontWeight: '700', fontSize: 14 },
 
+  // Sign out
   signOutBtn: {
-    borderRadius: 20,
-    padding: 15,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    justifyContent: 'center',
+    gap: 12,
+    borderRadius: 28,
+    paddingVertical: 18,
     borderWidth: 1,
   },
-  signOutText: { fontWeight: '600', fontSize: 14 },
+  signOutText: { fontWeight: '700', fontSize: 14 },
 
-  version: { textAlign: 'center', fontSize: 12 },
+  // Edit modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 28,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 420,
+    borderRadius: 24,
+    borderWidth: 1,
+    padding: 24,
+  },
+  modalTitle: { fontSize: 18, fontWeight: '800', letterSpacing: -0.3, marginBottom: 18 },
+  modalInput: {
+    borderWidth: 1.5,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 18,
+    fontWeight: '700',
+    ...Platform.select({ web: { outlineStyle: 'none' } as any }),
+  },
+  modalHint: { fontSize: 12, fontWeight: '500', marginTop: 8 },
+  motivationGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  motivationChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  modalActions: { flexDirection: 'row', gap: 12, marginTop: 24 },
+  modalBtn: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 14,
+  },
+  modalSave: {
+    ...Platform.select({
+      web: { backgroundImage: 'linear-gradient(135deg, #7C3AED, #8B5CF6)' } as any,
+      default: { backgroundColor: ACCENT },
+    }),
+  },
 });

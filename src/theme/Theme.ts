@@ -10,10 +10,12 @@ export const Colors = {
   successDark: '#059669',
   warning: '#F59E0B',
   error: '#EF4444',
+  info: '#2196F3',
 
   background: '#0A0A1A',
   surface: '#0F0F1F',
   card: '#12122A',
+  cardElevated: '#22223A',
   cardGlass: 'rgba(255,255,255,0.04)',
   cardGlassBorder: 'rgba(255,255,255,0.08)',
   border: 'rgba(255,255,255,0.08)',
@@ -84,6 +86,10 @@ export const Theme = {
     soft: Platform.select({
       web: { boxShadow: '0 8px 32px rgba(124,58,237,0.12)' } as any,
       default: { shadowColor: '#7C3AED', shadowOpacity: 0.12, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 2 },
+    }),
+    medium: Platform.select({
+      web: { boxShadow: '0 16px 40px rgba(124,58,237,0.15)' } as any,
+      default: { shadowColor: '#7C3AED', shadowOpacity: 0.15, shadowRadius: 24, shadowOffset: { width: 0, height: 16 }, elevation: 4 },
     }),
     glow: Platform.select({
       web: { boxShadow: '0 0 30px rgba(124,58,237,0.45), 0 4px 20px rgba(124,58,237,0.25)' } as any,

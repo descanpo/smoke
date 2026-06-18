@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl =
@@ -12,6 +13,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
+    // On web the OAuth redirect returns the session in the URL (?code=...),
+    // which must be parsed to complete sign-in. Native uses deep-link handling.
+    detectSessionInUrl: Platform.OS === 'web',
   },
 });

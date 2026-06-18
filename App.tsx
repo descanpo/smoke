@@ -10,6 +10,7 @@ import OnboardingScreen from './src/screens/OnboardingScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ProgressScreen from './src/screens/ProgressScreen';
 import StatsScreen from './src/screens/StatsScreen';
+import CommunityScreen from './src/screens/CommunityScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import { ThemeProvider, useThemeMode } from './src/context/ThemeContext';
 import { LanguageProvider, useLanguage } from './src/context/LanguageContext';
@@ -21,7 +22,7 @@ import {
   cancelAllNotifications,
 } from './src/services/notifications';
 
-const TAB_SCREENS: ScreenType[] = ['Home', 'Progress', 'Stats', 'Profile'];
+const TAB_SCREENS: ScreenType[] = ['Home', 'Progress', 'Stats', 'Community', 'Profile'];
 
 const AppContent = () => {
   const { currentScreen, navigate, reset } = useNavigation();
@@ -49,7 +50,7 @@ const AppContent = () => {
       setSession(s);
       if (s) {
         // Don't re-navigate if already on a main screen (avoids stale closure nav bug)
-        const TAB_SCREENS_SET = new Set(['Home', 'Progress', 'Stats', 'Profile']);
+        const TAB_SCREENS_SET = new Set(TAB_SCREENS);
         if (!TAB_SCREENS_SET.has(currentScreenRef.current)) {
           fetchJourney(s.user.id);
         } else if (event === 'SIGNED_IN') {
@@ -118,6 +119,8 @@ const AppContent = () => {
         return <ProgressScreen session={session} journey={journey} />;
       case 'Stats':
         return <StatsScreen session={session} journey={journey} />;
+      case 'Community':
+        return <CommunityScreen session={session} journey={journey} />;
       case 'Profile':
         return (
           <ProfileScreen
@@ -127,6 +130,7 @@ const AppContent = () => {
               setJourney(null);
               navigate('Onboarding');
             }}
+            onJourneyUpdate={() => fetchJourney(session.user.id)}
           />
         );
       default:

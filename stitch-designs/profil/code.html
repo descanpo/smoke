@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Smoke - Profil</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#8B5CF6",
+                        secondary: "#06B6D4",
+                        success: "#10B981",
+                        warning: "#F59E0B",
+                        surface: "#0A0A1A",
+                        "on-surface": "#FFFFFF",
+                        "on-surface-variant": "#94A3B8"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "1.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        headline: ["Sora", "sans-serif"],
+                        display: ["Sora", "sans-serif"],
+                        body: ["Plus Jakarta Sans", "sans-serif"],
+                        label: ["Plus Jakarta Sans", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0A0A1A;
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .nav-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-40 bg-[#0A0A1A]/80 backdrop-blur-md flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-3">
+<!-- Placeholder for potential logo or leading icon if needed, but following prompt layout -->
+<div class="w-8 h-8"></div>
+</div>
+<h1 class="font-headline font-black text-2xl tracking-tighter text-[#8B5CF6]">Smoke</h1>
+<button class="text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</header>
+<main class="px-6 max-w-2xl mx-auto">
+<!-- User Identity Section -->
+<section class="flex flex-col items-center mt-6 mb-10 text-center">
+<div class="relative p-1 rounded-full bg-gradient-to-tr from-[#8B5CF6] to-[#06B6D4] mb-4">
+<div class="w-24 h-24 rounded-full bg-[#8B5CF6] flex items-center justify-center border-4 border-[#0A0A1A]">
+<span class="text-3xl font-bold font-headline text-white tracking-tight">RD</span>
+</div>
+</div>
+<h2 class="text-2xl font-bold font-headline text-white">Rıza Demir</h2>
+<p class="text-on-surface-variant text-sm font-medium">riza@email.com</p>
+</section>
+<!-- Stat Chips Row -->
+<section class="glass-card rounded-2xl flex items-stretch divide-x divide-white/10 mb-10 overflow-hidden">
+<div class="flex-1 py-5 flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-[#8B5CF6] text-xl mb-1">calendar_month</span>
+<div class="flex flex-col items-center">
+<span class="text-xl font-extrabold font-headline">11</span>
+<span class="text-[10px] font-bold text-on-surface-variant tracking-wider uppercase">GÜN TEMİZ</span>
+</div>
+</div>
+<div class="flex-1 py-5 flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-[#06B6D4] text-xl mb-1">wallet</span>
+<div class="flex flex-col items-center">
+<span class="text-xl font-extrabold font-headline">₺1.800</span>
+<span class="text-[10px] font-bold text-on-surface-variant tracking-wider uppercase">TASARRUF</span>
+</div>
+</div>
+<div class="flex-1 py-5 flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-[#F59E0B] text-xl mb-1">smoke_free</span>
+<div class="flex flex-col items-center">
+<span class="text-xl font-extrabold font-headline">240</span>
+<span class="text-[10px] font-bold text-on-surface-variant tracking-wider uppercase">SİGARA</span>
+</div>
+</div>
+</section>
+<!-- Settings Groups -->
+<div class="space-y-8">
+<!-- Yolculuk Bilgileri -->
+<div class="space-y-3">
+<h3 class="px-2 text-[11px] font-bold tracking-widest text-on-surface-variant uppercase">YOLCULUK BİLGİLERİ</h3>
+<div class="glass-card rounded-2xl overflow-hidden divide-y divide-white/5">
+<div class="flex items-center justify-between p-4 hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">calendar_today</span>
+</div>
+<span class="font-medium text-sm">Bırakma Tarihi</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm text-on-surface-variant">14 Haziran 2025</span>
+<span class="material-symbols-outlined text-on-surface-variant/40 text-lg">chevron_right</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-orange-500">local_fire_department</span>
+</div>
+<span class="font-medium text-sm">Günlük Sigara</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm text-on-surface-variant">20</span>
+<span class="material-symbols-outlined text-on-surface-variant/40 text-lg">chevron_right</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-emerald-500">payments</span>
+</div>
+<span class="font-medium text-sm">Paket Fiyatı</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm text-on-surface-variant">₺75</span>
+<span class="material-symbols-outlined text-on-surface-variant/40 text-lg">chevron_right</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-rose-500">favorite</span>
+</div>
+<span class="font-medium text-sm">Motivasyon</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm text-on-surface-variant">Sağlığım için</span>
+<span class="material-symbols-outlined text-on-surface-variant/40 text-lg">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Ayarlar -->
+<div class="space-y-3">
+<h3 class="px-2 text-[11px] font-bold tracking-widest text-on-surface-variant uppercase">AYARLAR</h3>
+<div class="glass-card rounded-2xl overflow-hidden divide-y divide-white/5">
+<div class="flex items-center justify-between p-4">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-indigo-400">dark_mode</span>
+</div>
+<span class="font-medium text-sm">Karanlık Mod</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-cyan-400">language</span>
+</div>
+<span class="font-medium text-sm">Dil</span>
+</div>
+<div class="flex bg-white/5 rounded-lg p-1">
+<button class="px-3 py-1 text-xs font-bold rounded-md bg-primary text-white">TR</button>
+<button class="px-3 py-1 text-xs font-bold rounded-md text-on-surface-variant">EN</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Destek -->
+<div class="space-y-3">
+<h3 class="px-2 text-[11px] font-bold tracking-widest text-on-surface-variant uppercase">DESTEK</h3>
+<div class="glass-card rounded-2xl overflow-hidden divide-y divide-white/5">
+<div class="flex items-center justify-between p-4 hover:bg-white/5 transition-colors cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-green-400">call</span>
+</div>
+<span class="font-medium text-sm">ALO 171 Sigara Bırakma Hattı</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/40 text-lg">open_in_new</span>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-white/5 transition-colors cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-gray-500/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-gray-400">description</span>
+</div>
+<span class="font-medium text-sm">Kullanım Koşulları</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/40 text-lg">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-white/5 transition-colors cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-blue-400">security</span>
+</div>
+<span class="font-medium text-sm">KVKK Aydınlatma Metni</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/40 text-lg">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Hesap -->
+<div class="space-y-3">
+<h3 class="px-2 text-[11px] font-bold tracking-widest text-on-surface-variant uppercase">HESAP</h3>
+<div class="space-y-3">
+<button class="w-full glass-card hover:bg-rose-500/5 transition-colors rounded-2xl p-4 flex items-center justify-center gap-3 text-rose-500 font-bold group">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">delete</span>
+<span class="text-sm">Yolculuğu Sıfırla</span>
+</button>
+<button class="w-full bg-white/5 hover:bg-white/10 active:scale-[0.98] transition-all rounded-2xl p-4 flex items-center justify-center gap-3 text-white font-bold">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-sm">Çıkış Yap</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-3 bg-[#0A0A1A]/90 nav-blur border-t border-white/5 rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+<!-- Tab 1 -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant/60 hover:text-[#06B6D4] transition-colors" href="#">
+<span class="material-symbols-outlined mb-0.5">grid_view</span>
+<span class="font-label font-medium text-[10px]">Ana Sayfa</span>
+</a>
+<!-- Tab 2 -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant/60 hover:text-[#06B6D4] transition-colors" href="#">
+<span class="material-symbols-outlined mb-0.5">monitor_heart</span>
+<span class="font-label font-medium text-[10px]">Sağlık</span>
+</a>
+<!-- Center FAB -->
+<div class="relative -top-6">
+<button class="bg-gradient-to-tr from-[#8B5CF6] to-[#06B6D4] rounded-full p-4 shadow-lg shadow-violet-500/30 active:scale-90 duration-150 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-3xl" style="font-variation-settings: 'wght' 400;">add</span>
+</button>
+</div>
+<!-- Tab 3 -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant/60 hover:text-[#06B6D4] transition-colors" href="#">
+<span class="material-symbols-outlined mb-0.5">bar_chart</span>
+<span class="font-label font-medium text-[10px]">İstatistik</span>
+</a>
+<!-- Tab 4 (Active) -->
+<a class="flex flex-col items-center justify-center text-[#8B5CF6] font-bold transition-colors" href="#">
+<span class="material-symbols-outlined mb-0.5" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label font-medium text-[10px]">Profil</span>
+</a>
+</nav>
+<!-- Background Atmospheric Glow -->
+<div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-20">
+<div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-violet-600 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-[20%] left-[-10%] w-[40%] h-[40%] bg-cyan-600 blur-[120px] rounded-full"></div>
+</div>
+<script>
+        // Simple micro-interaction for toggle
+        const toggle = document.querySelector('input[type="checkbox"]');
+        toggle.addEventListener('change', (e) => {
+            if (!e.target.checked) {
+                document.documentElement.classList.remove('dark');
+            } else {
+                document.documentElement.classList.add('dark');
+            }
+        });
+    </script>
+</body></html>

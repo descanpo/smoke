@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Smoke - İstatistikler</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5CF6',
+                        secondary: '#06B6D4',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        background: '#0A0A1A',
+                        card: '#16162A',
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "1.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Sora", "sans-serif"],
+                        "display": ["Sora", "sans-serif"],
+                        "body": ["Plus Jakarta Sans", "sans-serif"],
+                        "label": ["Plus Jakarta Sans", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(22, 22, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-icon {
+            font-variation-settings: 'FILL' 1, 'wght' 400;
+        }
+        body {
+            background-color: #0A0A1A;
+            color: #F8FAFC;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body selection:bg-violet-500/30">
+<!-- Top App Bar (Shared Component Context) -->
+<header class="flex justify-between items-center px-6 py-6 w-full fixed top-0 z-50 bg-background/80 backdrop-blur-md">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border border-violet-500/20 p-0.5 overflow-hidden">
+<img class="w-full h-full object-cover rounded-full" data-alt="A cinematic close-up of a young professional with a determined expression, lit by moody neon violet and cyan ambient light against a dark, tech-focused background. The lighting creates a premium, high-contrast editorial look, emphasizing clean skin textures and a modern aesthetic consistent with a luxury health app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJOQh7BruMJzGVEOA5X1hhyrioDY7wiGoD-kxls3F7VGKyAtPsH5Wnfw01COR55SikABm0Jq4Urcxy-gi5b_dvD_EQyQxvL-WQF_-zTwIwA1RyZl61TCeFazL8jQKkK_sDNdUeW3t1KJO50n9uo0wgmaHoWksKLFJ6mXgW7q2xbbip8oyRfpettGLhEt_g1uD-VBRRJKGgbq_uuct7HnqksilQkuiijcFd9SXk2GJ8pY95tek8fhjQMLfuawzaPa16MhR5J792zQ"/>
+</div>
+<h1 class="font-headline text-lg font-bold text-slate-100 tracking-tight">Merhaba, Kullanıcı</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined text-violet-500">groups</span>
+</button>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto space-y-8">
+<!-- Header Section -->
+<section class="space-y-1">
+<span class="text-[10px] font-bold tracking-[0.2em] text-violet-500 font-headline">ANALİZ</span>
+<h2 class="text-3xl font-extrabold font-headline text-white">İstatistikler</h2>
+</section>
+<!-- Weekly Activity Card -->
+<section class="glass-card rounded-2xl p-6 shadow-2xl">
+<div class="flex justify-between items-center mb-8">
+<h3 class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">HAFTALIK AKTİVİTE</h3>
+<div class="flex gap-4 items-center">
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-slate-600"></div>
+<span class="text-[10px] text-slate-400 font-medium">Geçmiş</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+<span class="text-[10px] text-cyan-400 font-medium">Bugün</span>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-end h-40 gap-2 mb-2">
+<!-- Pzt -->
+<div class="flex flex-col items-center flex-1 gap-2">
+<span class="text-[10px] text-slate-500 font-semibold">4</span>
+<div class="w-full bg-slate-800 rounded-t-full relative" style="height: 40%;">
+<div class="absolute inset-0 bg-gradient-to-t from-violet-600/50 to-violet-400 rounded-t-full opacity-60"></div>
+</div>
+<span class="text-[10px] text-slate-500 mt-2">Pzt</span>
+</div>
+<!-- Sal -->
+<div class="flex flex-col items-center flex-1 gap-2">
+<span class="text-[10px] text-slate-500 font-semibold">2</span>
+<div class="w-full bg-slate-800 rounded-t-full relative" style="height: 25%;">
+<div class="absolute inset-0 bg-gradient-to-t from-violet-600/50 to-violet-400 rounded-t-full opacity-60"></div>
+</div>
+<span class="text-[10px] text-slate-500 mt-2">Sal</span>
+</div>
+<!-- Çar -->
+<div class="flex flex-col items-center flex-1 gap-2">
+<span class="text-[10px] text-slate-500 font-semibold">7</span>
+<div class="w-full bg-slate-800 rounded-t-full relative" style="height: 65%;">
+<div class="absolute inset-0 bg-gradient-to-t from-violet-600/50 to-violet-400 rounded-t-full opacity-60"></div>
+</div>
+<span class="text-[10px] text-slate-500 mt-2">Çar</span>
+</div>
+<!-- Per -->
+<div class="flex flex-col items-center flex-1 gap-2">
+<span class="text-[10px] text-slate-500 font-semibold">5</span>
+<div class="w-full bg-slate-800 rounded-t-full relative" style="height: 50%;">
+<div class="absolute inset-0 bg-gradient-to-t from-violet-600/50 to-violet-400 rounded-t-full opacity-60"></div>
+</div>
+<span class="text-[10px] text-slate-500 mt-2">Per</span>
+</div>
+<!-- Cum -->
+<div class="flex flex-col items-center flex-1 gap-2">
+<span class="text-[10px] text-slate-500 font-semibold">3</span>
+<div class="w-full bg-slate-800 rounded-t-full relative" style="height: 35%;">
+<div class="absolute inset-0 bg-gradient-to-t from-violet-600/50 to-violet-400 rounded-t-full opacity-60"></div>
+</div>
+<span class="text-[10px] text-slate-500 mt-2">Cum</span>
+</div>
+<!-- Cmt (Today) -->
+<div class="flex flex-col items-center flex-1 gap-2">
+<span class="text-[10px] text-cyan-400 font-bold">12</span>
+<div class="w-full bg-slate-800 rounded-t-full relative shadow-[0_0_15px_rgba(6,182,212,0.3)]" style="height: 100%;">
+<div class="absolute inset-0 bg-gradient-to-t from-cyan-600 to-cyan-300 rounded-t-full"></div>
+</div>
+<span class="text-[10px] text-cyan-400 font-bold mt-2">Cmt</span>
+</div>
+<!-- Paz -->
+<div class="flex flex-col items-center flex-1 gap-2">
+<span class="text-[10px] text-slate-500 font-semibold">-</span>
+<div class="w-full bg-slate-800/30 rounded-t-full" style="height: 10%;"></div>
+<span class="text-[10px] text-slate-500 mt-2">Paz</span>
+</div>
+</div>
+</section>
+<!-- Stat Tiles Grid -->
+<section class="grid grid-cols-2 gap-4">
+<!-- Resistance -->
+<div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-16 h-16 bg-success/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+<div class="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-success text-xl">shield</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="text-3xl font-black font-headline text-white">85%</span>
+<div class="w-1.5 h-1.5 rounded-full bg-success mb-1.5"></div>
+</div>
+<p class="text-[10px] font-bold tracking-wider text-slate-400 mt-1 uppercase">DİRENÇ ORANI</p>
+</div>
+<!-- Streak -->
+<div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-16 h-16 bg-violet-500/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+<div class="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-violet-500 text-xl" style="font-variation-settings: 'FILL' 1;">flare</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="text-3xl font-black font-headline text-white">12</span>
+<div class="w-1.5 h-1.5 rounded-full bg-violet-500 mb-1.5"></div>
+</div>
+<p class="text-[10px] font-bold tracking-wider text-slate-400 mt-1 uppercase">EN UZUN SERİ</p>
+</div>
+<!-- Requests -->
+<div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-16 h-16 bg-warning/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+<div class="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-warning text-xl">bolt</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="text-3xl font-black font-headline text-white">24</span>
+<div class="w-1.5 h-1.5 rounded-full bg-warning mb-1.5"></div>
+</div>
+<p class="text-[10px] font-bold tracking-wider text-slate-400 mt-1 uppercase">TOPLAM İSTEK</p>
+</div>
+<!-- Clean Days -->
+<div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-16 h-16 bg-cyan-400/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+<div class="w-10 h-10 rounded-xl bg-cyan-400/10 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-cyan-400 text-xl">calendar_today</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="text-3xl font-black font-headline text-white">11</span>
+<div class="w-1.5 h-1.5 rounded-full bg-cyan-400 mb-1.5"></div>
+</div>
+<p class="text-[10px] font-bold tracking-wider text-slate-400 mt-1 uppercase">TEMİZ GÜN</p>
+</div>
+</section>
+<!-- Trigger Analysis -->
+<section class="glass-card rounded-2xl p-6">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-1.5 h-5 bg-violet-500 rounded-full"></div>
+<h3 class="text-sm font-bold tracking-tight text-white uppercase">TETİKLEYİCİ ANALİZİ</h3>
+</div>
+<div class="space-y-5">
+<!-- Stres -->
+<div class="space-y-2">
+<div class="flex justify-between items-center text-[11px] font-semibold">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded bg-violet-500/20 text-violet-500 flex items-center justify-center text-[14px] material-symbols-outlined">psychology</span>
+<span class="text-slate-200">Stres</span>
+</div>
+<span class="text-violet-400">42%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-violet-500 rounded-full w-[42%]"></div>
+</div>
+</div>
+<!-- Sıkıntı -->
+<div class="space-y-2">
+<div class="flex justify-between items-center text-[11px] font-semibold">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded bg-slate-500/20 text-slate-400 flex items-center justify-center text-[14px] material-symbols-outlined">sentiment_neutral</span>
+<span class="text-slate-200">Sıkıntı</span>
+</div>
+<span class="text-slate-400">28%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-slate-500 rounded-full w-[28%]"></div>
+</div>
+</div>
+<!-- Sosyal Ortam -->
+<div class="space-y-2">
+<div class="flex justify-between items-center text-[11px] font-semibold">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded bg-success/20 text-success flex items-center justify-center text-[14px] material-symbols-outlined">groups</span>
+<span class="text-slate-200">Sosyal Ortam</span>
+</div>
+<span class="text-success">18%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-success rounded-full w-[18%]"></div>
+</div>
+</div>
+<!-- Yemek Sonrası -->
+<div class="space-y-2">
+<div class="flex justify-between items-center text-[11px] font-semibold">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded bg-warning/20 text-warning flex items-center justify-center text-[14px] material-symbols-outlined">restaurant</span>
+<span class="text-slate-200">Yemek Sonrası</span>
+</div>
+<span class="text-warning">12%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-warning rounded-full w-[12%]"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Shared Component Implementation) -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl bg-slate-950/80 backdrop-blur-xl border-t border-white/10 shadow-[0_-4px_24px_rgba(139,92,246,0.15)]">
+<div class="flex justify-around items-center px-4 pb-8 pt-4 w-full relative">
+<!-- Ana Sayfa -->
+<a class="flex flex-col items-center justify-center text-slate-400 hover:text-violet-400 transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-body text-[10px] font-medium">Ana Sayfa</span>
+</a>
+<!-- Sağlık -->
+<a class="flex flex-col items-center justify-center text-slate-400 hover:text-violet-400 transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1">fitness_center</span>
+<span class="font-body text-[10px] font-medium">Sağlık</span>
+</a>
+<!-- FAB (Central Action) -->
+<div class="relative -mt-12">
+<button class="w-14 h-14 bg-violet-500 rounded-full flex items-center justify-center text-white shadow-[0_8px_20px_rgba(139,92,246,0.4)] active:scale-90 transition-all duration-200 group">
+<span class="material-symbols-outlined text-3xl group-hover:rotate-90 transition-transform">add</span>
+</button>
+</div>
+<!-- İstatistik (ACTIVE) -->
+<a class="flex flex-col items-center justify-center text-violet-500 scale-110 transition-transform active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1 active-icon">monitoring</span>
+<span class="font-body text-[10px] font-medium">İstatistik</span>
+<div class="w-1 h-1 bg-violet-500 rounded-full mt-1"></div>
+</a>
+<!-- Profil -->
+<a class="flex flex-col items-center justify-center text-slate-400 hover:text-violet-400 transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-body text-[10px] font-medium">Profil</span>
+</a>
+</div>
+</nav>
+<script>
+        // Micro-interaction for tiles
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+                card.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0px)';
+            });
+        });
+    </script>
+</body></html>

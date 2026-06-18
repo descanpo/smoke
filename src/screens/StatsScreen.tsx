@@ -1,20 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Platform, SafeAreaView, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../services/supabase';
 import { getColors } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useNavigation } from '../navigation/Navigator';
 
-const TRIGGER_LABELS: Record<string, { label: string; labelEn: string; icon: string; color: string }> = {
-  stress:     { label: 'Stres',         labelEn: 'Stress',       icon: '😫', color: '#F43F5E' },
-  boredom:    { label: 'Sıkıntı',       labelEn: 'Boredom',      icon: '😑', color: '#8B5CF6' },
-  social:     { label: 'Sosyal Ortam',  labelEn: 'Social',       icon: '👥', color: '#EAB308' },
-  after_meal: { label: 'Yemek Sonrası', labelEn: 'After Meal',   icon: '🍽️', color: '#F97316' },
-  coffee:     { label: 'Kahve Sonrası', labelEn: 'After Coffee', icon: '☕', color: '#F59E0B' },
-  alcohol:    { label: 'Alkol',         labelEn: 'Alcohol',      icon: '🍺', color: '#64748B' },
-  habit:      { label: 'Alışkanlık',    labelEn: 'Habit',        icon: '🔄', color: '#06B6D4' },
-  emotion:    { label: 'Duygusal',      labelEn: 'Emotional',    icon: '💔', color: '#EC4899' },
-  other:      { label: 'Diğer',         labelEn: 'Other',        icon: '❓', color: '#6B7280' },
+const ACCENT = '#8B5CF6';
+const CYAN = '#06B6D4';
+
+const TRIGGER_LABELS: Record<string, { label: string; labelEn: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
+  stress:     { label: 'Stres',         labelEn: 'Stress',       icon: 'thunderstorm-outline', color: '#F43F5E' },
+  boredom:    { label: 'Sıkıntı',       labelEn: 'Boredom',      icon: 'hourglass-outline',    color: '#8B5CF6' },
+  social:     { label: 'Sosyal Ortam',  labelEn: 'Social',       icon: 'people-outline',       color: '#EAB308' },
+  after_meal: { label: 'Yemek Sonrası', labelEn: 'After Meal',   icon: 'restaurant-outline',   color: '#F97316' },
+  coffee:     { label: 'Kahve Sonrası', labelEn: 'After Coffee', icon: 'cafe-outline',         color: '#F59E0B' },
+  alcohol:    { label: 'Alkol',         labelEn: 'Alcohol',      icon: 'wine-outline',         color: '#64748B' },
+  habit:      { label: 'Alışkanlık',    labelEn: 'Habit',        icon: 'repeat-outline',       color: '#06B6D4' },
+  emotion:    { label: 'Duygusal',      labelEn: 'Emotional',    icon: 'heart-dislike-outline',color: '#EC4899' },
+  other:      { label: 'Diğer',         labelEn: 'Other',        icon: 'ellipsis-horizontal',  color: '#6B7280' },
 };
 
 function calcStats(journey: any) {
@@ -50,6 +55,7 @@ function calcLongestStreak(logs: any[], quitDate: Date): number {
 export default function StatsScreen({ session, journey }: { session: any; journey: any }) {
   const { mode, isDark } = useThemeMode();
   const { lang, t } = useLanguage();
+  const { navigate } = useNavigation();
   const colors = getColors(mode);
 
   const [weekly, setWeekly] = useState<{ label: string; count: number; isToday: boolean }[]>([]);
@@ -134,9 +140,31 @@ export default function StatsScreen({ session, journey }: { session: any; journe
     );
   };
 
+  // Clean premium surface — matches HomeScreen `card`.
+  const card = {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...Platform.select({
+      web: {
+        boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 6px 20px rgba(17,17,40,0.06)',
+      } as any,
+      default: {
+        shadowColor: isDark ? '#000' : '#111128',
+        shadowOpacity: isDark ? 0.3 : 0.06,
+        shadowRadius: 16,
+        shadowOffset: { width: 0, height: 8 },
+        elevation: 3,
+      },
+    }),
+  };
+
   if (!journey) {
     return (
-      <View style={[s.container, { backgroundColor: colors.background }]}>
+      <View style={[s.container, s.emptyContainer, { backgroundColor: colors.background }]}>
+        <View style={[s.emptyIconWrap, { backgroundColor: ACCENT + (isDark ? '22' : '14') }]}>
+          <Ionicons name="bar-chart-outline" size={32} color={ACCENT} />
+        </View>
         <Text style={[s.empty, { color: colors.textSecondary }]}>
           {lang === 'tr' ? 'Yolculuk bulunamadı' : 'Journey not found'}
         </Text>
@@ -148,212 +176,298 @@ export default function StatsScreen({ session, journey }: { session: any; journe
   const maxBar = Math.max(...weekly.map(d => d.count), 1);
   const triggerTotal = triggers.reduce((sum, t2) => sum + t2.count, 0) || 1;
 
-  const glassCard = {
-    backgroundColor: isDark ? 'rgba(18,18,42,0.6)' : colors.card,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...Platform.select({ web: isDark ? { backdropFilter: 'blur(20px)' } as any : {} }),
-  };
+  // 2x2 overview tiles — mirrors HomeScreen stat-tile metadata, mapped to the reference.
+  const statTiles: { accent: string; icon: keyof typeof Ionicons.glyphMap; value: string; label: string }[] = [
+    {
+      accent: '#10B981',
+      icon: 'shield-checkmark',
+      value: `%${resistPct}`,
+      label: t.resistanceRate,
+    },
+    {
+      accent: ACCENT,
+      icon: 'flame',
+      value: `${longestStreak}`,
+      label: t.longestStreak,
+    },
+    {
+      accent: '#F59E0B',
+      icon: 'flash',
+      value: `${totalCravings}`,
+      label: t.totalCravings,
+    },
+    {
+      accent: CYAN,
+      icon: 'calendar',
+      value: `${cleanDays}`,
+      label: t.cleanDays,
+    },
+  ];
 
   return (
-    <ScrollView
-      style={[s.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={s.content}
-      showsVerticalScrollIndicator={false}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <ScrollView
+        style={[s.container, { backgroundColor: colors.background }]}
+        contentContainerStyle={s.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={s.header}>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.eyebrow, { color: colors.textTertiary }]}>
+              {lang === 'tr' ? 'ANALİZ' : 'ANALYTICS'}
+            </Text>
+            <Text style={[s.title, { color: colors.text }]}>{t.statistics}</Text>
+          </View>
+          <TouchableOpacity
+            style={[s.iconBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', borderColor: colors.border }]}
+            activeOpacity={0.7}
+            onPress={() => navigate('Community')}
+          >
+            <Ionicons name="people-outline" size={20} color={colors.text} />
+          </TouchableOpacity>
+        </View>
 
-      {/* Header */}
-      <Text style={[s.title, { color: colors.text }]}>{t.statistics}</Text>
-      <Text style={[s.subtitle, { color: colors.textSecondary }]}>
-        {lang === 'tr' ? 'Bu hafta harika gidiyorsun 📈' : "You're doing great this week 📈"}
-      </Text>
-
-      {/* Weekly Bar Chart */}
-      <View style={[glassCard, s.card]}>
-        <Text style={[s.cardTitle, { color: colors.text }]}>{t.weeklyActivity}</Text>
-        <View style={s.chart}>
-          {weekly.map((d, i) => (
-            <View key={i} style={s.barGroup}>
-              <View style={s.barWrap}>
-                <View style={[s.barBg, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)' }]} />
-                {d.count > 0 && (
-                  <View style={[s.bar, {
-                    height: `${(d.count / maxBar) * 100}%` as any,
-                    ...Platform.select({
-                      web: {
-                        background: d.isToday
-                          ? '#06B6D4'
-                          : 'linear-gradient(180deg, rgba(124,58,237,0.6) 0%, rgba(124,58,237,1) 100%)',
-                        boxShadow: d.isToday ? '0 0 8px rgba(6,182,212,0.6)' : 'none',
-                      } as any,
-                      default: {
-                        backgroundColor: d.isToday ? '#06B6D4' : '#7C3AED',
-                        shadowColor: d.isToday ? '#06B6D4' : '#7C3AED',
-                        shadowOpacity: d.isToday ? 0.5 : 0.2,
-                        shadowRadius: 4,
-                        shadowOffset: { width: 0, height: 0 },
-                      },
-                    }),
-                  }]} />
-                )}
+        {/* Weekly Bar Chart */}
+        <View style={[card, s.chartCard]}>
+          <View style={s.cardHead}>
+            <Text style={[s.eyebrow, { color: colors.textTertiary }]}>{t.weeklyActivity}</Text>
+            <View style={s.legend}>
+              <View style={s.legendItem}>
+                <View style={[s.legendDot, { backgroundColor: isDark ? '#475569' : '#94A3B8' }]} />
+                <Text style={[s.legendText, { color: colors.textTertiary }]}>
+                  {lang === 'tr' ? 'GEÇMİŞ' : 'PAST'}
+                </Text>
               </View>
-              <Text style={[s.barLabel, { color: colors.textTertiary }, d.isToday && { color: '#06B6D4', fontWeight: '700' }]}>
-                {d.label}
-              </Text>
+              <View style={s.legendItem}>
+                <View style={[s.legendDot, { backgroundColor: CYAN }]} />
+                <Text style={[s.legendText, { color: colors.textTertiary }]}>
+                  {lang === 'tr' ? 'BUGÜN' : 'TODAY'}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={s.chart}>
+            {weekly.map((d, i) => {
+              const fillPct = Math.max(d.count > 0 ? 8 : 0, (d.count / maxBar) * 100);
+              return (
+                <View key={i} style={s.barGroup}>
+                  {/* value (today only, matching reference) */}
+                  <View style={s.barValueSlot}>
+                    {d.isToday && d.count > 0 && (
+                      <Text style={[s.barValue, { color: CYAN }]}>{d.count}</Text>
+                    )}
+                  </View>
+                  {/* track */}
+                  <View style={[s.barTrack, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(17,17,40,0.05)' }]}>
+                    {fillPct > 0 && (
+                      <View
+                        style={[
+                          s.barFill,
+                          d.isToday ? s.barFillToday : null,
+                          { height: `${fillPct}%` as any },
+                          d.isToday
+                            ? { backgroundColor: CYAN }
+                            : Platform.select({
+                                web: { backgroundImage: 'linear-gradient(180deg, #8B5CF6, #06B6D4)', opacity: 0.45 } as any,
+                                default: { backgroundColor: ACCENT, opacity: 0.55 },
+                              }),
+                        ]}
+                      />
+                    )}
+                  </View>
+                  <Text style={[s.barLabel, { color: colors.textTertiary }, d.isToday && { color: CYAN, fontWeight: '800' }]}>
+                    {d.label}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Overview 2x2 — mirrors HomeScreen stat tiles */}
+        <View style={s.statsGrid}>
+          {statTiles.map((tile, i) => (
+            <View key={i} style={[s.statCard, card]}>
+              <View style={s.statTop}>
+                <View style={[s.statIconWrap, { backgroundColor: tile.accent + (isDark ? '22' : '14') }]}>
+                  <Ionicons name={tile.icon} size={18} color={tile.accent} />
+                </View>
+                <View style={[s.statDot, { backgroundColor: tile.accent }]} />
+              </View>
+              <Text style={[s.statValue, { color: colors.text }]}>{tile.value}</Text>
+              <Text style={[s.statLabel, { color: colors.textTertiary }]}>{tile.label}</Text>
             </View>
           ))}
         </View>
-      </View>
 
-      {/* Stats Cards 2x2 */}
-      <View style={s.statsGrid}>
-        {/* Resistance Rate */}
-        <View style={[glassCard, s.statCard]}>
-          <Text style={[s.statCardTitle, { color: colors.textSecondary }]}>{t.resistanceRate}</Text>
-          <Text style={[s.statBigValue, { color: '#10B981' }]}>{resistPct}%</Text>
-          <Text style={[s.statCardDesc, { color: colors.textTertiary }]}>
-            {totalCravings} {lang === 'tr' ? 'istekten' : 'of'} {resistedCravings} {lang === 'tr' ? 'direndi' : 'resisted'}
-          </Text>
-        </View>
-
-        {/* Longest Streak */}
-        <View style={[glassCard, s.statCard]}>
-          <Text style={[s.statCardTitle, { color: colors.textSecondary }]}>{t.longestStreak}</Text>
-          <Text style={[s.statBigValue, { color: '#7C3AED' }]}>{longestStreak}</Text>
-          <Text style={[s.statCardDesc, { color: colors.textTertiary }]}>{t.personalRecord}</Text>
-        </View>
-
-        {/* Total Cravings */}
-        <View style={[glassCard, s.statCard]}>
-          <Text style={[s.statCardTitle, { color: colors.textSecondary }]}>{t.totalCravings}</Text>
-          <Text style={[s.statBigValue, { color: '#F59E0B' }]}>{totalCravings}</Text>
-          <Text style={[s.statCardDesc, { color: colors.textTertiary }]}>{t.cravingsLogged}</Text>
-        </View>
-
-        {/* Clean Days */}
-        <View style={[glassCard, s.statCard]}>
-          <Text style={[s.statCardTitle, { color: colors.textSecondary }]}>{t.cleanDays}</Text>
-          <Text style={[s.statBigValue, { color: '#06B6D4' }]}>{cleanDays}</Text>
-          <Text style={[s.statCardDesc, { color: colors.textTertiary }]}>{t.cleanDaysDesc}</Text>
-        </View>
-      </View>
-
-      {/* Trigger Analysis */}
-      {triggers.length > 0 ? (
-        <View style={[glassCard, s.card]}>
-          <Text style={[s.cardTitle, { color: colors.text }]}>{t.triggerAnalysis}</Text>
-          {triggers.map((trig) => {
-            const info = TRIGGER_LABELS[trig.key] ?? { label: trig.key, labelEn: trig.key, icon: '❓', color: '#6B7280' };
-            const widthPct = Math.round((trig.count / triggerTotal) * 100);
-            return (
-              <View key={trig.key} style={s.triggerRow}>
-                <Text style={s.triggerIcon}>{info.icon}</Text>
-                <Text style={[s.triggerLabel, { color: colors.textSecondary }]}>
-                  {lang === 'tr' ? info.label : info.labelEn}
-                </Text>
-                <View style={[s.triggerTrack, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]}>
-                  <View style={[s.triggerFill, { width: `${widthPct}%` as any, backgroundColor: info.color }]} />
+        {/* Trigger Analysis */}
+        {triggers.length > 0 ? (
+          <View style={[card, s.triggerCard]}>
+            <Text style={[s.eyebrow, { color: colors.textTertiary, marginBottom: 18 }]}>{t.triggerAnalysis}</Text>
+            {triggers.map((trig, idx) => {
+              const info = TRIGGER_LABELS[trig.key] ?? { label: trig.key, labelEn: trig.key, icon: 'ellipsis-horizontal' as keyof typeof Ionicons.glyphMap, color: '#6B7280' };
+              const widthPct = Math.round((trig.count / triggerTotal) * 100);
+              return (
+                <View key={trig.key} style={[s.triggerRow, idx === triggers.length - 1 && { marginBottom: 0 }]}>
+                  <View style={[s.triggerIconWrap, { backgroundColor: info.color + (isDark ? '22' : '14') }]}>
+                    <Ionicons name={info.icon} size={16} color={info.color} />
+                  </View>
+                  <View style={s.triggerBody}>
+                    <View style={s.triggerLabelRow}>
+                      <Text style={[s.triggerLabel, { color: colors.text }]} numberOfLines={1}>
+                        {lang === 'tr' ? info.label : info.labelEn}
+                      </Text>
+                      <Text style={[s.triggerPct, { color: info.color }]}>%{widthPct}</Text>
+                    </View>
+                    <View style={[s.triggerTrack, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
+                      <View style={[s.triggerFill, {
+                        width: `${widthPct}%` as any,
+                        backgroundColor: info.color,
+                      }]} />
+                    </View>
+                  </View>
                 </View>
-                <Text style={[s.triggerPct, { color: colors.text }]}>{widthPct}%</Text>
-              </View>
-            );
-          })}
-        </View>
-      ) : (
-        <View style={[glassCard, s.card, { alignItems: 'center', padding: 32 }]}>
-          <Text style={{ fontSize: 40, marginBottom: 10 }}>📊</Text>
-          <Text style={{ color: colors.textSecondary, fontSize: 14, textAlign: 'center' }}>
-            {lang === 'tr'
-              ? 'İstek kaydetmeye başladığında tetikleyici analizi burada görünecek.'
-              : 'Trigger analysis will appear here once you start logging cravings.'}
-          </Text>
-        </View>
-      )}
-    </ScrollView>
+              );
+            })}
+          </View>
+        ) : (
+          <View style={[card, s.triggerCard, s.emptyState]}>
+            <View style={[s.emptyIconWrap, { backgroundColor: ACCENT + (isDark ? '22' : '14') }]}>
+              <Ionicons name="bar-chart-outline" size={32} color={ACCENT} />
+            </View>
+            <Text style={[s.emptyTitle, { color: colors.text }]}>
+              {lang === 'tr' ? 'Henüz veri yok' : 'No data yet'}
+            </Text>
+            <Text style={[s.emptyText, { color: colors.textSecondary }]}>
+              {lang === 'tr'
+                ? 'İstek kaydetmeye başladığında tetikleyici analizi burada görünecek.'
+                : 'Trigger analysis will appear here once you start logging cravings.'}
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const s = StyleSheet.create({
   container: { flex: 1 },
-  content: { padding: 20, paddingTop: 52, paddingBottom: 120 },
-  empty: { textAlign: 'center', marginTop: 100 },
+  content: { padding: 20, paddingTop: 16, paddingBottom: 120 },
+  emptyContainer: { justifyContent: 'center', alignItems: 'center' },
+  empty: { textAlign: 'center', fontSize: 15, fontWeight: '600' },
 
-  title: { fontSize: 26, fontWeight: '800', marginBottom: 4 },
-  subtitle: { fontSize: 13, marginBottom: 20 },
+  eyebrow: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.2 },
 
-  card: {
-    padding: 16,
-    marginBottom: 14,
+  // Header
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
+  title: { fontSize: 32, fontWeight: '800', letterSpacing: -0.5, marginTop: 6 },
+  iconBtn: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+
+  // Card heads
+  cardHead: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
   },
-  cardTitle: { fontSize: 14, fontWeight: '700', marginBottom: 16 },
+
+  // Legend
+  legend: { flexDirection: 'row', gap: 14 },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendText: { fontSize: 10, fontWeight: '700', letterSpacing: 0.4 },
 
   // Bar chart
+  chartCard: { borderRadius: 24, padding: 22 },
   chart: {
     flexDirection: 'row',
-    height: 180,
-    gap: 6,
+    gap: 8,
     alignItems: 'flex-end',
-    marginBottom: 8,
   },
-  barGroup: { flex: 1, alignItems: 'center', gap: 6 },
-  barWrap: {
-    flex: 1,
-    width: '100%',
+  barGroup: { flex: 1, alignItems: 'center', justifyContent: 'flex-end' },
+  barValueSlot: { height: 18, justifyContent: 'flex-end', marginBottom: 6 },
+  barValue: { fontSize: 11, fontWeight: '800' },
+  barTrack: {
+    width: 10,
+    height: 132,
+    borderRadius: 999,
+    overflow: 'hidden',
     justifyContent: 'flex-end',
-    position: 'relative',
   },
-  barBg: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    top: 0,
-    borderRadius: 6,
-  },
-  bar: {
+  barFill: {
     width: '100%',
-    borderRadius: 6,
-    minHeight: 4,
+    borderRadius: 999,
   },
-  barLabel: { fontSize: 10, fontWeight: '500' },
+  barFillToday: {
+    ...Platform.select({
+      web: { boxShadow: '0 0 15px rgba(6,182,212,0.55)' } as any,
+      default: {
+        shadowColor: CYAN,
+        shadowOpacity: 0.55,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 0 },
+        elevation: 4,
+      },
+    }),
+  },
+  barLabel: { fontSize: 11, fontWeight: '700', marginTop: 12 },
 
-  // Stats grid 2x2
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 14 },
-  statCard: {
-    flex: 1,
-    minWidth: '45%',
-    padding: 16,
-  },
-  statCardTitle: {
-    fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 6,
-    fontWeight: '600',
-  },
-  statBigValue: { fontSize: 32, fontWeight: '800', marginBottom: 4, letterSpacing: -1 },
-  statCardDesc: { fontSize: 11, lineHeight: 16 },
+  // Stats grid 2x2 (mirrors HomeScreen)
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 20 },
+  statCard: { flex: 1, minWidth: '45%', borderRadius: 24, padding: 18 },
+  statTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
+  statIconWrap: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  statDot: { width: 7, height: 7, borderRadius: 4, marginTop: 4 },
+  statValue: { fontSize: 28, fontWeight: '800', letterSpacing: -1, marginBottom: 4 },
+  statLabel: { fontSize: 10.5, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
 
   // Triggers
+  triggerCard: { borderRadius: 24, padding: 22, marginTop: 20 },
   triggerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
+    gap: 12,
+    marginBottom: 20,
   },
-  triggerIcon: { fontSize: 16, width: 22, textAlign: 'center' },
-  triggerLabel: { width: 110, fontSize: 13, fontWeight: '500' },
+  triggerIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  triggerBody: { flex: 1 },
+  triggerLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  triggerLabel: { flex: 1, fontSize: 13, fontWeight: '700', paddingRight: 8, letterSpacing: -0.2 },
   triggerTrack: {
-    flex: 1,
-    height: 8,
-    borderRadius: 4,
+    height: 6,
+    borderRadius: 999,
     overflow: 'hidden',
   },
   triggerFill: {
     height: '100%',
-    borderRadius: 4,
-    minWidth: 4,
+    borderRadius: 999,
+    minWidth: 6,
   },
-  triggerPct: { width: 32, fontSize: 12, fontWeight: '700', textAlign: 'right' },
+  triggerPct: { fontSize: 13, fontWeight: '800', textAlign: 'right' },
+
+  // Empty state
+  emptyState: { alignItems: 'center', paddingVertical: 36 },
+  emptyIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyTitle: { fontSize: 16, fontWeight: '800', marginBottom: 6 },
+  emptyText: { fontSize: 13, textAlign: 'center', lineHeight: 19, maxWidth: 260 },
 });

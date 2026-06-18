@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Linking,
+  ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Linking, Image,
 } from 'react-native';
 import { supabase } from '../services/supabase';
 import { Theme, getColors } from '../theme/Theme';
@@ -10,8 +10,15 @@ import { useLanguage } from '../context/LanguageContext';
 
 type Mode = 'login' | 'register';
 
-const TEST_EMAIL = 'test@smoke.app';
-const TEST_PASSWORD = 'Test1234!';
+// Official 4-color Google "G" logo, embedded as an SVG data URI (no extra deps).
+const GOOGLE_LOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">' +
+  '<path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>' +
+  '<path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"/>' +
+  '<path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>' +
+  '<path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>' +
+  '</svg>'
+);
 
 function openURL(url: string) {
   if (Platform.OS === 'web') {
@@ -27,21 +34,25 @@ export default function WelcomeScreen() {
   const colors = getColors(mode);
 
   const [authMode, setAuthMode] = useState<Mode>('login');
-  const [email, setEmail] = useState(TEST_EMAIL);
-  const [password, setPassword] = useState(TEST_PASSWORD);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [focused, setFocused] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const isLogin = authMode === 'login';
+
   const handleSubmit = async () => {
     setError(''); setSuccess('');
     if (!email.trim() || !password.trim()) { setError(t.emailRequired); return; }
-    if (authMode === 'register' && !displayName.trim()) { setError(t.nameRequired); return; }
+    if (!isLogin && !displayName.trim()) { setError(t.nameRequired); return; }
     setLoading(true);
 
-    if (authMode === 'login') {
+    if (isLogin) {
       const { error: e } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
@@ -81,33 +92,26 @@ export default function WelcomeScreen() {
     }
   };
 
-  const orbOpacity = isDark ? 0.15 : 0.08;
-  const orb2Opacity = isDark ? 0.10 : 0.06;
-
-  const glassCardStyle = {
-    backgroundColor: isDark ? 'rgba(18, 18, 42, 0.75)' : colors.cardGlass,
-    borderWidth: 1,
-    borderColor: isDark ? 'rgba(255, 255, 255, 0.07)' : colors.cardGlassBorder,
-    ...Platform.select({ web: isDark ? { backdropFilter: 'blur(20px)' } as any : {} }),
-  };
-
-  const inputStyle = {
-    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-    borderRadius: Theme.rounded.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 14,
+  const inputBase = {
+    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
     fontSize: 15,
     color: colors.text,
     ...Platform.select({ web: { outlineStyle: 'none' } as any }),
   };
+  const borderFor = (key: string) => ({
+    borderColor: focused === key ? colors.primary : colors.border,
+  });
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      {/* Background */}
-      <View style={[s.bgContainer, { backgroundColor: colors.background }]} pointerEvents="none">
-        <View style={[s.orb1, { backgroundColor: `rgba(124,58,237,${orbOpacity})` }]} />
-        <View style={[s.orb2, { backgroundColor: `rgba(6,182,212,${orb2Opacity})` }]} />
+      {/* Ambient background */}
+      <View style={[s.bg, { backgroundColor: colors.background }]} pointerEvents="none">
+        <View style={[s.orb1, { backgroundColor: `rgba(124,58,237,${isDark ? 0.18 : 0.10})` }]} />
+        <View style={[s.orb2, { backgroundColor: `rgba(6,182,212,${isDark ? 0.12 : 0.07})` }]} />
       </View>
 
       {/* Language switcher */}
@@ -118,71 +122,66 @@ export default function WelcomeScreen() {
             style={[
               s.langBtn,
               lang === l
-                ? { backgroundColor: colors.primary, borderColor: colors.primary }
-                : { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' },
+                ? { backgroundColor: colors.primary }
+                : { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' },
             ]}
             onPress={() => setLang(l)}
             activeOpacity={0.8}
           >
             <Text style={[s.langText, { color: lang === l ? '#fff' : colors.textSecondary }]}>
-              {l === 'tr' ? '🇹🇷 TR' : '🇬🇧 EN'}
+              {l === 'tr' ? 'TR' : 'EN'}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
       <ScrollView
-        style={s.container}
+        style={{ flex: 1 }}
         contentContainerStyle={s.content}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero */}
-        <View style={s.hero}>
-          <View style={s.iconHalo}>
-            <View style={s.iconInner}>
-              <Text style={s.heroIcon}>🚭</Text>
-            </View>
+        {/* Brand */}
+        <View style={s.brand}>
+          <View style={s.logoMark}>
+            <Text style={s.logoEmoji}>🚭</Text>
           </View>
           <Text style={[s.appName, { color: colors.text }]}>{t.appName}</Text>
           <Text style={[s.tagline, { color: colors.textSecondary }]}>{t.appTagline}</Text>
         </View>
 
-        {/* Features */}
-        <View style={s.features}>
-          {[
-            { icon: '💰', text: t.feature1 },
-            { icon: '❤️', text: t.feature2 },
-            { icon: '🇹🇷', text: t.feature3 },
-          ].map((f, i) => (
-            <View key={i} style={[s.featureRow, glassCardStyle, { borderRadius: Theme.rounded.md }]}>
-              <View style={s.featureIconWrap}>
-                <Text style={s.featureIcon}>{f.icon}</Text>
-              </View>
-              <Text style={[s.featureText, { color: colors.textSecondary }]}>{f.text}</Text>
-            </View>
-          ))}
-        </View>
+        {/* Auth card */}
+        <View style={[s.card, {
+          backgroundColor: isDark ? 'rgba(20,20,44,0.7)' : 'rgba(255,255,255,0.9)',
+          borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+          ...Platform.select({ web: { backdropFilter: 'blur(24px)' } as any }),
+        }]}>
+          <Text style={[s.cardTitle, { color: colors.text }]}>
+            {isLogin ? t.welcomeBack : t.createAccountTitle}
+          </Text>
+          <Text style={[s.cardSubtitle, { color: colors.textTertiary }]}>
+            {isLogin ? t.loginSubtitle : t.registerSubtitle}
+          </Text>
 
-        {/* Auth Card */}
-        <View style={[glassCardStyle, s.authCard]}>
-          {/* Toggle */}
-          <View style={[s.toggle, {
-            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
-            borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+          {/* Segmented toggle */}
+          <View style={[s.segment, {
+            backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
           }]}>
-            {(['login', 'register'] as Mode[]).map(m => (
-              <TouchableOpacity
-                key={m}
-                style={[s.toggleBtn, authMode === m && s.toggleBtnActive]}
-                onPress={() => { setAuthMode(m); setError(''); setSuccess(''); }}
-                activeOpacity={0.8}
-              >
-                <Text style={[s.toggleText, { color: colors.textSecondary }, authMode === m && s.toggleTextActive]}>
-                  {m === 'login' ? t.signIn : t.signUp}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            {(['login', 'register'] as Mode[]).map(m => {
+              const active = authMode === m;
+              return (
+                <TouchableOpacity
+                  key={m}
+                  style={[s.segmentBtn, active && { backgroundColor: colors.primary }]}
+                  onPress={() => { setAuthMode(m); setError(''); setSuccess(''); }}
+                  activeOpacity={0.85}
+                >
+                  <Text style={[s.segmentText, { color: active ? '#fff' : colors.textSecondary }]}>
+                    {m === 'login' ? t.signIn : t.signUp}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
           {/* Google */}
@@ -190,15 +189,13 @@ export default function WelcomeScreen() {
             style={s.googleBtn}
             onPress={handleGoogleSignIn}
             disabled={googleLoading}
-            activeOpacity={0.85}
+            activeOpacity={0.9}
           >
             {googleLoading ? (
               <ActivityIndicator color="#1a1a1a" size="small" />
             ) : (
               <>
-                <View style={s.googleIcon}>
-                  <Text style={s.googleG}>G</Text>
-                </View>
+                <Image source={{ uri: GOOGLE_LOGO }} style={s.googleLogo} resizeMode="contain" />
                 <Text style={s.googleBtnText}>{t.continueWithGoogle}</Text>
               </>
             )}
@@ -213,44 +210,55 @@ export default function WelcomeScreen() {
 
           {/* Form */}
           <View style={s.form}>
-            {authMode === 'register' && (
+            {!isLogin && (
               <TextInput
-                style={inputStyle}
+                style={[inputBase, borderFor('name')]}
                 placeholder={t.fullName}
                 placeholderTextColor={colors.textTertiary}
                 value={displayName}
                 onChangeText={setDisplayName}
+                onFocus={() => setFocused('name')}
+                onBlur={() => setFocused(null)}
                 autoCapitalize="words"
               />
             )}
 
-            <View style={s.inputWrapper}>
-              <TextInput
-                style={inputStyle}
-                placeholder={t.email}
-                placeholderTextColor={colors.textTertiary}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-              {email === TEST_EMAIL && (
-                <View style={s.testBadge}>
-                  <Text style={[s.testBadgeText, { color: Theme.colors.warning, backgroundColor: Theme.colors.warning + '22' }]}>TEST</Text>
-                </View>
-              )}
-            </View>
-
             <TextInput
-              style={inputStyle}
-              placeholder={t.password}
+              style={[inputBase, borderFor('email')]}
+              placeholder={t.email}
               placeholderTextColor={colors.textTertiary}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
+              value={email}
+              onChangeText={setEmail}
+              onFocus={() => setFocused('email')}
+              onBlur={() => setFocused(null)}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
             />
 
-            {authMode === 'login' && (
+            <View style={s.passwordWrap}>
+              <TextInput
+                style={[inputBase, borderFor('password'), { paddingRight: 64 }]}
+                placeholder={t.password}
+                placeholderTextColor={colors.textTertiary}
+                value={password}
+                onChangeText={setPassword}
+                onFocus={() => setFocused('password')}
+                onBlur={() => setFocused(null)}
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity
+                style={s.eyeBtn}
+                onPress={() => setShowPassword(v => !v)}
+                activeOpacity={0.7}
+              >
+                <Text style={[s.eyeText, { color: colors.primary }]}>
+                  {showPassword ? t.hide : t.show}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {isLogin && (
               <TouchableOpacity activeOpacity={0.7} style={{ alignSelf: 'flex-end' }}>
                 <Text style={[s.forgotText, { color: colors.primary }]}>{t.forgotPassword}</Text>
               </TouchableOpacity>
@@ -263,24 +271,16 @@ export default function WelcomeScreen() {
               style={s.submitBtn}
               onPress={handleSubmit}
               disabled={loading}
-              activeOpacity={0.85}
+              activeOpacity={0.9}
             >
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text style={s.submitBtnText}>
-                  {authMode === 'login' ? `${t.signIn} →` : `${t.createAccount} →`}
+                  {isLogin ? `${t.signIn} →` : `${t.createAccount} →`}
                 </Text>
               )}
             </TouchableOpacity>
-
-            {authMode === 'login' && email === TEST_EMAIL && (
-              <View style={[s.testHint, { backgroundColor: Theme.colors.warning + '18', borderColor: Theme.colors.warning + '44' }]}>
-                <Text style={[s.testHintText, { color: Theme.colors.warning }]}>
-                  🧪 {lang === 'tr' ? 'Test kullanıcısı otomatik dolduruldu' : 'Test user pre-filled'}
-                </Text>
-              </View>
-            )}
           </View>
         </View>
 
@@ -297,135 +297,69 @@ export default function WelcomeScreen() {
 }
 
 const s = StyleSheet.create({
-  bgContainer: {
-    position: 'absolute',
-    top: 0, left: 0, right: 0, bottom: 0,
-    overflow: 'hidden',
-  },
+  bg: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden' },
   orb1: {
-    position: 'absolute',
-    width: 320,
-    height: 320,
-    borderRadius: 160,
-    top: -80,
-    left: -80,
-    ...Platform.select({ web: { filter: 'blur(80px)' } as any }),
+    position: 'absolute', width: 340, height: 340, borderRadius: 170, top: -110, right: -90,
+    ...Platform.select({ web: { filter: 'blur(90px)' } as any }),
   },
   orb2: {
-    position: 'absolute',
-    width: 280,
-    height: 280,
-    borderRadius: 140,
-    bottom: 80,
-    right: -80,
-    ...Platform.select({ web: { filter: 'blur(80px)' } as any }),
+    position: 'absolute', width: 300, height: 300, borderRadius: 150, bottom: -80, left: -90,
+    ...Platform.select({ web: { filter: 'blur(90px)' } as any }),
   },
 
-  // Language switcher
   langSwitcher: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 52 : 36,
+    top: Platform.OS === 'ios' ? 54 : 38,
     right: 20,
     flexDirection: 'row',
     gap: 6,
     zIndex: 10,
   },
-  langBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  langText: { fontSize: 12, fontWeight: '600' },
+  langBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10 },
+  langText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.5 },
 
-  container: { flex: 1 },
-  content: { paddingHorizontal: 24, paddingTop: 56, paddingBottom: 40 },
-
-  // Hero
-  hero: { alignItems: 'center', marginBottom: 28 },
-  iconHalo: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: 'rgba(124,58,237,0.15)',
-    alignItems: 'center',
+  content: {
+    flexGrow: 1,
     justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 72,
+  },
+
+  // Brand
+  brand: { alignItems: 'center', marginBottom: 28 },
+  logoMark: {
+    width: 76, height: 76, borderRadius: 24,
+    backgroundColor: 'rgba(124,58,237,0.18)',
+    alignItems: 'center', justifyContent: 'center',
     marginBottom: 16,
-    ...Platform.select({
-      web: { boxShadow: '0 0 40px rgba(124,58,237,0.4)' } as any,
-      default: { shadowColor: '#7C3AED', shadowOpacity: 0.4, shadowRadius: 20, shadowOffset: { width: 0, height: 0 }, elevation: 6 },
-    }),
-  },
-  iconInner: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: 'rgba(124,58,237,0.25)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  heroIcon: { fontSize: 38 },
-  appName: {
-    fontSize: 40,
-    fontWeight: '800',
-    letterSpacing: 3,
-    marginBottom: 6,
-  },
-  tagline: {
-    fontSize: 14,
-    textAlign: 'center',
-  },
-
-  // Features
-  features: { marginBottom: 24, gap: 8 },
-  featureRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 12,
-  },
-  featureIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(124,58,237,0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  featureIcon: { fontSize: 18 },
-  featureText: { fontSize: 13, flex: 1 },
-
-  // Auth Card
-  authCard: {
-    borderRadius: Theme.rounded.xl,
-    padding: 20,
-    marginBottom: 20,
-    gap: 0,
-  },
-
-  // Toggle
-  toggle: {
-    flexDirection: 'row',
-    borderRadius: Theme.rounded.lg,
-    padding: 4,
-    marginBottom: 18,
     borderWidth: 1,
-  },
-  toggleBtn: {
-    flex: 1,
-    paddingVertical: 9,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  toggleBtnActive: {
-    backgroundColor: Theme.colors.primary,
+    borderColor: 'rgba(124,58,237,0.35)',
     ...Platform.select({
-      web: { boxShadow: '0 0 20px rgba(124,58,237,0.4)' } as any,
-      default: { shadowColor: '#7C3AED', shadowOpacity: 0.4, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 4 },
+      web: { boxShadow: '0 0 50px rgba(124,58,237,0.35)' } as any,
+      default: { shadowColor: '#7C3AED', shadowOpacity: 0.4, shadowRadius: 24, shadowOffset: { width: 0, height: 8 }, elevation: 8 },
     }),
   },
-  toggleText: { fontSize: 14, fontWeight: '600' },
-  toggleTextActive: { color: '#fff' },
+  logoEmoji: { fontSize: 36 },
+  appName: { fontSize: 34, fontWeight: '800', letterSpacing: 1, marginBottom: 4 },
+  tagline: { fontSize: 13, textAlign: 'center' },
+
+  // Card
+  card: {
+    borderRadius: 26,
+    borderWidth: 1,
+    padding: 22,
+    ...Platform.select({
+      web: { boxShadow: '0 24px 60px rgba(0,0,0,0.35)' } as any,
+      default: { shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 30, shadowOffset: { width: 0, height: 16 }, elevation: 10 },
+    }),
+  },
+  cardTitle: { fontSize: 21, fontWeight: '800', letterSpacing: -0.3 },
+  cardSubtitle: { fontSize: 13, marginTop: 4, marginBottom: 18 },
+
+  // Segmented control
+  segment: { flexDirection: 'row', borderRadius: 13, padding: 4, marginBottom: 16 },
+  segmentBtn: { flex: 1, paddingVertical: 9, borderRadius: 10, alignItems: 'center' },
+  segmentText: { fontSize: 14, fontWeight: '700' },
 
   // Google
   googleBtn: {
@@ -434,91 +368,51 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
     backgroundColor: '#ffffff',
-    borderRadius: Theme.rounded.md,
-    padding: 13,
-    marginBottom: 16,
-    ...Platform.select({ web: { cursor: 'pointer' } as any }),
+    borderRadius: 14,
+    paddingVertical: 13,
+    ...Platform.select({
+      web: { cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,0,0,0.12)' } as any,
+      default: { shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 3 },
+    }),
   },
-  googleIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  googleG: { fontSize: 14, fontWeight: '800', color: '#4285F4' },
-  googleBtnText: { fontSize: 15, fontWeight: '600', color: '#1a1a1a' },
+  googleLogo: { width: 18, height: 18 },
+  googleBtnText: { fontSize: 15, fontWeight: '700', color: '#1f1f1f' },
 
   // Divider
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 16,
-  },
+  divider: { flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 16 },
   dividerLine: { flex: 1, height: 1 },
-  dividerText: { fontSize: 12 },
+  dividerText: { fontSize: 12, fontWeight: '500' },
 
   // Form
-  form: { gap: 10 },
-  inputWrapper: { position: 'relative' },
-  testBadge: {
-    position: 'absolute',
-    right: 10,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-  },
-  testBadgeText: {
-    fontSize: 9,
-    fontWeight: '800',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    letterSpacing: 0.5,
-  },
-  forgotText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  errorText: { fontSize: 13, textAlign: 'center' },
-  successText: { fontSize: 13, textAlign: 'center' },
+  form: { gap: 12 },
+  passwordWrap: { position: 'relative', justifyContent: 'center' },
+  eyeBtn: { position: 'absolute', right: 14, paddingVertical: 4, paddingHorizontal: 4 },
+  eyeText: { fontSize: 12, fontWeight: '700' },
+  forgotText: { fontSize: 12.5, fontWeight: '600', marginTop: -2 },
+  errorText: { fontSize: 13, textAlign: 'center', fontWeight: '500' },
+  successText: { fontSize: 13, textAlign: 'center', fontWeight: '500' },
 
   submitBtn: {
-    borderRadius: Theme.rounded.md,
-    padding: 15,
+    borderRadius: 14,
+    paddingVertical: 15,
     alignItems: 'center',
-    marginTop: 4,
+    marginTop: 2,
     ...Platform.select({
       web: {
-        background: 'linear-gradient(135deg, #7C3AED, #8B5CF6)',
-        boxShadow: '0 0 30px rgba(124,58,237,0.45)',
+        backgroundImage: 'linear-gradient(135deg, #7C3AED, #8B5CF6)',
+        boxShadow: '0 8px 28px rgba(124,58,237,0.45)',
       } as any,
       default: {
         backgroundColor: Theme.colors.primary,
         shadowColor: '#7C3AED',
         shadowOpacity: 0.45,
         shadowRadius: 16,
-        shadowOffset: { width: 0, height: 0 },
+        shadowOffset: { width: 0, height: 8 },
         elevation: 6,
       },
     }),
   },
-  submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '800', letterSpacing: 0.3 },
 
-  testHint: {
-    borderRadius: Theme.rounded.md,
-    padding: 10,
-    borderWidth: 1,
-  },
-  testHintText: { fontSize: 12, textAlign: 'center', lineHeight: 18 },
-
-  legal: {
-    textAlign: 'center',
-    fontSize: 11,
-    lineHeight: 17,
-  },
+  legal: { textAlign: 'center', fontSize: 11, lineHeight: 17, marginTop: 22 },
 });

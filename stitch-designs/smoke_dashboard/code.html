@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Smoke — Hedefe Doğru</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                bg: "#0A0A1A",
+                surface: "rgba(30, 30, 50, 0.4)",
+                primary: "#8B5CF6", // Violet
+                secondary: "#06B6D4", // Cyan
+                success: "#10B981", // Emerald
+                warning: "#F59E0B", // Amber
+                onSurface: "#F8FAFC",
+                onSurfaceMuted: "#94A3B8"
+              }
+            },
+            borderRadius: {
+              "DEFAULT": "0.5rem",
+              "lg": "1rem",
+              "xl": "1.5rem",
+              "2xl": "1.75rem",
+              "3xl": "2.25rem",
+              "full": "9999px"
+            },
+            fontFamily: {
+              headline: ["Sora", "sans-serif"],
+              display: ["Sora", "sans-serif"],
+              body: ["Plus Jakarta Sans", "sans-serif"],
+              label: ["Plus Jakarta Sans", "sans-serif"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+      body {
+        background-color: #0A0A1A;
+        color: #F8FAFC;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .progress-ring-circle {
+        transition: stroke-dashoffset 0.85s ease-in-out;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+      }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .text-gradient-violet-cyan {
+        background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .bg-gradient-primary {
+        background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+      }
+      ::-webkit-scrollbar { display: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body pb-32">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-6 py-6 w-full fixed top-0 z-50 bg-brand-bg/80 backdrop-blur-md">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold tracking-widest text-brand-secondary/80 font-headline uppercase leading-none mb-1">HEDEFE DOĞRU</span>
+<h1 class="font-headline text-lg font-bold text-white tracking-tight">Merhaba, Rıza 👋</h1>
+</div>
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 flex items-center justify-center rounded-full glass-card hover:bg-white/10 transition-colors active:scale-95">
+<span class="material-symbols-outlined text-brand-onSurface" data-icon="groups">groups</span>
+</button>
+<div class="w-10 h-10 rounded-full border-2 border-brand-primary/30 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a modern man with a friendly expression, soft cinematic lighting, deep blue studio background, crisp high-resolution photography, aesthetic matching a premium wellness application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgf_yrGwEnjquGvJxBsLuuFNZmMQWo_l7PcJ37Y164ef1TZRLun18rGkipE-irdLYpYmRNpGEkC3zySD32IVTC4VxH7R0gL-sAiFTLejD97yrNc0eQiIc33SiMmOwS5czVniauJsqysiAYv65BPTc_OV_-7YIr0NTciF-MKmuqcAl4xb9Bs4RHVmiiip3dR8GYWROiMrbekbvAiGbySY-3PWJ921wsf5d6h5z574QC-aNEguk1n6C0KmwUNq37Q5rX_RZFJesmyg"/>
+</div>
+</div>
+</header>
+<main class="mt-24 px-6 space-y-8 max-w-lg mx-auto">
+<!-- Hero Section: Circular Progress -->
+<section class="relative flex flex-col items-center py-4">
+<div class="relative w-64 h-64 flex items-center justify-center">
+<!-- Decorative Glow -->
+<div class="absolute inset-0 bg-brand-primary/20 blur-[60px] rounded-full scale-75"></div>
+<svg class="w-full h-full drop-shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+<circle class="text-white/5" cx="128" cy="128" fill="transparent" r="110" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-brand-primary progress-ring-circle" cx="128" cy="128" fill="transparent" r="110" stroke="url(#heroGradient)" stroke-dasharray="691" stroke-dashoffset="140" stroke-linecap="round" stroke-width="12"></circle>
+<defs>
+<lineargradient id="heroGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#8B5CF6"></stop>
+<stop offset="100%" stop-color="#06B6D4"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="text-6xl font-extrabold font-headline tracking-tighter text-white">12</span>
+<span class="text-sm font-bold tracking-widest text-brand-onSurfaceMuted uppercase">GÜN</span>
+</div>
+</div>
+<div class="mt-6 text-center space-y-1">
+<p class="text-lg font-bold text-white">12 gün sigara içmedin 🎉</p>
+<p class="text-sm text-brand-onSurfaceMuted">14 Haziran 2025 tarihinden beri</p>
+</div>
+</section>
+<!-- Live Timer -->
+<div class="flex items-center justify-center space-x-3 w-full py-4 glass-card rounded-2xl">
+<div class="flex flex-col items-center">
+<span class="text-2xl font-bold font-headline text-gradient-violet-cyan">12</span>
+<span class="text-[10px] font-bold text-brand-onSurfaceMuted uppercase">GÜN</span>
+</div>
+<span class="text-xl text-white/20 font-light">•</span>
+<div class="flex flex-col items-center">
+<span class="text-2xl font-bold font-headline text-white">6</span>
+<span class="text-[10px] font-bold text-brand-onSurfaceMuted uppercase">SAAT</span>
+</div>
+<span class="text-xl text-white/20 font-light">•</span>
+<div class="flex flex-col items-center">
+<span class="text-2xl font-bold font-headline text-white">42</span>
+<span class="text-[10px] font-bold text-brand-onSurfaceMuted uppercase">DK</span>
+</div>
+</div>
+<!-- Stat Grid (2x2) -->
+<section class="grid grid-cols-2 gap-4">
+<!-- Tile 1 -->
+<div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-40 group hover:border-brand-secondary/40 transition-all">
+<div class="w-10 h-10 rounded-xl bg-brand-secondary/10 flex items-center justify-center text-brand-secondary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="block">block</span>
+</div>
+<div>
+<h3 class="text-3xl font-extrabold font-headline text-white">240</h3>
+<p class="text-[10px] font-bold tracking-wider text-brand-secondary uppercase">SİGARA İÇİLMEDİ</p>
+</div>
+</div>
+<!-- Tile 2 -->
+<div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-40 group hover:border-brand-success/40 transition-all">
+<div class="w-10 h-10 rounded-xl bg-brand-success/10 flex items-center justify-center text-brand-success group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+<div>
+<h3 class="text-3xl font-extrabold font-headline text-white">₺1.800</h3>
+<p class="text-[10px] font-bold tracking-wider text-brand-success uppercase">TASARRUF</p>
+</div>
+</div>
+<!-- Tile 3 -->
+<div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-40 group hover:border-brand-warning/40 transition-all">
+<div class="w-10 h-10 rounded-xl bg-brand-warning/10 flex items-center justify-center text-brand-warning group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="local_fire_department">local_fire_department</span>
+</div>
+<div>
+<h3 class="text-3xl font-extrabold font-headline text-white">18</h3>
+<p class="text-[10px] font-bold tracking-wider text-brand-warning uppercase">DİRENİLEN İSTEK</p>
+</div>
+</div>
+<!-- Tile 4 -->
+<div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-40 group hover:border-brand-primary/40 transition-all">
+<div class="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span>
+</div>
+<div>
+<h3 class="text-3xl font-extrabold font-headline text-white">3</h3>
+<p class="text-[10px] font-bold tracking-wider text-brand-primary uppercase">ROZET</p>
+</div>
+</div>
+</section>
+<!-- Health Milestone Card -->
+<section class="glass-card p-6 rounded-3xl space-y-4">
+<div class="flex justify-between items-start">
+<div class="space-y-1">
+<span class="text-[10px] font-bold tracking-widest text-brand-onSurfaceMuted uppercase">SONRAKİ HEDEF</span>
+<h4 class="text-lg font-bold text-white flex items-center gap-2">
+                         1 Ay — Akciğerler Temizleniyor
+                    </h4>
+</div>
+<div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-brand-primary">
+<span class="material-symbols-outlined" data-icon="lungs">lens</span>
+</div>
+</div>
+<div class="space-y-2">
+<div class="w-full h-2.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-primary rounded-full shadow-[0_0_10px_rgba(139,92,246,0.5)]" style="width: 62%;"></div>
+</div>
+<div class="flex justify-between text-[11px] font-bold">
+<span class="text-brand-onSurface">62% Tamamlandı</span>
+<span class="text-brand-onSurfaceMuted">18 gün kaldı</span>
+</div>
+</div>
+</section>
+<!-- Action Buttons -->
+<section class="flex gap-4">
+<button class="flex-1 bg-gradient-primary h-14 rounded-2xl flex items-center justify-center gap-3 font-bold text-white shadow-lg active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="local_fire_department">local_fire_department</span>
+                İstek Kaydet
+            </button>
+<button class="flex-1 glass-card h-14 rounded-2xl flex items-center justify-center gap-3 font-bold text-white active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="air">air</span>
+                Nefes Egzersizi
+            </button>
+</section>
+<!-- Badges Row -->
+<section class="space-y-4">
+<div class="flex justify-between items-center">
+<h3 class="text-sm font-bold tracking-tight text-white">Başarıların</h3>
+<button class="text-xs font-bold text-brand-primary">Tümünü Gör</button>
+</div>
+<div class="flex space-x-4 overflow-x-auto pb-2 -mx-1 px-1">
+<div class="flex-shrink-0 w-20 flex flex-col items-center gap-2">
+<div class="w-16 h-16 rounded-full bg-gradient-to-br from-brand-warning to-amber-600 flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="verified">verified</span>
+</div>
+<span class="text-[10px] text-center font-medium leading-tight">İlk Gün</span>
+</div>
+<div class="flex-shrink-0 w-20 flex flex-col items-center gap-2">
+<div class="w-16 h-16 rounded-full bg-gradient-to-br from-brand-secondary to-cyan-700 flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="savings">savings</span>
+</div>
+<span class="text-[10px] text-center font-medium leading-tight">Birikim</span>
+</div>
+<div class="flex-shrink-0 w-20 flex flex-col items-center gap-2">
+<div class="w-16 h-16 rounded-full bg-gradient-to-br from-brand-primary to-violet-800 flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="star">star</span>
+</div>
+<span class="text-[10px] text-center font-medium leading-tight">1 Hafta</span>
+</div>
+<div class="flex-shrink-0 w-20 flex flex-col items-center gap-2">
+<div class="w-16 h-16 rounded-full glass-card border-dashed flex items-center justify-center opacity-40">
+<span class="material-symbols-outlined text-white text-2xl" data-icon="lock">lock</span>
+</div>
+<span class="text-[10px] text-center font-medium text-brand-onSurfaceMuted leading-tight">Direnç</span>
+</div>
+<div class="flex-shrink-0 w-20 flex flex-col items-center gap-2">
+<div class="w-16 h-16 rounded-full glass-card border-dashed flex items-center justify-center opacity-40">
+<span class="material-symbols-outlined text-white text-2xl" data-icon="lock">lock</span>
+</div>
+<span class="text-[10px] text-center font-medium text-brand-onSurfaceMuted leading-tight">Süper Kahraman</span>
+</div>
+</div>
+</section>
+<!-- Motivational Quote -->
+<section class="glass-card p-6 rounded-3xl flex gap-6">
+<div class="w-1.5 h-auto bg-gradient-primary rounded-full shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.3)]"></div>
+<div class="space-y-3">
+<p class="text-brand-onSurface italic leading-relaxed font-medium">"Zincirlerini kırmak her zaman zordur ama bir kez kırdığında artık her şey mümkündür."</p>
+<p class="text-[11px] font-bold tracking-widest text-brand-primary uppercase">— MOTİVASYON REHBERİ</p>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-slate-950/80 backdrop-blur-xl border-t border-white/10 flex justify-around items-center px-4 pb-8 pt-3 shadow-[0_-4px_24px_rgba(139,92,246,0.15)]">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center text-brand-primary scale-110 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-body text-[10px] font-bold mt-1">Ana Sayfa</span>
+</a>
+<!-- Health -->
+<a class="flex flex-col items-center justify-center text-slate-400 hover:text-violet-400 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+<span class="font-body text-[10px] font-medium mt-1">Sağlık</span>
+</a>
+<!-- Central FAB -->
+<div class="relative -mt-12">
+<button class="w-14 h-14 bg-gradient-primary rounded-full flex items-center justify-center text-white shadow-xl border-4 border-slate-950/80 active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined text-3xl font-bold" data-icon="add">add</span>
+</button>
+</div>
+<!-- Stats -->
+<a class="flex flex-col items-center justify-center text-slate-400 hover:text-violet-400 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="font-body text-[10px] font-medium mt-1">İstatistik</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-slate-400 hover:text-violet-400 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-body text-[10px] font-medium mt-1">Profil</span>
+</a>
+</nav>
+<script>
+      // Subtle pulse for the progress ring glow
+      const ring = document.querySelector('.progress-ring-circle');
+      if(ring) {
+        let offset = 691;
+        const target = 140;
+        const animate = () => {
+          if(offset > target) {
+            offset -= 4;
+            ring.style.strokeDashoffset = offset;
+            requestAnimationFrame(animate);
+          }
+        };
+        setTimeout(animate, 500);
+      }
+    </script>
+</body></html>

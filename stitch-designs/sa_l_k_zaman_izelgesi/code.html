@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              background: "#0A0A1A",
+              primary: "#8B5CF6",
+              secondary: "#06B6D4",
+              success: "#10B981",
+              warning: "#F59E0B",
+              surface: "rgba(255, 255, 255, 0.03)",
+              border: "rgba(255, 255, 255, 0.08)"
+            },
+            borderRadius: {
+              "DEFAULT": "0.5rem",
+              "lg": "1rem",
+              "xl": "1.5rem",
+              "2xl": "1.75rem",
+              "full": "9999px"
+            },
+            fontFamily: {
+              headline: ["Sora", "sans-serif"],
+              display: ["Sora", "sans-serif"],
+              body: ["Plus Jakarta Sans", "sans-serif"],
+              label: ["Plus Jakarta Sans", "sans-serif"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+      body {
+        background-color: #0A0A1A;
+        color: white;
+        -webkit-font-smoothing: antialiased;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      }
+      .timeline-gradient {
+        background: linear-gradient(to bottom, #10B981 0%, #10B981 50%, #8B5CF6 75%, rgba(255,255,255,0.1) 100%);
+      }
+      @keyframes pulse-ring {
+        0% { transform: scale(0.8); opacity: 0.5; }
+        50% { transform: scale(1.2); opacity: 0.3; }
+        100% { transform: scale(0.8); opacity: 0.5; }
+      }
+      .animate-pulse-ring {
+        animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body selection:bg-primary/30">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 bg-[#0A0A1A]/80 backdrop-blur-xl border-b border-white/5 shadow-2xl shadow-violet-900/20 flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-secondary p-[1px]">
+<div class="w-full h-full rounded-full bg-background flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A high-end editorial portrait of a young person with clear skin and bright eyes, softly lit in a dark studio with violet and cyan rim lighting. The style is premium, reminiscent of a modern health and fitness magazine, emphasizing vitality and a smoke-free lifestyle." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7Whn7KWjWh9tCrCeDXW6thoXVqTYx-6L9SMgk6gcSbyZtHzTs2NgRhC31Y6LKnyO6MfxQZzmAEvUxtjgHyrwNuxE8Mr3yulyEsbs3yNBBGhPvPmej70ChaV3wqp2oXQ11ho-n8eaHlURJvdduZOiM9T7dZ6TjWvW-KxCh6ShvQfei2mBwL3-tdj_jroj_DpWLqSSFLRgvJYaYtTUiXmAfZdqTyQWFZFzB51xvl7Yd7Wa0cPZY84ZjJeR_WxG7vT3NATL2D4BWgA"/>
+</div>
+</div>
+<span class="font-headline font-black text-white tracking-tighter text-2xl">Smoke</span>
+</div>
+<button class="text-white/40 hover:text-white transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto">
+<!-- Header Section -->
+<section class="mb-10">
+<span class="font-headline text-[10px] font-bold tracking-[0.2em] text-primary uppercase mb-2 block">İYİLEŞME</span>
+<h1 class="font-headline text-3xl font-extrabold tracking-tight text-white mb-2">Sağlık Zaman Çizelgesi</h1>
+<p class="text-white/50 text-sm font-medium">Vücudun her geçen gün daha iyiye gidiyor</p>
+</section>
+<!-- Summary Progress Card -->
+<div class="glass-card rounded-2xl p-6 mb-12 shadow-2xl shadow-black/50">
+<div class="flex justify-between items-end mb-6">
+<div>
+<span class="font-label text-[10px] font-bold tracking-widest text-white/40 uppercase mb-2 block">İLERLEME</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline text-5xl font-extrabold text-white">6/9</span>
+<span class="font-label text-xs font-semibold text-white/60">HEDEF TAMAMLANDI</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-headline text-2xl font-bold text-secondary">66%</span>
+</div>
+</div>
+<div class="h-3 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full" style="width: 66%"></div>
+</div>
+</div>
+<!-- Timeline Section -->
+<div class="relative">
+<!-- Central Line -->
+<div class="absolute left-[19px] top-4 bottom-4 w-[2px] timeline-gradient"></div>
+<!-- TIMELINE ITEMS -->
+<div class="space-y-12">
+<!-- ACHIEVED 1 -->
+<div class="relative pl-14">
+<div class="absolute left-0 top-1 w-10 h-10 flex items-center justify-center">
+<div class="w-4 h-4 bg-success rounded-full flex items-center justify-center ring-4 ring-success/20">
+<span class="material-symbols-outlined text-white text-[10px] font-bold">check</span>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-5 flex items-start gap-4">
+<div class="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-success">favorite</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline font-bold text-white text-base">Nabız Normale Döndü</h3>
+<span class="bg-success/10 text-success text-[10px] font-bold px-2 py-1 rounded-full border border-success/20">Tamamlandı ✓</span>
+</div>
+<p class="text-white/40 text-xs">Son sigaradan 20 dakika sonra.</p>
+</div>
+</div>
+</div>
+<!-- ACHIEVED 2 -->
+<div class="relative pl-14">
+<div class="absolute left-0 top-1 w-10 h-10 flex items-center justify-center">
+<div class="w-4 h-4 bg-success rounded-full flex items-center justify-center ring-4 ring-success/20">
+<span class="material-symbols-outlined text-white text-[10px] font-bold">check</span>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-5 flex items-start gap-4">
+<div class="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-success">air</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline font-bold text-white text-base">Kan Oksijeni Arttı</h3>
+<span class="bg-success/10 text-success text-[10px] font-bold px-2 py-1 rounded-full border border-success/20">Tamamlandı ✓</span>
+</div>
+<p class="text-white/40 text-xs">Karbonmonoksit seviyesi düştü.</p>
+</div>
+</div>
+</div>
+<!-- ACHIEVED 3 -->
+<div class="relative pl-14">
+<div class="absolute left-0 top-1 w-10 h-10 flex items-center justify-center">
+<div class="w-4 h-4 bg-success rounded-full flex items-center justify-center ring-4 ring-success/20">
+<span class="material-symbols-outlined text-white text-[10px] font-bold">check</span>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-5 flex items-start gap-4">
+<div class="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-success">bolt</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline font-bold text-white text-base">Nikotin Vücudu Terk Etti</h3>
+<span class="bg-success/10 text-success text-[10px] font-bold px-2 py-1 rounded-full border border-success/20">Tamamlandı ✓</span>
+</div>
+<p class="text-white/40 text-xs">Vücudun tamamen temizlendi.</p>
+</div>
+</div>
+</div>
+<!-- ACHIEVED 4 -->
+<div class="relative pl-14">
+<div class="absolute left-0 top-1 w-10 h-10 flex items-center justify-center">
+<div class="w-4 h-4 bg-success rounded-full flex items-center justify-center ring-4 ring-success/20">
+<span class="material-symbols-outlined text-white text-[10px] font-bold">check</span>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-5 flex items-start gap-4">
+<div class="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-success">restaurant</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline font-bold text-white text-base">Tat ve Koku Güçlendi</h3>
+<span class="bg-success/10 text-success text-[10px] font-bold px-2 py-1 rounded-full border border-success/20">Tamamlandı ✓</span>
+</div>
+<p class="text-white/40 text-xs">Duyu reseptörleri yenilendi.</p>
+</div>
+</div>
+</div>
+<!-- CURRENT ITEM -->
+<div class="relative pl-14">
+<div class="absolute left-0 top-1 w-10 h-10 flex items-center justify-center">
+<div class="relative">
+<div class="absolute inset-0 bg-primary rounded-full animate-pulse-ring"></div>
+<div class="relative w-5 h-5 bg-primary rounded-full ring-4 ring-primary/20 border-2 border-white shadow-lg shadow-primary/50"></div>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-5 border-primary/40 shadow-xl shadow-primary/5">
+<div class="flex items-start gap-4 mb-4">
+<div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary">tune</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline font-bold text-white text-base leading-tight">1 Ay — Akciğerler Temizleniyor</h3>
+<span class="bg-primary/20 text-primary text-[10px] font-bold px-2 py-1 rounded-full border border-primary/30">Devam Ediyor</span>
+</div>
+<p class="text-white/50 text-xs">Öksürük ve nefes darlığı azalıyor.</p>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-[10px] font-bold uppercase tracking-wider text-white/40">
+<span>İlerleme</span>
+<span class="text-primary">62%</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full" style="width: 62%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- LOCKED 1 -->
+<div class="relative pl-14 opacity-50 grayscale">
+<div class="absolute left-0 top-1 w-10 h-10 flex items-center justify-center">
+<div class="w-4 h-4 bg-transparent border-2 border-white/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-white/40 text-[10px] font-bold">lock</span>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-5 flex items-start gap-4">
+<div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-white/40">directions_run</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline font-bold text-white/60 text-base">3 Ay — Nefes Rahatladı</h3>
+<span class="bg-white/5 text-white/40 text-[10px] font-bold px-2 py-1 rounded-full border border-white/10">Kilitli</span>
+</div>
+<p class="text-white/30 text-xs">Egzersiz kapasitesi belirgin şekilde artacak.</p>
+</div>
+</div>
+</div>
+<!-- LOCKED 2 -->
+<div class="relative pl-14 opacity-50 grayscale">
+<div class="absolute left-0 top-1 w-10 h-10 flex items-center justify-center">
+<div class="w-4 h-4 bg-transparent border-2 border-white/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-white/40 text-[10px] font-bold">lock</span>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-5 flex items-start gap-4">
+<div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-white/40">ecg_heart</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline font-bold text-white/60 text-base">1 Yıl — Kalp Krizi Riski</h3>
+<span class="bg-white/5 text-white/40 text-[10px] font-bold px-2 py-1 rounded-full border border-white/10">Kilitli</span>
+</div>
+<p class="text-white/30 text-xs">Risk, sigara içenlere göre yarı yarıya düşecek.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-[#0A0A1A]/90 backdrop-blur-2xl rounded-t-[28px] border-t border-white/10 shadow-[0_-8px_30px_rgb(0,0,0,0.5)] flex justify-around items-center px-4 pt-3 pb-6">
+<a class="flex flex-col items-center justify-center text-white/30 hover:text-[#06B6D4] transition-all active:scale-90 duration-300 ease-out group" href="#">
+<span class="material-symbols-outlined mb-1 group-hover:scale-110">dashboard</span>
+<span class="font-label text-[10px] font-medium tracking-wide uppercase">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-white/30 hover:text-[#06B6D4] transition-all active:scale-90 duration-300 ease-out group" href="#">
+<span class="material-symbols-outlined mb-1 group-hover:scale-110">bar_chart</span>
+<span class="font-label text-[10px] font-medium tracking-wide uppercase">Stats</span>
+</a>
+<div class="relative -top-8">
+<button class="w-14 h-14 bg-gradient-to-tr from-primary to-secondary rounded-full flex items-center justify-center text-white shadow-lg shadow-primary/40 active:scale-90 transition-transform duration-200">
+<span class="material-symbols-outlined text-3xl font-bold" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+</div>
+<a class="flex flex-col items-center justify-center text-[#8B5CF6] relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-[#8B5CF6] after:rounded-full" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">auto_graph</span>
+<span class="font-label text-[10px] font-medium tracking-wide uppercase">Health</span>
+</a>
+<a class="flex flex-col items-center justify-center text-white/30 hover:text-[#06B6D4] transition-all active:scale-90 duration-300 ease-out group" href="#">
+<span class="material-symbols-outlined mb-1 group-hover:scale-110">person</span>
+<span class="font-label text-[10px] font-medium tracking-wide uppercase">Profile</span>
+</a>
+</nav>
+<script>
+      // Subtle micro-interactions
+      document.querySelectorAll('.glass-card').forEach(card => {
+        card.addEventListener('mousedown', () => {
+          card.style.transform = 'scale(0.98)';
+          card.style.transition = 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        });
+        card.addEventListener('mouseup', () => {
+          card.style.transform = 'scale(1)';
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = 'scale(1)';
+        });
+      });
+    </script>
+</body></html>

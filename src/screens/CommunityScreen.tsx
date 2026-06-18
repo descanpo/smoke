@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
   TextInput, Modal, Platform, ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../services/supabase';
 import { Theme } from '../theme/Theme';
 
@@ -15,12 +16,12 @@ const POST_TYPES = [
   { key: 'question', label: 'Soru' },
 ];
 
-const POST_TYPE_BADGE: Record<string, { label: string; color: string; bg: string }> = {
-  motivation: { label: 'Motivasyon', color: Theme.colors.primary, bg: 'rgba(124,58,237,0.15)' },
-  milestone:  { label: 'Kilometre Taşı', color: Theme.colors.success, bg: 'rgba(16,185,129,0.15)' },
-  tip:        { label: 'İpucu', color: Theme.colors.secondary, bg: 'rgba(6,182,212,0.15)' },
-  story:      { label: 'Hikaye', color: Theme.colors.warning, bg: 'rgba(245,158,11,0.15)' },
-  question:   { label: 'Soru', color: '#A3A3C2', bg: 'rgba(163,163,194,0.15)' },
+const POST_TYPE_BADGE: Record<string, { label: string; color: string }> = {
+  motivation: { label: 'Motivasyon', color: Theme.colors.primary },
+  milestone:  { label: 'Kilometre Taşı', color: Theme.colors.success },
+  tip:        { label: 'İpucu', color: Theme.colors.secondary },
+  story:      { label: 'Hikaye', color: Theme.colors.warning },
+  question:   { label: 'Soru', color: '#A3A3C2' },
 };
 
 const AVATAR_COLORS = ['#7C3AED', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
@@ -101,16 +102,18 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
     <View style={s.container}>
       {/* Header */}
       <View style={s.headerRow}>
-        <View>
-          <Text style={s.title}>Topluluk</Text>
-          <Text style={s.subtitle}>Birlikte daha güçlüsünüz 💪</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={s.eyebrow}>TOPLULUK</Text>
+          <Text style={s.title}>Birlikte Güçlüyüz</Text>
+          <Text style={s.subtitle}>Yolculuğunu paylaş, ilham ver</Text>
         </View>
         <TouchableOpacity
           style={s.shareBtn}
           onPress={() => setShowForm(true)}
           activeOpacity={0.85}
         >
-          <Text style={s.shareBtnText}>+ Paylaşım Yap</Text>
+          <Ionicons name="add" size={20} color="#fff" />
+          <Text style={s.shareBtnText}>Paylaş</Text>
         </TouchableOpacity>
       </View>
 
@@ -121,16 +124,19 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
         style={s.filterScroll}
         contentContainerStyle={s.filterContent}
       >
-        {POST_TYPES.map(t => (
-          <TouchableOpacity
-            key={t.key}
-            style={[s.chip, filterType === t.key && s.chipActive]}
-            onPress={() => setFilterType(t.key)}
-            activeOpacity={0.8}
-          >
-            <Text style={[s.chipText, filterType === t.key && s.chipTextActive]}>{t.label}</Text>
-          </TouchableOpacity>
-        ))}
+        {POST_TYPES.map(t => {
+          const active = filterType === t.key;
+          return (
+            <TouchableOpacity
+              key={t.key}
+              style={[s.chip, active && s.chipActive]}
+              onPress={() => setFilterType(t.key)}
+              activeOpacity={0.8}
+            >
+              <Text style={[s.chipText, active && s.chipTextActive]}>{t.label}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
 
       {loading ? (
@@ -139,51 +145,76 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
         </View>
       ) : (
         <ScrollView style={{ flex: 1 }} contentContainerStyle={s.list} showsVerticalScrollIndicator={false}>
+          <Text style={s.sectionLabel}>AKIŞ</Text>
+
           {filteredPosts.length === 0 && (
             <View style={s.emptyState}>
-              <Text style={{ fontSize: 48, marginBottom: 12 }}>👥</Text>
+              <View style={s.emptyIconWrap}>
+                <Ionicons name="people-outline" size={38} color={Theme.colors.primary} />
+              </View>
               <Text style={s.emptyTitle}>Henüz paylaşım yok</Text>
-              <Text style={s.emptyDesc}>İlk paylaşımı sen yap!</Text>
+              <Text style={s.emptyDesc}>İlk paylaşımı sen yap ve topluluğa ilham ver.</Text>
+              <TouchableOpacity style={s.emptyBtn} onPress={() => setShowForm(true)} activeOpacity={0.85}>
+                <Ionicons name="create-outline" size={18} color="#fff" />
+                <Text style={s.emptyBtnText}>İlk paylaşımı yap</Text>
+              </TouchableOpacity>
             </View>
           )}
 
           {filteredPosts.map(post => {
             const name = post.is_anonymous ? 'Anonim' : (post.profiles?.display_name ?? 'Kullanıcı');
             const initials = post.is_anonymous ? '?' : name.charAt(0).toUpperCase();
-            const avatarColor = post.is_anonymous ? '#4B4B6B' : getAvatarColor(name);
+            const avatarColor = post.is_anonymous ? '#6B6B8F' : getAvatarColor(name);
             const badge = POST_TYPE_BADGE[post.post_type];
+            const liked = likedIds.has(post.id);
 
             return (
               <View key={post.id} style={s.postCard}>
                 <View style={s.postHeader}>
-                  <View style={[s.avatar, { backgroundColor: avatarColor + '30', borderColor: avatarColor + '60', borderWidth: 1.5 }]}>
-                    <Text style={[s.avatarText, { color: avatarColor }]}>{initials}</Text>
+                  <View style={[s.avatar, { backgroundColor: avatarColor }]}>
+                    <Text style={s.avatarText}>{initials}</Text>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={s.authorName}>{name}</Text>
+                    <Text style={s.authorName} numberOfLines={1}>{name}</Text>
                     <Text style={s.postTime}>{timeAgo(post.created_at)}</Text>
                   </View>
                   {badge && (
-                    <View style={[s.badge, { backgroundColor: badge.bg }]}>
+                    <View style={s.badge}>
+                      <View style={[s.badgeDot, { backgroundColor: badge.color }]} />
                       <Text style={[s.badgeText, { color: badge.color }]}>{badge.label}</Text>
                     </View>
                   )}
                 </View>
+
                 <Text style={s.postContent}>{post.content}</Text>
+
                 <View style={s.postActions}>
-                  <TouchableOpacity style={s.actionBtn} onPress={() => handleLike(post)} activeOpacity={0.7}>
-                    <Text style={s.actionIcon}>{likedIds.has(post.id) ? '❤️' : '🤍'}</Text>
-                    <Text style={s.actionCount}>{post.likes_count ?? 0}</Text>
+                  <TouchableOpacity
+                    style={s.actionBtn}
+                    onPress={() => handleLike(post)}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Ionicons
+                      name={liked ? 'heart' : 'heart-outline'}
+                      size={20}
+                      color={liked ? Theme.colors.error : Theme.colors.textSecondary}
+                    />
+                    <Text style={[s.actionCount, liked && s.actionCountLiked]}>{post.likes_count ?? 0}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={s.actionBtn} activeOpacity={0.7}>
-                    <Text style={s.actionIcon}>💬</Text>
+                  <TouchableOpacity
+                    style={s.actionBtn}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Ionicons name="chatbubble-outline" size={19} color={Theme.colors.textSecondary} />
                     <Text style={s.actionCount}>{post.comments_count ?? 0}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
             );
           })}
-          <View style={{ height: 20 }} />
+          <View style={{ height: 110 }} />
         </ScrollView>
       )}
 
@@ -196,16 +227,18 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
         >
           <TouchableOpacity activeOpacity={1} style={s.modal} onPress={() => {}}>
             <View style={s.modalHandle} />
-            <Text style={s.modalTitle}>💬 Yeni Paylaşım</Text>
+            <Text style={s.modalTitle}>Yeni Paylaşım</Text>
+            <Text style={s.modalSubtitle}>Düşüncelerini toplulukla paylaş</Text>
 
-            <Text style={s.fieldLabel}>Tür</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 14 }}>
+            <Text style={s.fieldLabel}>TÜR</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 18 }}>
               <View style={{ flexDirection: 'row', gap: 8, paddingRight: 8 }}>
                 {POST_TYPES.filter(t => t.key !== 'all').map(t => (
                   <TouchableOpacity
                     key={t.key}
                     style={[s.modalChip, type === t.key && s.modalChipActive]}
                     onPress={() => setType(t.key)}
+                    activeOpacity={0.8}
                   >
                     <Text style={[s.modalChipText, type === t.key && s.modalChipTextActive]}>{t.label}</Text>
                   </TouchableOpacity>
@@ -213,6 +246,7 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
               </View>
             </ScrollView>
 
+            <Text style={s.fieldLabel}>MESAJIN</Text>
             <TextInput
               style={s.textarea}
               placeholder="Sigarasız yolculuğunu paylaş..."
@@ -226,13 +260,16 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
 
             <TouchableOpacity style={s.anonRow} onPress={() => setAnon(a => !a)} activeOpacity={0.7}>
               <View style={[s.checkbox, anon && s.checkboxActive]}>
-                {anon && <Text style={{ color: '#fff', fontSize: 12 }}>✓</Text>}
+                {anon && <Ionicons name="checkmark" size={15} color="#fff" />}
               </View>
-              <Text style={s.anonText}>Anonim olarak paylaş</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={s.anonText}>Anonim olarak paylaş</Text>
+                <Text style={s.anonHint}>İsmin gizli kalır</Text>
+              </View>
             </TouchableOpacity>
 
             <View style={s.modalBtns}>
-              <TouchableOpacity style={s.cancelBtn} onPress={() => setShowForm(false)}>
+              <TouchableOpacity style={s.cancelBtn} onPress={() => setShowForm(false)} activeOpacity={0.8}>
                 <Text style={s.cancelBtnText}>İptal</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -243,7 +280,12 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
               >
                 {posting
                   ? <ActivityIndicator color="#fff" size="small" />
-                  : <Text style={s.postBtnText}>Paylaş 🚀</Text>
+                  : (
+                    <>
+                      <Ionicons name="paper-plane-outline" size={17} color="#fff" />
+                      <Text style={s.postBtnText}>Paylaş</Text>
+                    </>
+                  )
                 }
               </TouchableOpacity>
             </View>
@@ -260,173 +302,215 @@ const s = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     paddingHorizontal: 20,
-    paddingTop: 52,
-    paddingBottom: 12,
+    paddingTop: 60,
+    paddingBottom: 18,
+    gap: 12,
   },
-  title: { fontSize: 26, fontWeight: '800', color: Theme.colors.text },
-  subtitle: { fontSize: 13, color: Theme.colors.textSecondary, marginTop: 2 },
+  eyebrow: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Theme.colors.primary,
+    letterSpacing: 1.6,
+    marginBottom: 6,
+  },
+  title: { fontSize: 28, fontWeight: '800', color: Theme.colors.text, letterSpacing: -0.6 },
+  subtitle: { fontSize: 14, color: Theme.colors.textSecondary, marginTop: 5 },
   shareBtn: {
-    borderRadius: Theme.rounded.md,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    ...Platform.select({
-      web: {
-        background: 'linear-gradient(135deg, #7C3AED, #8B5CF6)',
-        boxShadow: '0 0 20px rgba(124,58,237,0.35)',
-      } as any,
-      default: {
-        backgroundColor: Theme.colors.primary,
-        shadowColor: '#7C3AED',
-        shadowOpacity: 0.35,
-        shadowRadius: 10,
-        shadowOffset: { width: 0, height: 0 },
-        elevation: 4,
-      },
-    }),
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: Theme.colors.primary,
+    borderRadius: Theme.rounded.full,
+    paddingLeft: 14,
+    paddingRight: 18,
+    paddingVertical: 11,
+    ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
   },
-  shareBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
+  shareBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
 
   // Filter chips
-  filterScroll: { maxHeight: 48 },
+  filterScroll: { maxHeight: 50, flexGrow: 0 },
   filterContent: {
     paddingHorizontal: 20,
-    paddingBottom: 8,
+    paddingVertical: 4,
     gap: 8,
     flexDirection: 'row',
     alignItems: 'center',
   },
   chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
     borderRadius: Theme.rounded.full,
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: Theme.colors.border,
+    ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
   },
   chipActive: {
-    backgroundColor: 'rgba(124,58,237,0.2)',
+    backgroundColor: Theme.colors.primary,
     borderColor: Theme.colors.primary,
   },
-  chipText: { fontSize: 13, color: Theme.colors.textSecondary, fontWeight: '500' },
-  chipTextActive: { color: Theme.colors.primary, fontWeight: '700' },
+  chipText: { fontSize: 13, color: Theme.colors.textSecondary, fontWeight: '600' },
+  chipTextActive: { color: '#fff', fontWeight: '700' },
 
   // Posts list
-  list: { paddingHorizontal: 20, paddingTop: 8 },
-  emptyState: { alignItems: 'center', paddingVertical: 60 },
-  emptyTitle: { fontSize: 18, fontWeight: '600', color: Theme.colors.textSecondary },
-  emptyDesc: { fontSize: 14, color: Theme.colors.textTertiary, marginTop: 6 },
+  list: { paddingHorizontal: 20, paddingTop: 12 },
+  sectionLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Theme.colors.textTertiary,
+    letterSpacing: 1.4,
+    marginBottom: 14,
+  },
+  emptyState: { alignItems: 'center', paddingVertical: 64, paddingHorizontal: 24 },
+  emptyIconWrap: {
+    width: 88, height: 88, borderRadius: 44,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 20,
+    backgroundColor: 'rgba(124,58,237,0.10)',
+  },
+  emptyTitle: { fontSize: 19, fontWeight: '800', color: Theme.colors.text, letterSpacing: -0.3 },
+  emptyDesc: { fontSize: 14, color: Theme.colors.textTertiary, marginTop: 8, textAlign: 'center', lineHeight: 21 },
+  emptyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    marginTop: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 13,
+    borderRadius: Theme.rounded.full,
+    backgroundColor: Theme.colors.primary,
+    ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
+  },
+  emptyBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
 
   // Post card
   postCard: {
-    backgroundColor: 'rgba(18,18,42,0.7)',
-    borderRadius: Theme.rounded.xl,
+    backgroundColor: Theme.colors.card,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-    padding: 16,
+    borderColor: Theme.colors.border,
+    padding: 18,
     marginBottom: 12,
-    ...Platform.select({ web: { backdropFilter: 'blur(20px)' } as any }),
   },
-  postHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
+  postHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 13 },
   avatar: {
-    width: 38, height: 38, borderRadius: 19,
+    width: 42, height: 42, borderRadius: 21,
     alignItems: 'center', justifyContent: 'center',
   },
-  avatarText: { fontSize: 15, fontWeight: '800' },
-  authorName: { fontSize: 14, fontWeight: '600', color: Theme.colors.text },
-  postTime: { fontSize: 12, color: Theme.colors.textTertiary, marginTop: 1 },
+  avatarText: { fontSize: 17, fontWeight: '800', color: '#fff' },
+  authorName: { fontSize: 15, fontWeight: '700', color: Theme.colors.text },
+  postTime: { fontSize: 12.5, color: Theme.colors.textTertiary, marginTop: 2 },
   badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: Theme.rounded.full,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
-  badgeText: { fontSize: 11, fontWeight: '600' },
+  badgeDot: { width: 7, height: 7, borderRadius: 4 },
+  badgeText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.1 },
 
-  postContent: { fontSize: 14, color: Theme.colors.textSecondary, lineHeight: 22, marginBottom: 12 },
+  postContent: { fontSize: 15, color: Theme.colors.text, opacity: 0.94, lineHeight: 23, marginBottom: 14 },
   postActions: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 20,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.06)',
-    paddingTop: 10,
+    borderTopColor: Theme.colors.border,
+    paddingTop: 13,
   },
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    ...Platform.select({ web: { cursor: 'pointer' } as any }),
+    gap: 7,
+    paddingVertical: 4,
+    ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
   },
-  actionIcon: { fontSize: 16 },
-  actionCount: { fontSize: 13, color: Theme.colors.textSecondary },
+  actionCount: { fontSize: 13.5, color: Theme.colors.textSecondary, fontWeight: '600' },
+  actionCountLiked: { color: Theme.colors.error, fontWeight: '700' },
 
   // Modal
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
   modal: {
-    backgroundColor: '#0F0F1F',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    backgroundColor: Theme.colors.surface,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     borderTopWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: Theme.colors.borderLight,
     padding: 24,
     paddingBottom: 40,
+    ...Platform.select({
+      web: { boxShadow: '0 -12px 48px rgba(0,0,0,0.5)' } as any,
+      default: {},
+    }),
   },
   modalHandle: {
-    width: 36, height: 4, borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    width: 40, height: 5, borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.18)',
     alignSelf: 'center',
-    marginBottom: 20,
+    marginBottom: 22,
   },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: Theme.colors.text, marginBottom: 16 },
+  modalTitle: { fontSize: 22, fontWeight: '800', color: Theme.colors.text, letterSpacing: -0.4 },
+  modalSubtitle: { fontSize: 14, color: Theme.colors.textSecondary, marginTop: 4, marginBottom: 22 },
   fieldLabel: {
     fontSize: 11,
+    fontWeight: '800',
     color: Theme.colors.textTertiary,
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    marginBottom: 11,
+    letterSpacing: 1.2,
   },
   modalChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    paddingHorizontal: 15,
+    paddingVertical: 9,
     borderRadius: Theme.rounded.full,
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: Theme.colors.border,
+    ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
   },
-  modalChipActive: { borderColor: Theme.colors.primary, backgroundColor: 'rgba(124,58,237,0.2)' },
-  modalChipText: { fontSize: 13, color: Theme.colors.textSecondary, fontWeight: '500' },
-  modalChipTextActive: { color: Theme.colors.primary },
+  modalChipActive: {
+    borderColor: Theme.colors.primary,
+    backgroundColor: Theme.colors.primary,
+  },
+  modalChipText: { fontSize: 13, color: Theme.colors.textSecondary, fontWeight: '600' },
+  modalChipTextActive: { color: '#fff', fontWeight: '700' },
   textarea: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: Theme.rounded.md,
+    backgroundColor: Theme.colors.cardGlass,
+    borderRadius: Theme.rounded.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    padding: 12,
-    fontSize: 14,
+    borderColor: Theme.colors.border,
+    padding: 15,
+    fontSize: 15,
     color: Theme.colors.text,
-    minHeight: 100,
-    marginBottom: 12,
-    ...Platform.select({ web: { outlineStyle: 'none' } as any }),
+    lineHeight: 22,
+    minHeight: 112,
+    marginBottom: 20,
+    ...Platform.select({ web: { outlineStyle: 'none' } as any, default: {} }),
   },
-  anonRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
+  anonRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 22 },
   checkbox: {
-    width: 20, height: 20, borderRadius: 4, borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.2)',
+    width: 24, height: 24, borderRadius: 7, borderWidth: 1.5,
+    borderColor: Theme.colors.borderLight,
     alignItems: 'center', justifyContent: 'center',
   },
   checkboxActive: { backgroundColor: Theme.colors.primary, borderColor: Theme.colors.primary },
-  anonText: { fontSize: 14, color: Theme.colors.textSecondary },
-  modalBtns: { flexDirection: 'row', gap: 10 },
+  anonText: { fontSize: 15, color: Theme.colors.text, fontWeight: '600' },
+  anonHint: { fontSize: 12.5, color: Theme.colors.textTertiary, marginTop: 1 },
+  modalBtns: { flexDirection: 'row', gap: 12 },
   cancelBtn: {
-    flex: 1, padding: 14, borderRadius: Theme.rounded.md, alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    flex: 1, paddingVertical: 15, borderRadius: Theme.rounded.lg, alignItems: 'center',
+    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: Theme.colors.border,
+    ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
   },
-  cancelBtnText: { color: Theme.colors.textSecondary, fontWeight: '600' },
+  cancelBtnText: { color: Theme.colors.textSecondary, fontWeight: '700', fontSize: 15 },
   postBtn: {
-    flex: 2, padding: 14, borderRadius: Theme.rounded.md, alignItems: 'center',
+    flex: 2, flexDirection: 'row', gap: 8, paddingVertical: 15,
+    borderRadius: Theme.rounded.lg, alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: Theme.colors.primary,
+    ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
   },
-  postBtnText: { color: '#fff', fontWeight: '700' },
+  postBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 });

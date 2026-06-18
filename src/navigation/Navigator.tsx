@@ -7,6 +7,7 @@ export type ScreenType =
   | 'Home'
   | 'Progress'
   | 'Stats'
+  | 'Community'
   | 'Profile';
 
 interface NavigationContextType {
