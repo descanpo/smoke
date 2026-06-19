@@ -1,67 +1,78 @@
 import { Platform } from 'react-native';
 
+// "Sade & güven veren" sağlık paleti.
+// Mor marka kimliği korunur; neon parlama azaltılır, nötr slate zeminler kullanılır.
+
 export const Colors = {
   primary: '#7C3AED',
   primaryLight: '#8B5CF6',
   primaryDark: '#5B21B6',
-  secondary: '#06B6D4',
-  secondaryDark: '#0891B2',
+  secondary: '#0EA5A4',      // güven veren teal (sağlık)
+  secondaryDark: '#0F766E',
   success: '#10B981',
   successDark: '#059669',
   warning: '#F59E0B',
   error: '#EF4444',
   info: '#2196F3',
 
-  background: '#0A0A1A',
-  surface: '#0F0F1F',
-  card: '#12122A',
-  cardElevated: '#22223A',
-  cardGlass: 'rgba(255,255,255,0.04)',
+  background: '#0D0E12',
+  surface: '#15161C',
+  card: '#16171D',
+  cardElevated: '#1E1F27',
+  cardGlass: '#16171D',
   cardGlassBorder: 'rgba(255,255,255,0.08)',
   border: 'rgba(255,255,255,0.08)',
   borderLight: 'rgba(255,255,255,0.12)',
   text: '#FFFFFF',
-  textSecondary: '#A3A3C2',
-  textTertiary: '#6B6B8F',
+  textSecondary: '#A1A1B5',
+  textTertiary: '#6E6E85',
 };
 
 export const darkColors = {
-  background: '#0A0A1A',
-  card: '#12122A',
-  cardGlass: 'rgba(255,255,255,0.04)',
+  background: '#0D0E12',
+  card: '#16171D',
+  cardGlass: '#16171D',
   cardGlassBorder: 'rgba(255,255,255,0.08)',
-  surface: '#0F0F24',
+  surface: '#15161C',
+  cardElevated: '#1E1F27',
   border: 'rgba(255,255,255,0.08)',
+  borderLight: 'rgba(255,255,255,0.12)',
   text: '#FFFFFF',
-  textSecondary: '#A3A3C2',
-  textTertiary: '#5A5A7A',
+  textSecondary: '#A1A1B5',
+  textTertiary: '#6E6E85',
   primary: '#7C3AED',
   primaryLight: '#8B5CF6',
-  secondary: '#06B6D4',
+  primarySoft: 'rgba(124,58,237,0.14)',
+  secondary: '#14B8A6',
   success: '#10B981',
   warning: '#F59E0B',
-  error: '#EF4444',
+  error: '#F87171',
 };
 
 export const lightColors = {
-  background: '#F2F0FB',
+  background: '#F7F8FA',
   card: '#FFFFFF',
-  cardGlass: 'rgba(255,255,255,0.95)',
-  cardGlassBorder: 'rgba(124,58,237,0.12)',
-  surface: '#FAFAFE',
-  border: 'rgba(0,0,0,0.07)',
-  text: '#0A0A1A',
-  textSecondary: '#4A4A6A',
-  textTertiary: '#8A8AAA',
+  cardGlass: '#FFFFFF',
+  cardGlassBorder: 'rgba(15,23,42,0.08)',
+  surface: '#FFFFFF',
+  cardElevated: '#FFFFFF',
+  border: 'rgba(15,23,42,0.08)',
+  borderLight: 'rgba(15,23,42,0.12)',
+  text: '#0F172A',
+  textSecondary: '#475569',
+  textTertiary: '#94A3B8',
   primary: '#7C3AED',
   primaryLight: '#8B5CF6',
-  secondary: '#0891B2',
+  primarySoft: 'rgba(124,58,237,0.08)',
+  secondary: '#0D9488',
   success: '#059669',
   warning: '#D97706',
   error: '#DC2626',
 };
 
-export const getColors = (mode: 'dark' | 'light') =>
+export type ThemeColors = typeof darkColors;
+
+export const getColors = (mode: 'dark' | 'light'): ThemeColors =>
   mode === 'dark' ? darkColors : lightColors;
 
 export const Theme = {
@@ -70,42 +81,36 @@ export const Theme = {
     xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 48,
   },
   rounded: {
-    sm: 8, md: 12, lg: 16, xl: 20, xxl: 28, full: 9999,
+    sm: 8, md: 12, lg: 16, xl: 18, xxl: 22, full: 9999,
   },
   typography: {
-    h1: { fontSize: 32, fontWeight: '800' as const, letterSpacing: -0.5 },
-    h2: { fontSize: 24, fontWeight: '700' as const, letterSpacing: -0.3 },
-    h3: { fontSize: 20, fontWeight: '700' as const },
-    h4: { fontSize: 17, fontWeight: '600' as const },
+    h1: { fontSize: 28, fontWeight: '800' as const, letterSpacing: -0.5 },
+    h2: { fontSize: 22, fontWeight: '700' as const, letterSpacing: -0.3 },
+    h3: { fontSize: 18, fontWeight: '700' as const },
+    h4: { fontSize: 16, fontWeight: '600' as const },
     body: { fontSize: 15, fontWeight: '400' as const, lineHeight: 22 },
     bodySmall: { fontSize: 13, fontWeight: '400' as const, lineHeight: 19 },
-    caption: { fontSize: 11, fontWeight: '500' as const, letterSpacing: 0.3 },
+    caption: { fontSize: 12, fontWeight: '500' as const, letterSpacing: 0.2 },
     label: { fontSize: 13, fontWeight: '600' as const },
   },
+  // Nötr, yumuşak gölgeler — neon glow yok.
   shadows: {
     soft: Platform.select({
-      web: { boxShadow: '0 8px 32px rgba(124,58,237,0.12)' } as any,
-      default: { shadowColor: '#7C3AED', shadowOpacity: 0.12, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 2 },
+      web: { boxShadow: '0 2px 8px rgba(15,23,42,0.06)' } as any,
+      default: { shadowColor: '#0F172A', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 1 },
     }),
     medium: Platform.select({
-      web: { boxShadow: '0 16px 40px rgba(124,58,237,0.15)' } as any,
-      default: { shadowColor: '#7C3AED', shadowOpacity: 0.15, shadowRadius: 24, shadowOffset: { width: 0, height: 16 }, elevation: 4 },
+      web: { boxShadow: '0 6px 20px rgba(15,23,42,0.10)' } as any,
+      default: { shadowColor: '#0F172A', shadowOpacity: 0.10, shadowRadius: 16, shadowOffset: { width: 0, height: 6 }, elevation: 3 },
     }),
-    glow: Platform.select({
-      web: { boxShadow: '0 0 30px rgba(124,58,237,0.45), 0 4px 20px rgba(124,58,237,0.25)' } as any,
-      default: { shadowColor: '#7C3AED', shadowOpacity: 0.45, shadowRadius: 16, shadowOffset: { width: 0, height: 0 }, elevation: 6 },
-    }),
-    cyanGlow: Platform.select({
-      web: { boxShadow: '0 0 24px rgba(6,182,212,0.35)' } as any,
-      default: { shadowColor: '#06B6D4', shadowOpacity: 0.35, shadowRadius: 12, shadowOffset: { width: 0, height: 0 }, elevation: 4 },
-    }),
-    successGlow: Platform.select({
-      web: { boxShadow: '0 0 20px rgba(16,185,129,0.3)' } as any,
-      default: { shadowColor: '#10B981', shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 4 },
+    // Birincil CTA için izin verilen TEK hafif renkli gölge (abartısız).
+    primary: Platform.select({
+      web: { boxShadow: '0 6px 18px rgba(124,58,237,0.28)' } as any,
+      default: { shadowColor: '#7C3AED', shadowOpacity: 0.28, shadowRadius: 14, shadowOffset: { width: 0, height: 6 }, elevation: 5 },
     }),
     card: Platform.select({
-      web: { boxShadow: '0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)' } as any,
-      default: { shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
+      web: { boxShadow: '0 2px 12px rgba(15,23,42,0.06)' } as any,
+      default: { shadowColor: '#0F172A', shadowOpacity: 0.08, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
     }),
   },
 };

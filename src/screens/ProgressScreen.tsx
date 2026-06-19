@@ -3,13 +3,9 @@ import {
   View, Text, ScrollView, StyleSheet, Platform, Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getColors } from '../theme/Theme';
+import { getColors, Theme } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-
-const ACCENT = '#8B5CF6';
-const CYAN = '#06B6D4';
-const SUCCESS = '#10B981';
 
 type MilestoneIcon = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -31,7 +27,7 @@ const MILESTONES: Array<{
   { id: 12, minutes: 5256000, label: '10 Yıl',    labelEn: '10 Years',   desc: 'Akciğer kanseri riski yarıya düştü',                descEn: 'Lung cancer risk halved',                   icon: 'trophy-outline' },
 ];
 
-function CurrentPulse() {
+function CurrentPulse({ primaryColor }: { primaryColor: string }) {
   const anim = useRef(new Animated.Value(1)).current;
   useEffect(() => {
     Animated.loop(
@@ -49,11 +45,11 @@ function CurrentPulse() {
         width: 36,
         height: 36,
         borderRadius: 18,
-        backgroundColor: 'rgba(139,92,246,0.18)',
+        backgroundColor: primaryColor + '2A',
         transform: [{ scale: anim }],
       }} />
-      <View style={nodeStyles.current}>
-        <View style={nodeStyles.currentDot} />
+      <View style={[nodeStyles.current, { borderColor: primaryColor }]}>
+        <View style={[nodeStyles.currentDot, { backgroundColor: primaryColor }]} />
       </View>
     </View>
   );
@@ -66,19 +62,16 @@ const nodeStyles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: '#fff',
     borderWidth: 2.5,
-    borderColor: ACCENT,
+    borderColor: '#7C3AED', // overridden inline
     alignItems: 'center',
     justifyContent: 'center',
-    ...Platform.select({
-      web: { boxShadow: '0 2px 12px rgba(139,92,246,0.4)' } as any,
-      default: { shadowColor: ACCENT, shadowOpacity: 0.4, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } },
-    }),
+    ...Theme.shadows.soft,
   },
   currentDot: {
     width: 13,
     height: 13,
     borderRadius: 6.5,
-    backgroundColor: ACCENT,
+    backgroundColor: '#7C3AED', // overridden inline
   },
 });
 
@@ -109,23 +102,12 @@ export default function ProgressScreen({ session, journey }: { session: any; jou
     ? Math.min((elapsedMinutes - prevMilestone.minutes) / (currMilestone.minutes - prevMilestone.minutes), 1)
     : 0;
 
-  // Canonical card surface (mirrors HomeScreen)
-  const card = {
+  const cardStyle = {
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    ...Platform.select({
-      web: {
-        boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 6px 20px rgba(17,17,40,0.06)',
-      } as any,
-      default: {
-        shadowColor: isDark ? '#000' : '#111128',
-        shadowOpacity: isDark ? 0.3 : 0.06,
-        shadowRadius: 16,
-        shadowOffset: { width: 0, height: 8 },
-        elevation: 3,
-      },
-    }),
+    borderRadius: 18,
+    ...Theme.shadows.card,
   };
 
   const trackMuted = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
@@ -137,7 +119,7 @@ export default function ProgressScreen({ session, journey }: { session: any; jou
       showsVerticalScrollIndicator={false}
     >
       {/* Header */}
-      <Text style={[s.eyebrow, { color: ACCENT }]}>
+      <Text style={[s.eyebrow, { color: colors.textSecondary }]}>
         {lang === 'tr' ? 'İYİLEŞME' : 'RECOVERY'}
       </Text>
       <Text style={[s.title, { color: colors.text }]}>{t.healthTimeline}</Text>
@@ -148,7 +130,7 @@ export default function ProgressScreen({ session, journey }: { session: any; jou
       </Text>
 
       {/* Summary card */}
-      <View style={[s.summaryCard, card]}>
+      <View style={[s.summaryCard, cardStyle]}>
         <View style={s.summaryRow}>
           <View style={{ flex: 1 }}>
             <Text style={[s.eyebrow, { color: colors.textTertiary, marginBottom: 10 }]}>
@@ -161,11 +143,11 @@ export default function ProgressScreen({ session, journey }: { session: any; jou
               </Text>
             </View>
           </View>
-          <Text style={[s.summaryPctText, { color: CYAN }]}>{overallPct}%</Text>
+          <Text style={[s.summaryPctText, { color: colors.secondary }]}>{overallPct}%</Text>
         </View>
 
         <View style={[s.summaryTrack, { backgroundColor: trackMuted }]}>
-          <View style={[s.summaryFill, { width: `${overallPct}%` as any }]} />
+          <View style={[s.summaryFill, { width: `${overallPct}%` as any, backgroundColor: colors.primary }]} />
         </View>
       </View>
 
@@ -177,41 +159,28 @@ export default function ProgressScreen({ session, journey }: { session: any; jou
           const locked = !achieved && !isCurrent;
           const prevAchieved = i > 0 && elapsedMinutes >= MILESTONES[i - 1].minutes;
 
-          const iconColor = achieved ? SUCCESS : isCurrent ? ACCENT : colors.textTertiary;
+          const iconColor = achieved ? colors.success : isCurrent ? colors.primary : colors.textTertiary;
 
           const cardBorder = achieved
-            ? (isDark ? 'rgba(16,185,129,0.30)' : 'rgba(16,185,129,0.26)')
+            ? (isDark ? 'rgba(16,185,129,0.25)' : 'rgba(16,185,129,0.20)')
             : isCurrent
-            ? (isDark ? 'rgba(139,92,246,0.40)' : 'rgba(139,92,246,0.30)')
+            ? (isDark ? 'rgba(124,58,237,0.30)' : 'rgba(124,58,237,0.22)')
             : colors.border;
 
           const iconWellBg = achieved
-            ? SUCCESS + (isDark ? '22' : '14')
+            ? (isDark ? 'rgba(16,185,129,0.14)' : 'rgba(16,185,129,0.10)')
             : isCurrent
-            ? ACCENT + (isDark ? '22' : '14')
+            ? colors.primarySoft
             : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)');
 
-          const cardShadow = Platform.select({
-            web: {
-              boxShadow: isCurrent
-                ? '0 10px 28px rgba(139,92,246,0.18)'
-                : isDark ? '0 6px 18px rgba(0,0,0,0.28)' : '0 6px 18px rgba(17,17,40,0.05)',
-            } as any,
-            default: {
-              shadowColor: isCurrent ? ACCENT : (isDark ? '#000' : '#111128'),
-              shadowOpacity: isCurrent ? 0.18 : (isDark ? 0.28 : 0.05),
-              shadowRadius: 14,
-              shadowOffset: { width: 0, height: 6 },
-              elevation: isCurrent ? 4 : 2,
-            },
-          });
+          // Neutral card shadow for all states; isCurrent gets slightly more elevation
+          const cardShadow = isCurrent ? Theme.shadows.medium : Theme.shadows.card;
 
-          // Continuous connector: green through achieved segments, violet at the
-          // current node, fading to muted for locked.
+          // Continuous connector
           const connectorColor = achieved
-            ? SUCCESS
+            ? colors.success
             : isCurrent
-            ? ACCENT
+            ? colors.primary
             : trackMuted;
           const connectorOpacity = achieved ? 0.55 : isCurrent ? 0.45 : 1;
 
@@ -219,31 +188,28 @@ export default function ProgressScreen({ session, journey }: { session: any; jou
             <View key={m.id} style={s.timelineItem}>
               {/* Left track column */}
               <View style={s.trackCol}>
-                {/* Connector above node (skip for first item); bridges the
-                    gap between cards so the line reads continuous. */}
                 {i > 0 && (
                   <View style={[
                     s.connectorTop,
-                    { backgroundColor: prevAchieved ? SUCCESS : achieved ? SUCCESS : isCurrent ? ACCENT : trackMuted,
+                    { backgroundColor: prevAchieved ? colors.success : achieved ? colors.success : isCurrent ? colors.primary : trackMuted,
                       opacity: prevAchieved || achieved ? 0.55 : isCurrent ? 0.45 : 1 },
                   ]} />
                 )}
                 <View style={s.nodeSlot}>
                   {achieved ? (
-                    <View style={s.nodeAchievedRing}>
-                      <View style={s.nodeAchieved}>
+                    <View style={[s.nodeAchievedRing, { backgroundColor: isDark ? 'rgba(16,185,129,0.16)' : 'rgba(16,185,129,0.10)' }]}>
+                      <View style={[s.nodeAchieved, { backgroundColor: colors.success, ...Theme.shadows.soft }]}>
                         <Ionicons name="checkmark" size={11} color="#fff" />
                       </View>
                     </View>
                   ) : isCurrent ? (
-                    <CurrentPulse />
+                    <CurrentPulse primaryColor={colors.primary} />
                   ) : (
                     <View style={[s.nodeLocked, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', borderColor: colors.border }]}>
                       <Ionicons name="lock-closed" size={12} color={colors.textTertiary} />
                     </View>
                   )}
                 </View>
-                {/* Connector below node (skip for last item) */}
                 {i < MILESTONES.length - 1 && (
                   <View style={[
                     s.connector,
@@ -276,13 +242,13 @@ export default function ProgressScreen({ session, journey }: { session: any; jou
                     </Text>
                   </View>
                   {achieved && (
-                    <View style={s.pillAchieved}>
-                      <Text style={s.pillAchievedText}>{t.achieved}</Text>
+                    <View style={[s.pillAchieved, { backgroundColor: isDark ? 'rgba(16,185,129,0.14)' : 'rgba(16,185,129,0.10)' }]}>
+                      <Text style={[s.pillAchievedText, { color: colors.success }]}>{t.achieved}</Text>
                     </View>
                   )}
                   {isCurrent && (
-                    <View style={s.pillCurrent}>
-                      <Text style={s.pillCurrentText}>{t.inProgress}</Text>
+                    <View style={[s.pillCurrent, { backgroundColor: colors.primarySoft }]}>
+                      <Text style={[s.pillCurrentText, { color: colors.primary }]}>{t.inProgress}</Text>
                     </View>
                   )}
                   {locked && (
@@ -300,10 +266,10 @@ export default function ProgressScreen({ session, journey }: { session: any; jou
                       <Text style={[s.progressLabel, { color: colors.textTertiary }]}>
                         {lang === 'tr' ? 'İLERLEME' : 'PROGRESS'}
                       </Text>
-                      <Text style={s.progressPct}>{Math.round(currProgress * 100)}%</Text>
+                      <Text style={[s.progressPct, { color: colors.primary }]}>{Math.round(currProgress * 100)}%</Text>
                     </View>
-                    <View style={[s.progressTrack, { backgroundColor: isDark ? 'rgba(139,92,246,0.16)' : 'rgba(139,92,246,0.10)' }]}>
-                      <View style={[s.progressFill, { width: `${Math.round(currProgress * 100)}%` as any }]} />
+                    <View style={[s.progressTrack, { backgroundColor: colors.primarySoft }]}>
+                      <View style={[s.progressFill, { width: `${Math.round(currProgress * 100)}%` as any, backgroundColor: colors.primary }]} />
                     </View>
                   </View>
                 )}
@@ -321,12 +287,12 @@ const s = StyleSheet.create({
 
   // Header
   eyebrow: { fontSize: 11, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase' },
-  title: { fontSize: 30, fontWeight: '800', letterSpacing: -0.6, marginTop: 8, marginBottom: 8 },
+  title: { fontSize: 26, fontWeight: '800', letterSpacing: -0.4, marginTop: 8, marginBottom: 8 },
   subtitle: { fontSize: 14, lineHeight: 20, marginBottom: 24 },
 
   // Summary card
   summaryCard: {
-    borderRadius: 22,
+    borderRadius: 18,
     padding: 22,
     marginBottom: 30,
   },
@@ -339,10 +305,6 @@ const s = StyleSheet.create({
   summaryFill: {
     height: '100%',
     borderRadius: 6,
-    ...Platform.select({
-      web: { backgroundImage: 'linear-gradient(90deg, #8B5CF6, #06B6D4)' } as any,
-      default: { backgroundColor: ACCENT },
-    }),
   },
 
   // Timeline
@@ -357,21 +319,18 @@ const s = StyleSheet.create({
     width: 40,
     alignItems: 'center',
   },
-  // Fixed-height slot that centers any node type for consistent alignment
   nodeSlot: {
     width: 40,
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // Emerald ring wrapper around the achieved node
   nodeAchievedRing: {
     width: 28,
     height: 28,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(16,185,129,0.20)',
   },
   nodeAchieved: {
     width: 18,
@@ -379,11 +338,6 @@ const s = StyleSheet.create({
     borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: SUCCESS,
-    ...Platform.select({
-      web: { boxShadow: '0 2px 8px rgba(16,185,129,0.4)' } as any,
-      default: { shadowColor: SUCCESS, shadowOpacity: 0.4, shadowRadius: 6, shadowOffset: { width: 0, height: 2 } },
-    }),
   },
   nodeLocked: {
     width: 22,
@@ -395,8 +349,6 @@ const s = StyleSheet.create({
   },
   connectorTop: {
     width: 2,
-    // Pull up to overlap the previous card's bottom margin (16) so the
-    // timeline line stays continuous across the inter-card gap.
     height: 38,
     marginTop: -16,
     borderRadius: 1,
@@ -411,7 +363,7 @@ const s = StyleSheet.create({
   // Cards
   card: {
     flex: 1,
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
     padding: 18,
     marginBottom: 16,
@@ -437,16 +389,14 @@ const s = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 9999,
-    backgroundColor: 'rgba(16,185,129,0.12)',
   },
-  pillAchievedText: { fontSize: 10, color: SUCCESS, fontWeight: '700', letterSpacing: 0.3 },
+  pillAchievedText: { fontSize: 10, fontWeight: '700', letterSpacing: 0.3 },
   pillCurrent: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 9999,
-    backgroundColor: 'rgba(139,92,246,0.12)',
   },
-  pillCurrentText: { fontSize: 10, color: ACCENT, fontWeight: '700', letterSpacing: 0.3 },
+  pillCurrentText: { fontSize: 10, fontWeight: '700', letterSpacing: 0.3 },
   pillLocked: {
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -472,10 +422,6 @@ const s = StyleSheet.create({
   progressFill: {
     height: '100%',
     borderRadius: 3,
-    ...Platform.select({
-      web: { backgroundImage: 'linear-gradient(90deg, #8B5CF6, #06B6D4)' } as any,
-      default: { backgroundColor: ACCENT },
-    }),
   },
-  progressPct: { fontSize: 11, fontWeight: '800', color: ACCENT, letterSpacing: 0.3 },
+  progressPct: { fontSize: 11, fontWeight: '800', letterSpacing: 0.3 },
 });

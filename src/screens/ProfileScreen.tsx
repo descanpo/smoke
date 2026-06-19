@@ -7,15 +7,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../services/supabase';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { getColors } from '../theme/Theme';
+import { getColors, Theme } from '../theme/Theme';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
-
-const ACCENT = '#8B5CF6';
-const CYAN = '#06B6D4';
-const SUCCESS = '#10B981';
-const WARNING = '#F59E0B';
-const ERROR = '#EF4444';
 
 function calcStats(journey: any) {
   const mins = (Date.now() - new Date(journey.quit_date).getTime()) / 60000;
@@ -139,28 +133,18 @@ export default function ProfileScreen({
     }
   };
 
-  // ---- Canonical card (mirrors HomeScreen) ----
-  const card = {
+  // Solid card style per spec — neutral shadow, no neon glow
+  const cardStyle = {
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    ...Platform.select({
-      web: {
-        boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 6px 20px rgba(17,17,40,0.06)',
-      } as any,
-      default: {
-        shadowColor: isDark ? '#000' : '#111128',
-        shadowOpacity: isDark ? 0.3 : 0.06,
-        shadowRadius: 16,
-        shadowOffset: { width: 0, height: 8 },
-        elevation: 3,
-      },
-    }),
+    borderRadius: 18,
+    ...Theme.shadows.card,
   };
 
   const dividerColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
 
-  // Icon well — accent-tinted, mirrors HomeScreen stat/milestone wells
+  // Icon well — tinted background from theme colors
   const well = (accent: string) => ({
     width: 40,
     height: 40,
@@ -172,28 +156,28 @@ export default function ProfileScreen({
 
   // YOLCULUK BİLGİLERİ — editable info rows
   const journeyRows: { field: EditField; icon: IconName; accent: string; label: string; value: string }[] = [
-    { field: 'quit_date', icon: 'calendar-outline', accent: ACCENT, label: t.quitDate,
+    { field: 'quit_date', icon: 'calendar-outline', accent: colors.primary, label: t.quitDate,
       value: journey ? new Date(journey.quit_date).toLocaleDateString(lang === 'tr' ? 'tr-TR' : 'en-US', {
         day: 'numeric', month: 'long', year: 'numeric',
       }) : '' },
-    { field: 'cigarettes_per_day', icon: 'flame-outline', accent: WARNING, label: t.dailyCigs, value: journey ? `${journey.cigarettes_per_day}` : '' },
-    { field: 'cost_per_pack', icon: 'wallet-outline', accent: SUCCESS, label: t.packPrice, value: journey ? `₺${journey.cost_per_pack}` : '' },
-    { field: 'motivation', icon: 'heart-outline', accent: ERROR, label: t.motivation,
+    { field: 'cigarettes_per_day', icon: 'flame-outline', accent: colors.warning, label: t.dailyCigs, value: journey ? `${journey.cigarettes_per_day}` : '' },
+    { field: 'cost_per_pack', icon: 'wallet-outline', accent: colors.success, label: t.packPrice, value: journey ? `₺${journey.cost_per_pack}` : '' },
+    { field: 'motivation', icon: 'heart-outline', accent: colors.error, label: t.motivation,
       value: journey && journey.motivation ? getMotivationLabel(journey.motivation, lang) : (lang === 'tr' ? 'Seçilmedi' : 'Not set') },
   ];
 
   // DESTEK — link rows
   const supportRows: { icon: IconName; accent: string; label: string; url: string; external?: boolean }[] = [
-    { icon: 'call-outline', accent: SUCCESS, label: t.quitHelpline, url: 'tel:171', external: true },
+    { icon: 'call-outline', accent: colors.success, label: t.quitHelpline, url: 'tel:171', external: true },
     { icon: 'document-text-outline', accent: colors.textSecondary, label: t.termsLink, url: 'https://descanpo.github.io/smoke/terms.html' },
-    { icon: 'shield-checkmark-outline', accent: CYAN, label: t.kvkkLink, url: 'https://descanpo.github.io/smoke/kvkk.html' },
+    { icon: 'shield-checkmark-outline', accent: colors.secondary, label: t.kvkkLink, url: 'https://descanpo.github.io/smoke/kvkk.html' },
   ];
 
-  // Stat chips — uses calcStats data
+  // Stat chips
   const statChips: { accent: string; icon: IconName; value: string; label: string }[] = [
-    { accent: ACCENT, icon: 'calendar-clear-outline', value: `${stats.days}`, label: t.daysClean },
-    { accent: CYAN, icon: 'wallet-outline', value: `₺${stats.saved.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}`, label: t.savings },
-    { accent: WARNING, icon: 'ban-outline', value: stats.avoided.toLocaleString('tr-TR'), label: t.avoided },
+    { accent: colors.primary, icon: 'calendar-clear-outline', value: `${stats.days}`, label: t.daysClean },
+    { accent: colors.secondary, icon: 'wallet-outline', value: `₺${stats.saved.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}`, label: t.savings },
+    { accent: colors.warning, icon: 'ban-outline', value: stats.avoided.toLocaleString('tr-TR'), label: t.avoided },
   ];
 
   // Strip leading emoji/symbol prefix from reset label (no new t. keys)
@@ -206,21 +190,20 @@ export default function ProfileScreen({
         contentContainerStyle={s.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* TopAppBar: centered logo + settings */}
-        <View style={s.topBar}>
-          <View style={s.topBarSide} />
-          <Text style={[s.logo, { color: ACCENT }]}>Smoke</Text>
-          <View style={[s.topBarSide, { alignItems: 'flex-end' }]}>
-            <Ionicons name="settings-outline" size={22} color={colors.textSecondary} />
-          </View>
+        {/* Screen header per spec */}
+        <View style={s.header}>
+          <Text style={[s.headerTitle, { color: colors.text }]}>
+            {lang === 'tr' ? 'Profil' : 'Profile'}
+          </Text>
+          <Text style={[s.headerSub, { color: colors.textSecondary }]}>
+            {lang === 'tr' ? 'Hesap ve ayarlar' : 'Account & settings'}
+          </Text>
         </View>
 
-        {/* User identity — centered avatar with gradient ring */}
+        {/* User identity — avatar with primarySoft background */}
         <View style={s.identity}>
-          <View style={s.avatarRing}>
-            <View style={[s.avatarInner, { borderColor: colors.background }]}>
-              <Text style={s.avatarText}>{initials}</Text>
-            </View>
+          <View style={[s.avatarCircle, { backgroundColor: colors.primarySoft }]}>
+            <Text style={[s.avatarText, { color: colors.primary }]}>{initials}</Text>
           </View>
           <Text style={[s.displayName, { color: colors.text }]}>{displayName}</Text>
           <Text style={[s.email, { color: colors.textSecondary }]} numberOfLines={1}>{email}</Text>
@@ -228,7 +211,7 @@ export default function ProfileScreen({
 
         {/* Stat chips card */}
         {journey && (
-          <View style={[s.chipsCard, card]}>
+          <View style={[s.chipsCard, cardStyle]}>
             {statChips.map((chip, i) => (
               <React.Fragment key={chip.label}>
                 {i > 0 && <View style={[s.chipSep, { backgroundColor: dividerColor }]} />}
@@ -246,7 +229,7 @@ export default function ProfileScreen({
         {journey && (
           <View style={s.section}>
             <Text style={[s.eyebrow, { color: colors.textTertiary }]}>{t.journeyInfo}</Text>
-            <View style={[s.groupCard, card]}>
+            <View style={[s.groupCard, cardStyle]}>
               {journeyRows.map((row, i) => (
                 <TouchableOpacity
                   key={row.label}
@@ -269,7 +252,7 @@ export default function ProfileScreen({
         {/* AYARLAR */}
         <View style={s.section}>
           <Text style={[s.eyebrow, { color: colors.textTertiary }]}>{t.settings}</Text>
-          <View style={[s.groupCard, card]}>
+          <View style={[s.groupCard, cardStyle]}>
             {/* Dark mode toggle */}
             <View style={[s.row, { borderBottomWidth: 1, borderBottomColor: dividerColor }]}>
               <View style={well('#6366F1')}>
@@ -279,7 +262,7 @@ export default function ProfileScreen({
               <Switch
                 value={isDark}
                 onValueChange={toggleTheme}
-                trackColor={{ false: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)', true: ACCENT }}
+                trackColor={{ false: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)', true: colors.primary }}
                 thumbColor="#fff"
                 ios_backgroundColor={isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}
                 {...Platform.select({ web: { activeThumbColor: '#fff' } as any, default: {} })}
@@ -288,8 +271,8 @@ export default function ProfileScreen({
 
             {/* Language segmented control */}
             <View style={s.row}>
-              <View style={well(CYAN)}>
-                <Ionicons name="language-outline" size={20} color={CYAN} />
+              <View style={well(colors.secondary)}>
+                <Ionicons name="language-outline" size={20} color={colors.secondary} />
               </View>
               <Text style={[s.rowLabel, { color: colors.text, flex: 1 }]}>{t.language}</Text>
               <View style={[s.langSegment, {
@@ -300,7 +283,7 @@ export default function ProfileScreen({
                     key={l}
                     onPress={() => setLang(l)}
                     activeOpacity={0.8}
-                    style={[s.langSegBtn, lang === l && s.langSegBtnActive]}
+                    style={[s.langSegBtn, lang === l && { backgroundColor: colors.primary }]}
                   >
                     <Text style={[
                       s.langSegText,
@@ -318,7 +301,7 @@ export default function ProfileScreen({
         {/* DESTEK */}
         <View style={s.section}>
           <Text style={[s.eyebrow, { color: colors.textTertiary }]}>{lang === 'tr' ? 'DESTEK' : 'SUPPORT'}</Text>
-          <View style={[s.groupCard, card]}>
+          <View style={[s.groupCard, cardStyle]}>
             {supportRows.map((row, i) => (
               <TouchableOpacity
                 key={row.label}
@@ -344,14 +327,19 @@ export default function ProfileScreen({
         <View style={s.section}>
           <Text style={[s.eyebrow, { color: colors.textTertiary }]}>{t.account}</Text>
 
-          {/* Reset (destructive) */}
+          {/* Reset (destructive — subtle error accent) */}
           <TouchableOpacity
-            style={[s.resetBtn, card]}
+            style={[s.resetBtn, {
+              backgroundColor: colors.card,
+              borderWidth: 1,
+              borderColor: colors.error + '33',
+              ...Theme.shadows.card,
+            }]}
             onPress={newJourney}
             activeOpacity={0.7}
           >
-            <Ionicons name="trash-outline" size={20} color={ERROR} />
-            <Text style={[s.resetText, { color: ERROR }]}>{resetLabel}</Text>
+            <Ionicons name="trash-outline" size={20} color={colors.error} />
+            <Text style={[s.resetText, { color: colors.error }]}>{resetLabel}</Text>
           </TouchableOpacity>
 
           {/* Sign out */}
@@ -390,8 +378,8 @@ export default function ProfileScreen({
                       onPress={() => setDraft(key)}
                       activeOpacity={0.8}
                       style={[s.motivationChip, {
-                        backgroundColor: active ? ACCENT : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
-                        borderColor: active ? ACCENT : colors.border,
+                        backgroundColor: active ? colors.primary : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                        borderColor: active ? colors.primary : colors.border,
                       }]}
                     >
                       <Text style={{ color: active ? '#fff' : colors.text, fontWeight: '600', fontSize: 14 }}>
@@ -433,7 +421,7 @@ export default function ProfileScreen({
                 <Text style={{ color: colors.textSecondary, fontWeight: '700' }}>{t.cancel}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[s.modalBtn, s.modalSave]}
+                style={[s.modalBtn, s.modalSave, { backgroundColor: colors.primary, ...Theme.shadows.primary }]}
                 onPress={saveEdit}
                 disabled={saving}
                 activeOpacity={0.85}
@@ -449,54 +437,44 @@ export default function ProfileScreen({
 }
 
 const s = StyleSheet.create({
-  content: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 120 },
+  content: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 120 },
 
-  // TopAppBar
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    marginBottom: 12,
+  // Screen header per spec
+  header: {
+    paddingTop: 16,
+    paddingBottom: 8,
+    marginBottom: 8,
   },
-  topBarSide: { width: 32, justifyContent: 'center' },
-  logo: { fontSize: 24, fontWeight: '800', letterSpacing: -0.8 },
+  headerTitle: {
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+    marginBottom: 2,
+  },
+  headerSub: {
+    fontSize: 14,
+  },
 
   // User identity
-  identity: { alignItems: 'center', marginTop: 12, marginBottom: 36 },
-  avatarRing: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+  identity: { alignItems: 'center', marginTop: 16, marginBottom: 28 },
+  avatarCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
-    padding: 4,
-    ...Platform.select({
-      web: { backgroundImage: 'linear-gradient(135deg, #8B5CF6, #06B6D4)' } as any,
-      default: { backgroundColor: ACCENT },
-    }),
+    marginBottom: 14,
   },
-  avatarInner: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 4,
-    backgroundColor: ACCENT,
-  },
-  avatarText: { fontSize: 30, fontWeight: '700', color: '#fff', letterSpacing: -0.5 },
-  displayName: { fontSize: 24, fontWeight: '700', letterSpacing: -0.4, marginBottom: 4 },
+  avatarText: { fontSize: 26, fontWeight: '700', letterSpacing: -0.5 },
+  displayName: { fontSize: 22, fontWeight: '700', letterSpacing: -0.4, marginBottom: 4 },
   email: { fontSize: 13, fontWeight: '500', maxWidth: '90%' },
 
   // Stat chips card
   chipsCard: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    borderRadius: 28,
     paddingVertical: 20,
-    marginBottom: 36,
+    marginBottom: 28,
     overflow: 'hidden',
   },
   statChip: { flex: 1, alignItems: 'center', justifyContent: 'center' },
@@ -511,19 +489,18 @@ const s = StyleSheet.create({
   },
 
   // Sections
-  section: { marginBottom: 32 },
+  section: { marginBottom: 24 },
   eyebrow: {
     fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 1.5,
-    marginBottom: 12,
-    marginLeft: 8,
+    marginBottom: 10,
+    marginLeft: 4,
   },
 
-  // Grouped cards
+  // Grouped cards — borderRadius applied via cardStyle object inline
   groupCard: {
-    borderRadius: 28,
     paddingHorizontal: 16,
     overflow: 'hidden',
   },
@@ -532,8 +509,9 @@ const s = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    paddingVertical: 16,
+    gap: 14,
+    paddingVertical: 14,
+    minHeight: 44,
     ...Platform.select({ web: { cursor: 'pointer' } as any }),
   },
   rowLabel: { fontSize: 14, fontWeight: '500' },
@@ -550,9 +528,9 @@ const s = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 7,
-  },
-  langSegBtnActive: {
-    backgroundColor: ACCENT,
+    minHeight: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   langSegText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.5 },
 
@@ -561,10 +539,11 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
-    borderRadius: 28,
-    paddingVertical: 18,
+    gap: 10,
+    borderRadius: 18,
+    paddingVertical: 16,
     marginBottom: 12,
+    minHeight: 52,
   },
   resetText: { fontWeight: '700', fontSize: 14 },
 
@@ -573,10 +552,11 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
-    borderRadius: 28,
-    paddingVertical: 18,
+    gap: 10,
+    borderRadius: 18,
+    paddingVertical: 16,
     borderWidth: 1,
+    minHeight: 52,
   },
   signOutText: { fontWeight: '700', fontSize: 14 },
 
@@ -591,7 +571,7 @@ const s = StyleSheet.create({
   modalCard: {
     width: '100%',
     maxWidth: 420,
-    borderRadius: 24,
+    borderRadius: 20,
     borderWidth: 1,
     padding: 24,
   },
@@ -620,11 +600,9 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 14,
     borderRadius: 14,
+    minHeight: 48,
   },
   modalSave: {
-    ...Platform.select({
-      web: { backgroundImage: 'linear-gradient(135deg, #7C3AED, #8B5CF6)' } as any,
-      default: { backgroundColor: ACCENT },
-    }),
+    // backgroundColor and shadow applied inline via colors.primary + Theme.shadows.primary
   },
 });

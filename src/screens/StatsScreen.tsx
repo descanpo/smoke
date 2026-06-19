@@ -2,13 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Platform, SafeAreaView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../services/supabase';
-import { getColors } from '../theme/Theme';
+import { getColors, Theme } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useNavigation } from '../navigation/Navigator';
-
-const ACCENT = '#8B5CF6';
-const CYAN = '#06B6D4';
 
 const TRIGGER_LABELS: Record<string, { label: string; labelEn: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
   stress:     { label: 'Stres',         labelEn: 'Stress',       icon: 'thunderstorm-outline', color: '#F43F5E' },
@@ -17,7 +14,7 @@ const TRIGGER_LABELS: Record<string, { label: string; labelEn: string; icon: key
   after_meal: { label: 'Yemek Sonrası', labelEn: 'After Meal',   icon: 'restaurant-outline',   color: '#F97316' },
   coffee:     { label: 'Kahve Sonrası', labelEn: 'After Coffee', icon: 'cafe-outline',         color: '#F59E0B' },
   alcohol:    { label: 'Alkol',         labelEn: 'Alcohol',      icon: 'wine-outline',         color: '#64748B' },
-  habit:      { label: 'Alışkanlık',    labelEn: 'Habit',        icon: 'repeat-outline',       color: '#06B6D4' },
+  habit:      { label: 'Alışkanlık',    labelEn: 'Habit',        icon: 'repeat-outline',       color: '#0EA5A4' },
   emotion:    { label: 'Duygusal',      labelEn: 'Emotional',    icon: 'heart-dislike-outline',color: '#EC4899' },
   other:      { label: 'Diğer',         labelEn: 'Other',        icon: 'ellipsis-horizontal',  color: '#6B7280' },
 };
@@ -140,34 +137,29 @@ export default function StatsScreen({ session, journey }: { session: any; journe
     );
   };
 
-  // Clean premium surface — matches HomeScreen `card`.
-  const card = {
+  const cardStyle = {
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    ...Platform.select({
-      web: {
-        boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 6px 20px rgba(17,17,40,0.06)',
-      } as any,
-      default: {
-        shadowColor: isDark ? '#000' : '#111128',
-        shadowOpacity: isDark ? 0.3 : 0.06,
-        shadowRadius: 16,
-        shadowOffset: { width: 0, height: 8 },
-        elevation: 3,
-      },
-    }),
+    ...Theme.shadows.card,
   };
 
   if (!journey) {
     return (
       <View style={[s.container, s.emptyContainer, { backgroundColor: colors.background }]}>
-        <View style={[s.emptyIconWrap, { backgroundColor: ACCENT + (isDark ? '22' : '14') }]}>
-          <Ionicons name="bar-chart-outline" size={32} color={ACCENT} />
+        <View style={[s.emptyCard, { backgroundColor: colors.card, borderColor: colors.border, ...Theme.shadows.card }]}>
+          <View style={[s.emptyIconWrap, { backgroundColor: colors.primarySoft }]}>
+            <Ionicons name="bar-chart-outline" size={32} color={colors.primary} />
+          </View>
+          <Text style={[s.emptyTitle, { color: colors.text }]}>
+            {lang === 'tr' ? 'Yolculuk bulunamadı' : 'Journey not found'}
+          </Text>
+          <Text style={[s.emptyText, { color: colors.textSecondary }]}>
+            {lang === 'tr'
+              ? 'İstatistikler yolculuğun başladığında burada görünecek.'
+              : 'Statistics will appear here once your journey begins.'}
+          </Text>
         </View>
-        <Text style={[s.empty, { color: colors.textSecondary }]}>
-          {lang === 'tr' ? 'Yolculuk bulunamadı' : 'Journey not found'}
-        </Text>
       </View>
     );
   }
@@ -176,16 +168,16 @@ export default function StatsScreen({ session, journey }: { session: any; journe
   const maxBar = Math.max(...weekly.map(d => d.count), 1);
   const triggerTotal = triggers.reduce((sum, t2) => sum + t2.count, 0) || 1;
 
-  // 2x2 overview tiles — mirrors HomeScreen stat-tile metadata, mapped to the reference.
+  // 2x2 overview tiles
   const statTiles: { accent: string; icon: keyof typeof Ionicons.glyphMap; value: string; label: string }[] = [
     {
-      accent: '#10B981',
+      accent: colors.success,
       icon: 'shield-checkmark',
       value: `%${resistPct}`,
       label: t.resistanceRate,
     },
     {
-      accent: ACCENT,
+      accent: colors.primary,
       icon: 'flame',
       value: `${longestStreak}`,
       label: t.longestStreak,
@@ -197,7 +189,7 @@ export default function StatsScreen({ session, journey }: { session: any; journe
       label: t.totalCravings,
     },
     {
-      accent: CYAN,
+      accent: colors.secondary,
       icon: 'calendar',
       value: `${cleanDays}`,
       label: t.cleanDays,
@@ -229,7 +221,7 @@ export default function StatsScreen({ session, journey }: { session: any; journe
         </View>
 
         {/* Weekly Bar Chart */}
-        <View style={[card, s.chartCard]}>
+        <View style={[cardStyle, s.chartCard]}>
           <View style={s.cardHead}>
             <Text style={[s.eyebrow, { color: colors.textTertiary }]}>{t.weeklyActivity}</Text>
             <View style={s.legend}>
@@ -240,7 +232,7 @@ export default function StatsScreen({ session, journey }: { session: any; journe
                 </Text>
               </View>
               <View style={s.legendItem}>
-                <View style={[s.legendDot, { backgroundColor: CYAN }]} />
+                <View style={[s.legendDot, { backgroundColor: colors.secondary }]} />
                 <Text style={[s.legendText, { color: colors.textTertiary }]}>
                   {lang === 'tr' ? 'BUGÜN' : 'TODAY'}
                 </Text>
@@ -253,10 +245,10 @@ export default function StatsScreen({ session, journey }: { session: any; journe
               const fillPct = Math.max(d.count > 0 ? 8 : 0, (d.count / maxBar) * 100);
               return (
                 <View key={i} style={s.barGroup}>
-                  {/* value (today only, matching reference) */}
+                  {/* value (today only) */}
                   <View style={s.barValueSlot}>
                     {d.isToday && d.count > 0 && (
-                      <Text style={[s.barValue, { color: CYAN }]}>{d.count}</Text>
+                      <Text style={[s.barValue, { color: colors.secondary }]}>{d.count}</Text>
                     )}
                   </View>
                   {/* track */}
@@ -265,19 +257,15 @@ export default function StatsScreen({ session, journey }: { session: any; journe
                       <View
                         style={[
                           s.barFill,
-                          d.isToday ? s.barFillToday : null,
                           { height: `${fillPct}%` as any },
                           d.isToday
-                            ? { backgroundColor: CYAN }
-                            : Platform.select({
-                                web: { backgroundImage: 'linear-gradient(180deg, #8B5CF6, #06B6D4)', opacity: 0.45 } as any,
-                                default: { backgroundColor: ACCENT, opacity: 0.55 },
-                              }),
+                            ? { backgroundColor: colors.secondary }
+                            : { backgroundColor: colors.primary, opacity: 0.50 },
                         ]}
                       />
                     )}
                   </View>
-                  <Text style={[s.barLabel, { color: colors.textTertiary }, d.isToday && { color: CYAN, fontWeight: '800' }]}>
+                  <Text style={[s.barLabel, { color: colors.textTertiary }, d.isToday && { color: colors.secondary, fontWeight: '800' }]}>
                     {d.label}
                   </Text>
                 </View>
@@ -286,10 +274,10 @@ export default function StatsScreen({ session, journey }: { session: any; journe
           </View>
         </View>
 
-        {/* Overview 2x2 — mirrors HomeScreen stat tiles */}
+        {/* Overview 2x2 */}
         <View style={s.statsGrid}>
           {statTiles.map((tile, i) => (
-            <View key={i} style={[s.statCard, card]}>
+            <View key={i} style={[s.statCard, cardStyle]}>
               <View style={s.statTop}>
                 <View style={[s.statIconWrap, { backgroundColor: tile.accent + (isDark ? '22' : '14') }]}>
                   <Ionicons name={tile.icon} size={18} color={tile.accent} />
@@ -304,7 +292,7 @@ export default function StatsScreen({ session, journey }: { session: any; journe
 
         {/* Trigger Analysis */}
         {triggers.length > 0 ? (
-          <View style={[card, s.triggerCard]}>
+          <View style={[cardStyle, s.triggerCard]}>
             <Text style={[s.eyebrow, { color: colors.textTertiary, marginBottom: 18 }]}>{t.triggerAnalysis}</Text>
             {triggers.map((trig, idx) => {
               const info = TRIGGER_LABELS[trig.key] ?? { label: trig.key, labelEn: trig.key, icon: 'ellipsis-horizontal' as keyof typeof Ionicons.glyphMap, color: '#6B7280' };
@@ -333,9 +321,9 @@ export default function StatsScreen({ session, journey }: { session: any; journe
             })}
           </View>
         ) : (
-          <View style={[card, s.triggerCard, s.emptyState]}>
-            <View style={[s.emptyIconWrap, { backgroundColor: ACCENT + (isDark ? '22' : '14') }]}>
-              <Ionicons name="bar-chart-outline" size={32} color={ACCENT} />
+          <View style={[cardStyle, s.triggerCard, s.emptyState]}>
+            <View style={[s.emptyIconWrap, { backgroundColor: colors.primarySoft }]}>
+              <Ionicons name="analytics-outline" size={32} color={colors.primary} />
             </View>
             <Text style={[s.emptyTitle, { color: colors.text }]}>
               {lang === 'tr' ? 'Henüz veri yok' : 'No data yet'}
@@ -355,14 +343,13 @@ export default function StatsScreen({ session, journey }: { session: any; journe
 const s = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 20, paddingTop: 16, paddingBottom: 120 },
-  emptyContainer: { justifyContent: 'center', alignItems: 'center' },
-  empty: { textAlign: 'center', fontSize: 15, fontWeight: '600' },
+  emptyContainer: { justifyContent: 'center', alignItems: 'center', padding: 20 },
 
   eyebrow: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.2 },
 
   // Header
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
-  title: { fontSize: 32, fontWeight: '800', letterSpacing: -0.5, marginTop: 6 },
+  title: { fontSize: 26, fontWeight: '800', letterSpacing: -0.4, marginTop: 6 },
   iconBtn: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
 
   // Card heads
@@ -380,7 +367,7 @@ const s = StyleSheet.create({
   legendText: { fontSize: 10, fontWeight: '700', letterSpacing: 0.4 },
 
   // Bar chart
-  chartCard: { borderRadius: 24, padding: 22 },
+  chartCard: { borderRadius: 18, padding: 22 },
   chart: {
     flexDirection: 'row',
     gap: 8,
@@ -400,23 +387,11 @@ const s = StyleSheet.create({
     width: '100%',
     borderRadius: 999,
   },
-  barFillToday: {
-    ...Platform.select({
-      web: { boxShadow: '0 0 15px rgba(6,182,212,0.55)' } as any,
-      default: {
-        shadowColor: CYAN,
-        shadowOpacity: 0.55,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 0 },
-        elevation: 4,
-      },
-    }),
-  },
   barLabel: { fontSize: 11, fontWeight: '700', marginTop: 12 },
 
-  // Stats grid 2x2 (mirrors HomeScreen)
+  // Stats grid 2x2
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 20 },
-  statCard: { flex: 1, minWidth: '45%', borderRadius: 24, padding: 18 },
+  statCard: { flex: 1, minWidth: '45%', borderRadius: 18, padding: 18 },
   statTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
   statIconWrap: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   statDot: { width: 7, height: 7, borderRadius: 4, marginTop: 4 },
@@ -424,7 +399,7 @@ const s = StyleSheet.create({
   statLabel: { fontSize: 10.5, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
 
   // Triggers
-  triggerCard: { borderRadius: 24, padding: 22, marginTop: 20 },
+  triggerCard: { borderRadius: 18, padding: 22, marginTop: 20 },
   triggerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -458,7 +433,15 @@ const s = StyleSheet.create({
   },
   triggerPct: { fontSize: 13, fontWeight: '800', textAlign: 'right' },
 
-  // Empty state
+  // Empty states
+  emptyCard: {
+    borderRadius: 18,
+    borderWidth: 1,
+    padding: 32,
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 340,
+  },
   emptyState: { alignItems: 'center', paddingVertical: 36 },
   emptyIconWrap: {
     width: 72,

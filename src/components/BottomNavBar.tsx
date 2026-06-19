@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, ScreenType } from '../navigation/Navigator';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { getColors, Theme } from '../theme/Theme';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 type TabDef = {
@@ -21,16 +22,11 @@ const TABS: TabDef[] = [
   { screen: 'Profile',  icon: 'person-outline',       iconActive: 'person',       labelTr: 'Profil',     labelEn: 'Profile' },
 ];
 
-const PRIMARY = '#7C3AED';
-
 export const BottomNavBar = ({ onLogCraving }: { onLogCraving?: () => void }) => {
   const { currentScreen, navigate } = useNavigation();
-  const { isDark } = useThemeMode();
+  const { mode } = useThemeMode();
   const { lang } = useLanguage();
-
-  const barBg = isDark ? '#15152E' : '#FFFFFF';
-  const topBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-  const inactiveColor = isDark ? '#6F6F92' : '#9A9AB2';
+  const colors = getColors(mode);
 
   // Render the four tabs with a centered FAB inserted in the middle.
   const left = TABS.slice(0, 2);
@@ -38,7 +34,7 @@ export const BottomNavBar = ({ onLogCraving }: { onLogCraving?: () => void }) =>
 
   const renderTab = (tab: TabDef) => {
     const active = currentScreen === tab.screen;
-    const color = active ? PRIMARY : inactiveColor;
+    const color = active ? colors.primary : colors.textTertiary;
     return (
       <TouchableOpacity
         key={tab.screen}
@@ -46,7 +42,7 @@ export const BottomNavBar = ({ onLogCraving }: { onLogCraving?: () => void }) =>
         onPress={() => navigate(tab.screen)}
         activeOpacity={0.7}
       >
-        <View style={[s.indicator, { backgroundColor: active ? PRIMARY : 'transparent' }]} />
+        <View style={[s.indicator, { backgroundColor: active ? colors.primary : 'transparent' }]} />
         <Ionicons name={active ? tab.iconActive : tab.icon} size={23} color={color} />
         <Text style={[s.label, { color }]} numberOfLines={1}>
           {lang === 'tr' ? tab.labelTr : tab.labelEn}
@@ -58,13 +54,16 @@ export const BottomNavBar = ({ onLogCraving }: { onLogCraving?: () => void }) =>
   return (
     <View style={s.wrapper} pointerEvents="box-none">
       <View style={[s.bar, {
-        backgroundColor: barBg,
-        borderTopColor: topBorder,
+        backgroundColor: colors.card,
+        borderTopColor: colors.border,
         ...Platform.select({
-          web: { boxShadow: '0 -8px 30px rgba(0,0,0,0.12)' } as any,
+          web: { boxShadow: '0 -4px 16px rgba(15,23,42,0.08)' } as any,
           default: {
-            shadowColor: '#000', shadowOpacity: isDark ? 0.4 : 0.12,
-            shadowRadius: 16, shadowOffset: { width: 0, height: -6 }, elevation: 20,
+            shadowColor: '#0F172A',
+            shadowOpacity: 0.08,
+            shadowRadius: 12,
+            shadowOffset: { width: 0, height: -4 },
+            elevation: 8,
           },
         }),
       }]}>
@@ -73,7 +72,7 @@ export const BottomNavBar = ({ onLogCraving }: { onLogCraving?: () => void }) =>
         {/* Center FAB */}
         <View style={s.fabSlot}>
           <TouchableOpacity
-            style={s.fab}
+            style={[s.fab, { backgroundColor: colors.primary, ...Theme.shadows.primary }]}
             onPress={onLogCraving}
             activeOpacity={0.9}
           >
@@ -97,8 +96,8 @@ const s = StyleSheet.create({
   bar: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     borderTopWidth: 1,
     paddingTop: 12,
     paddingBottom: Platform.OS === 'ios' ? 28 : 16,
@@ -108,6 +107,7 @@ const s = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
+    minHeight: 44,
     gap: 4,
     ...Platform.select({ web: { cursor: 'pointer', outlineStyle: 'none' } as any }),
   },
@@ -128,26 +128,12 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   fab: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    marginTop: -30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    marginTop: -28,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: PRIMARY,
-    ...Platform.select({
-      web: {
-        backgroundImage: 'linear-gradient(135deg, #7C3AED, #8B5CF6)',
-        boxShadow: '0 10px 26px rgba(124,58,237,0.5)',
-        cursor: 'pointer',
-      } as any,
-      default: {
-        shadowColor: PRIMARY,
-        shadowOpacity: 0.5,
-        shadowRadius: 14,
-        shadowOffset: { width: 0, height: 8 },
-        elevation: 10,
-      },
-    }),
+    ...Platform.select({ web: { cursor: 'pointer' } as any }),
   },
 });

@@ -82,12 +82,10 @@ export default function OnboardingScreen({
 
   const stepIcons: IconName[] = ['calendar-outline', 'flame-outline', 'cash-outline', 'sparkles-outline'];
 
-  const surface = isDark ? 'rgba(255,255,255,0.04)' : '#FFFFFF';
-
   const inputStyle = (key: string) => ({
-    backgroundColor: surface,
+    backgroundColor: colors.card,
     borderRadius: 14,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: focused === key ? colors.primary : colors.border,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -100,8 +98,8 @@ export default function OnboardingScreen({
     paddingHorizontal: 16,
     paddingVertical: 9,
     borderRadius: Theme.rounded.full,
-    backgroundColor: active ? (colors.primary + '14') : 'transparent',
-    borderWidth: 1.5,
+    backgroundColor: active ? colors.primarySoft : 'transparent',
+    borderWidth: 1,
     borderColor: active ? colors.primary : colors.border,
   });
 
@@ -112,9 +110,9 @@ export default function OnboardingScreen({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 16,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: active ? colors.primary : colors.border,
-    backgroundColor: active ? (colors.primary + '0F') : surface,
+    backgroundColor: active ? colors.primarySoft : colors.card,
   });
 
   return (
@@ -148,7 +146,7 @@ export default function OnboardingScreen({
                 key={i}
                 style={[
                   s.progressTrack,
-                  { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' },
+                  { backgroundColor: colors.border },
                 ]}
               >
                 <View
@@ -170,8 +168,9 @@ export default function OnboardingScreen({
 
         {/* Card */}
         <View style={[s.card, {
-          backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#FFFFFF',
+          backgroundColor: colors.card,
           borderColor: colors.border,
+          ...Theme.shadows.card,
         }]}>
           {/* Step icon */}
           <View style={[s.iconBadge, { backgroundColor: colors.primary + '14' }]}>
@@ -345,7 +344,7 @@ export default function OnboardingScreen({
                       activeOpacity={0.85}
                     >
                       <View style={[s.motivIconWrap, {
-                        backgroundColor: active ? colors.primary + '18' : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                        backgroundColor: active ? colors.primarySoft : colors.surface,
                       }]}>
                         <Ionicons name={m.icon} size={20} color={active ? colors.primary : colors.textSecondary} />
                       </View>
@@ -365,8 +364,8 @@ export default function OnboardingScreen({
 
           {!!error && (
             <View style={[s.errorBox, {
-              backgroundColor: isDark ? 'rgba(239,68,68,0.12)' : 'rgba(239,68,68,0.08)',
-              borderColor: 'rgba(239,68,68,0.3)',
+              backgroundColor: colors.cardElevated,
+              borderColor: colors.error,
             }]}>
               <Ionicons name="alert-circle-outline" size={16} color={colors.error} style={{ marginRight: 8 }} />
               <Text style={[s.errorText, { color: colors.error }]}>{error}</Text>
@@ -433,8 +432,8 @@ const s = StyleSheet.create({
 
   // Card
   card: {
-    borderRadius: 22,
-    borderWidth: 1.5,
+    borderRadius: 18,
+    borderWidth: 1,
     padding: 24,
   },
   iconBadge: {
@@ -476,22 +475,13 @@ const s = StyleSheet.create({
   backBtn: {
     flex: 1, flexDirection: 'row', paddingVertical: 16, borderRadius: 14,
     alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1.5,
+    borderWidth: 1,
   },
   backBtnText: { fontSize: 15, fontWeight: '700' },
   nextBtn: {
     flex: 2, paddingVertical: 16, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
     backgroundColor: Theme.colors.primary,
-    ...Platform.select({
-      web: { boxShadow: '0 8px 24px rgba(124,58,237,0.35)' } as any,
-      default: {
-        shadowColor: '#7C3AED',
-        shadowOpacity: 0.35,
-        shadowRadius: 14,
-        shadowOffset: { width: 0, height: 8 },
-        elevation: 6,
-      },
-    }),
+    ...Theme.shadows.primary,
   },
   nextBtnInner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   nextBtnText: { color: '#fff', fontSize: 16, fontWeight: '800', letterSpacing: 0.3 },

@@ -107,13 +107,7 @@ export default function WelcomeScreen() {
   });
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      {/* Ambient background */}
-      <View style={[s.bg, { backgroundColor: colors.background }]} pointerEvents="none">
-        <View style={[s.orb1, { backgroundColor: `rgba(124,58,237,${isDark ? 0.18 : 0.10})` }]} />
-        <View style={[s.orb2, { backgroundColor: `rgba(6,182,212,${isDark ? 0.12 : 0.07})` }]} />
-      </View>
-
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.background }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       {/* Language switcher */}
       <View style={s.langSwitcher}>
         {(['tr', 'en'] as const).map(l => (
@@ -152,9 +146,8 @@ export default function WelcomeScreen() {
 
         {/* Auth card */}
         <View style={[s.card, {
-          backgroundColor: isDark ? 'rgba(20,20,44,0.7)' : 'rgba(255,255,255,0.9)',
-          borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
-          ...Platform.select({ web: { backdropFilter: 'blur(24px)' } as any }),
+          backgroundColor: colors.card,
+          borderColor: colors.border,
         }]}>
           <Text style={[s.cardTitle, { color: colors.text }]}>
             {isLogin ? t.welcomeBack : t.createAccountTitle}
@@ -297,16 +290,6 @@ export default function WelcomeScreen() {
 }
 
 const s = StyleSheet.create({
-  bg: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden' },
-  orb1: {
-    position: 'absolute', width: 340, height: 340, borderRadius: 170, top: -110, right: -90,
-    ...Platform.select({ web: { filter: 'blur(90px)' } as any }),
-  },
-  orb2: {
-    position: 'absolute', width: 300, height: 300, borderRadius: 150, bottom: -80, left: -90,
-    ...Platform.select({ web: { filter: 'blur(90px)' } as any }),
-  },
-
   langSwitcher: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 54 : 38,
@@ -329,15 +312,12 @@ const s = StyleSheet.create({
   brand: { alignItems: 'center', marginBottom: 28 },
   logoMark: {
     width: 76, height: 76, borderRadius: 24,
-    backgroundColor: 'rgba(124,58,237,0.18)',
+    backgroundColor: 'rgba(124,58,237,0.14)',
     alignItems: 'center', justifyContent: 'center',
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: 'rgba(124,58,237,0.35)',
-    ...Platform.select({
-      web: { boxShadow: '0 0 50px rgba(124,58,237,0.35)' } as any,
-      default: { shadowColor: '#7C3AED', shadowOpacity: 0.4, shadowRadius: 24, shadowOffset: { width: 0, height: 8 }, elevation: 8 },
-    }),
+    borderColor: 'rgba(124,58,237,0.20)',
+    ...Theme.shadows.soft,
   },
   logoEmoji: { fontSize: 36 },
   appName: { fontSize: 34, fontWeight: '800', letterSpacing: 1, marginBottom: 4 },
@@ -345,13 +325,10 @@ const s = StyleSheet.create({
 
   // Card
   card: {
-    borderRadius: 26,
+    borderRadius: 18,
     borderWidth: 1,
     padding: 22,
-    ...Platform.select({
-      web: { boxShadow: '0 24px 60px rgba(0,0,0,0.35)' } as any,
-      default: { shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 30, shadowOffset: { width: 0, height: 16 }, elevation: 10 },
-    }),
+    ...Theme.shadows.card,
   },
   cardTitle: { fontSize: 21, fontWeight: '800', letterSpacing: -0.3 },
   cardSubtitle: { fontSize: 13, marginTop: 4, marginBottom: 18 },
@@ -397,20 +374,8 @@ const s = StyleSheet.create({
     paddingVertical: 15,
     alignItems: 'center',
     marginTop: 2,
-    ...Platform.select({
-      web: {
-        backgroundImage: 'linear-gradient(135deg, #7C3AED, #8B5CF6)',
-        boxShadow: '0 8px 28px rgba(124,58,237,0.45)',
-      } as any,
-      default: {
-        backgroundColor: Theme.colors.primary,
-        shadowColor: '#7C3AED',
-        shadowOpacity: 0.45,
-        shadowRadius: 16,
-        shadowOffset: { width: 0, height: 8 },
-        elevation: 6,
-      },
-    }),
+    backgroundColor: Theme.colors.primary,
+    ...Theme.shadows.primary,
   },
   submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '800', letterSpacing: 0.3 },
 

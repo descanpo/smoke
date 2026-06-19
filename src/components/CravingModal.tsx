@@ -4,7 +4,7 @@ import {
   ScrollView, ActivityIndicator, Platform, SafeAreaView,
 } from 'react-native';
 import { supabase } from '../services/supabase';
-import { getColors } from '../theme/Theme';
+import { getColors, Theme } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -70,16 +70,9 @@ export default function CravingModal({
   };
 
   // ---- palette helpers (presentation only) ----
-  const sheetBg = isDark ? '#0E0E1C' : '#FFFFFF';
-  const surfaceMuted = isDark ? 'rgba(255,255,255,0.045)' : 'rgba(15,15,40,0.035)';
-  const surfaceBorder = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(15,15,40,0.08)';
-  const inputBg = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,15,40,0.035)';
-  const inputBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(15,15,40,0.09)';
-  const railBg = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(15,15,40,0.06)';
-
-  const SUCCESS = '#10B981';
-  const ERROR = '#EF4444';
-  const PRIMARY = '#7C3AED';
+  const SUCCESS = colors.success;
+  const ERROR = colors.error;
+  const PRIMARY = colors.primary;
 
   const intensityColor = (v: number) => (v <= 3 ? '#10B981' : v <= 6 ? '#F59E0B' : '#EF4444');
   const liveColor = intensityColor(intensity);
@@ -88,14 +81,11 @@ export default function CravingModal({
     <TouchableOpacity style={s.overlay} activeOpacity={1} onPress={onClose}>
       <TouchableOpacity
         activeOpacity={1}
-        style={[s.sheet, { backgroundColor: sheetBg, borderColor: surfaceBorder }]}
+        style={[s.sheet, { backgroundColor: colors.card, borderColor: colors.border }]}
         onPress={() => {}}
       >
-        {/* Accent glow strip along the top */}
-        <View style={s.topGlow} pointerEvents="none" />
-
         {/* Drag handle */}
-        <View style={[s.dragHandle, { backgroundColor: isDark ? 'rgba(255,255,255,0.22)' : 'rgba(15,15,40,0.18)' }]} />
+        <View style={[s.dragHandle, { backgroundColor: colors.border }]} />
 
         <SafeAreaView>
           {done ? (
@@ -138,7 +128,7 @@ export default function CravingModal({
                   </View>
                 </View>
                 <TouchableOpacity
-                  style={[s.closeBtn, { backgroundColor: surfaceMuted, borderColor: surfaceBorder }]}
+                  style={[s.closeBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
                   onPress={onClose}
                   activeOpacity={0.7}
                 >
@@ -159,19 +149,9 @@ export default function CravingModal({
                       style={[
                         s.outcomeBtn,
                         {
-                          borderColor: active ? color : surfaceBorder,
-                          backgroundColor: active ? color + '1F' : surfaceMuted,
+                          borderColor: active ? color : colors.border,
+                          backgroundColor: active ? color + '1F' : colors.surface,
                         },
-                        active && Platform.select({
-                          web: { boxShadow: `0 8px 22px ${color}33` } as any,
-                          default: {
-                            shadowColor: color,
-                            shadowOpacity: 0.3,
-                            shadowRadius: 10,
-                            shadowOffset: { width: 0, height: 4 },
-                            elevation: 4,
-                          },
-                        }),
                       ]}
                       onPress={() => setResisted(val)}
                       activeOpacity={0.8}
@@ -192,7 +172,7 @@ export default function CravingModal({
                   <Text style={[s.intensityBadgeText, { color: liveColor }]}>{intensity}/10</Text>
                 </View>
               </View>
-              <View style={[s.intensityTrack, { backgroundColor: railBg }]}>
+              <View style={[s.intensityTrack, { backgroundColor: colors.surface }]}>
                 {Array.from({ length: 10 }, (_, i) => i + 1).map(v => {
                   const filled = v <= intensity;
                   return (
@@ -225,15 +205,15 @@ export default function CravingModal({
                       style={[
                         s.chip,
                         {
-                          backgroundColor: active ? 'rgba(124,58,237,0.16)' : inputBg,
-                          borderColor: active ? PRIMARY : inputBorder,
+                          backgroundColor: active ? colors.primarySoft : colors.surface,
+                          borderColor: active ? PRIMARY : colors.border,
                         },
                       ]}
                       onPress={() => setTrigger(active ? '' : trig.key)}
                       activeOpacity={0.75}
                     >
                       <Text style={s.chipIcon}>{trig.icon}</Text>
-                      <Text style={[s.chipText, { color: active ? '#8B5CF6' : colors.textSecondary }]}>
+                      <Text style={[s.chipText, { color: active ? colors.primaryLight : colors.textSecondary }]}>
                         {trig.label}
                       </Text>
                     </TouchableOpacity>
@@ -246,7 +226,7 @@ export default function CravingModal({
                 {t.notes} · {lang === 'tr' ? 'isteğe bağlı' : 'optional'}
               </Text>
               <TextInput
-                style={[s.textarea, { backgroundColor: inputBg, borderColor: inputBorder, color: colors.text }]}
+                style={[s.textarea, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
                 value={notes}
                 onChangeText={setNotes}
                 placeholder={t.notesPlaceholder}
@@ -258,7 +238,7 @@ export default function CravingModal({
 
               <View style={s.btnRow}>
                 <TouchableOpacity
-                  style={[s.cancelBtn, { backgroundColor: surfaceMuted, borderColor: surfaceBorder }]}
+                  style={[s.cancelBtn, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
                   onPress={onClose}
                   activeOpacity={0.8}
                 >
@@ -282,13 +262,12 @@ export default function CravingModal({
 const s = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.62)',
+    backgroundColor: 'rgba(0,0,0,0.55)',
     justifyContent: 'flex-end',
-    ...Platform.select({ web: { backdropFilter: 'blur(6px)' } as any }),
   },
   sheet: {
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
     borderWidth: 1,
     borderBottomWidth: 0,
     paddingHorizontal: 24,
@@ -297,31 +276,20 @@ const s = StyleSheet.create({
     maxHeight: '92%',
     overflow: 'hidden',
     ...Platform.select({
-      web: { boxShadow: '0 -16px 50px rgba(0,0,0,0.45)' } as any,
+      web: { boxShadow: '0 -6px 24px rgba(15,23,42,0.10)' } as any,
       default: {
-        shadowColor: '#000',
-        shadowOpacity: 0.35,
-        shadowRadius: 24,
-        shadowOffset: { width: 0, height: -8 },
-        elevation: 24,
+        shadowColor: '#0F172A',
+        shadowOpacity: 0.10,
+        shadowRadius: 20,
+        shadowOffset: { width: 0, height: -4 },
+        elevation: 12,
       },
     }),
   },
-  topGlow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 4,
-    ...Platform.select({
-      web: { backgroundImage: 'linear-gradient(90deg, #7C3AED, #06B6D4)' } as any,
-      default: { backgroundColor: '#7C3AED' },
-    }),
-  },
   dragHandle: {
-    width: 44,
-    height: 5,
-    borderRadius: 3,
+    width: 40,
+    height: 4,
+    borderRadius: 2,
     alignSelf: 'center',
     marginTop: 4,
     marginBottom: 18,
@@ -342,12 +310,7 @@ const s = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Platform.select({
-      web: {
-        backgroundImage: 'linear-gradient(135deg, rgba(124,58,237,0.22), rgba(6,182,212,0.18))',
-      } as any,
-      default: { backgroundColor: 'rgba(124,58,237,0.2)' },
-    }),
+    backgroundColor: 'rgba(124,58,237,0.14)',
   },
   headerIcon: { fontSize: 22 },
   headerTextWrap: { flex: 1 },
@@ -433,12 +396,7 @@ const s = StyleSheet.create({
     flex: 1,
     borderRadius: 7,
   },
-  intensityFillActive: {
-    ...Platform.select({
-      web: { boxShadow: '0 0 10px rgba(255,255,255,0.35)' } as any,
-      default: {},
-    }),
-  },
+  intensityFillActive: {},
 
   // Chips
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 9 },
@@ -485,20 +443,8 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#7C3AED',
-    ...Platform.select({
-      web: {
-        backgroundImage: 'linear-gradient(135deg, #7C3AED, #8B5CF6)',
-        boxShadow: '0 10px 28px rgba(124,58,237,0.45)',
-        cursor: 'pointer',
-      } as any,
-      default: {
-        shadowColor: '#7C3AED',
-        shadowOpacity: 0.45,
-        shadowRadius: 14,
-        shadowOffset: { width: 0, height: 6 },
-        elevation: 8,
-      },
-    }),
+    ...Theme.shadows.primary,
+    ...Platform.select({ web: { cursor: 'pointer' } as any }),
   },
   saveBtnText: { color: '#fff', fontWeight: '800', fontSize: 15.5, letterSpacing: 0.3 },
 });

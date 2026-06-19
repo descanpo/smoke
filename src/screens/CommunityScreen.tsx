@@ -5,7 +5,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../services/supabase';
-import { Theme } from '../theme/Theme';
+import { Theme, getColors } from '../theme/Theme';
+import { useThemeMode } from '../context/ThemeContext';
 
 const POST_TYPES = [
   { key: 'all', label: 'Tümü' },
@@ -16,15 +17,14 @@ const POST_TYPES = [
   { key: 'question', label: 'Soru' },
 ];
 
-const POST_TYPE_BADGE: Record<string, { label: string; color: string }> = {
-  motivation: { label: 'Motivasyon', color: Theme.colors.primary },
-  milestone:  { label: 'Kilometre Taşı', color: Theme.colors.success },
-  tip:        { label: 'İpucu', color: Theme.colors.secondary },
-  story:      { label: 'Hikaye', color: Theme.colors.warning },
-  question:   { label: 'Soru', color: '#A3A3C2' },
+// Badge color keys resolved at render time from live colors
+const POST_TYPE_BADGE_KEY: Record<string, { label: string; colorKey: keyof ReturnType<typeof getColors> }> = {
+  motivation: { label: 'Motivasyon', colorKey: 'primary' },
+  milestone:  { label: 'Kilometre Taşı', colorKey: 'success' },
+  tip:        { label: 'İpucu', colorKey: 'secondary' },
+  story:      { label: 'Hikaye', colorKey: 'warning' },
+  question:   { label: 'Soru', colorKey: 'textTertiary' },
 };
-
-const AVATAR_COLORS = ['#7C3AED', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
 function timeAgo(iso: string) {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -34,13 +34,10 @@ function timeAgo(iso: string) {
   return `${Math.floor(diff / 86400)} gün önce`;
 }
 
-function getAvatarColor(name: string) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
-  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
-}
-
 export default function CommunityScreen({ session, journey }: { session: any; journey: any }) {
+  const { mode } = useThemeMode();
+  const colors = getColors(mode);
+
   const [posts, setPosts] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [content, setContent] = useState('');
@@ -99,16 +96,16 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
     : posts.filter(p => p.post_type === filterType);
 
   return (
-    <View style={s.container}>
+    <View style={[s.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={s.headerRow}>
         <View style={{ flex: 1 }}>
-          <Text style={s.eyebrow}>TOPLULUK</Text>
-          <Text style={s.title}>Birlikte Güçlüyüz</Text>
-          <Text style={s.subtitle}>Yolculuğunu paylaş, ilham ver</Text>
+          <Text style={[s.eyebrow, { color: colors.primary }]}>TOPLULUK</Text>
+          <Text style={[s.title, { color: colors.text }]}>Birlikte Güçlüyüz</Text>
+          <Text style={[s.subtitle, { color: colors.textSecondary }]}>Yolculuğunu paylaş, ilham ver</Text>
         </View>
         <TouchableOpacity
-          style={s.shareBtn}
+          style={[s.shareBtn, { backgroundColor: colors.primary }, Theme.shadows.primary]}
           onPress={() => setShowForm(true)}
           activeOpacity={0.85}
         >
@@ -129,11 +126,21 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
           return (
             <TouchableOpacity
               key={t.key}
-              style={[s.chip, active && s.chipActive]}
+              style={[
+                s.chip,
+                { borderColor: colors.border },
+                active && { backgroundColor: colors.primary, borderColor: colors.primary },
+              ]}
               onPress={() => setFilterType(t.key)}
               activeOpacity={0.8}
             >
-              <Text style={[s.chipText, active && s.chipTextActive]}>{t.label}</Text>
+              <Text style={[
+                s.chipText,
+                { color: colors.textSecondary },
+                active && s.chipTextActive,
+              ]}>
+                {t.label}
+              </Text>
             </TouchableOpacity>
           );
         })}
@@ -141,20 +148,26 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
 
       {loading ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator color={Theme.colors.primary} size="large" />
+          <ActivityIndicator color={colors.primary} size="large" />
         </View>
       ) : (
         <ScrollView style={{ flex: 1 }} contentContainerStyle={s.list} showsVerticalScrollIndicator={false}>
-          <Text style={s.sectionLabel}>AKIŞ</Text>
+          <Text style={[s.sectionLabel, { color: colors.textTertiary }]}>AKIŞ</Text>
 
           {filteredPosts.length === 0 && (
-            <View style={s.emptyState}>
-              <View style={s.emptyIconWrap}>
-                <Ionicons name="people-outline" size={38} color={Theme.colors.primary} />
+            <View style={[s.emptyState, { backgroundColor: colors.card, borderColor: colors.border }, Theme.shadows.card]}>
+              <View style={[s.emptyIconWrap, { backgroundColor: colors.primarySoft }]}>
+                <Ionicons name="people-outline" size={36} color={colors.primary} />
               </View>
-              <Text style={s.emptyTitle}>Henüz paylaşım yok</Text>
-              <Text style={s.emptyDesc}>İlk paylaşımı sen yap ve topluluğa ilham ver.</Text>
-              <TouchableOpacity style={s.emptyBtn} onPress={() => setShowForm(true)} activeOpacity={0.85}>
+              <Text style={[s.emptyTitle, { color: colors.text }]}>Henüz paylaşım yok</Text>
+              <Text style={[s.emptyDesc, { color: colors.textTertiary }]}>
+                İlk paylaşımı sen yap ve topluluğa ilham ver.
+              </Text>
+              <TouchableOpacity
+                style={[s.emptyBtn, { backgroundColor: colors.primary }, Theme.shadows.primary]}
+                onPress={() => setShowForm(true)}
+                activeOpacity={0.85}
+              >
                 <Ionicons name="create-outline" size={18} color="#fff" />
                 <Text style={s.emptyBtnText}>İlk paylaşımı yap</Text>
               </TouchableOpacity>
@@ -164,31 +177,34 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
           {filteredPosts.map(post => {
             const name = post.is_anonymous ? 'Anonim' : (post.profiles?.display_name ?? 'Kullanıcı');
             const initials = post.is_anonymous ? '?' : name.charAt(0).toUpperCase();
-            const avatarColor = post.is_anonymous ? '#6B6B8F' : getAvatarColor(name);
-            const badge = POST_TYPE_BADGE[post.post_type];
+            const badgeDef = POST_TYPE_BADGE_KEY[post.post_type];
+            const badgeColor = badgeDef ? colors[badgeDef.colorKey] as string : colors.textTertiary;
             const liked = likedIds.has(post.id);
 
             return (
-              <View key={post.id} style={s.postCard}>
+              <View
+                key={post.id}
+                style={[s.postCard, { backgroundColor: colors.card, borderColor: colors.border }, Theme.shadows.card]}
+              >
                 <View style={s.postHeader}>
-                  <View style={[s.avatar, { backgroundColor: avatarColor }]}>
-                    <Text style={s.avatarText}>{initials}</Text>
+                  <View style={[s.avatar, { backgroundColor: colors.primarySoft }]}>
+                    <Text style={[s.avatarText, { color: colors.primary }]}>{initials}</Text>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={s.authorName} numberOfLines={1}>{name}</Text>
-                    <Text style={s.postTime}>{timeAgo(post.created_at)}</Text>
+                    <Text style={[s.authorName, { color: colors.text }]} numberOfLines={1}>{name}</Text>
+                    <Text style={[s.postTime, { color: colors.textTertiary }]}>{timeAgo(post.created_at)}</Text>
                   </View>
-                  {badge && (
+                  {badgeDef && (
                     <View style={s.badge}>
-                      <View style={[s.badgeDot, { backgroundColor: badge.color }]} />
-                      <Text style={[s.badgeText, { color: badge.color }]}>{badge.label}</Text>
+                      <View style={[s.badgeDot, { backgroundColor: badgeColor }]} />
+                      <Text style={[s.badgeText, { color: badgeColor }]}>{badgeDef.label}</Text>
                     </View>
                   )}
                 </View>
 
-                <Text style={s.postContent}>{post.content}</Text>
+                <Text style={[s.postContent, { color: colors.text }]}>{post.content}</Text>
 
-                <View style={s.postActions}>
+                <View style={[s.postActions, { borderTopColor: colors.border }]}>
                   <TouchableOpacity
                     style={s.actionBtn}
                     onPress={() => handleLike(post)}
@@ -198,17 +214,23 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
                     <Ionicons
                       name={liked ? 'heart' : 'heart-outline'}
                       size={20}
-                      color={liked ? Theme.colors.error : Theme.colors.textSecondary}
+                      color={liked ? colors.error : colors.textSecondary}
                     />
-                    <Text style={[s.actionCount, liked && s.actionCountLiked]}>{post.likes_count ?? 0}</Text>
+                    <Text style={[
+                      s.actionCount,
+                      { color: colors.textSecondary },
+                      liked && { color: colors.error, fontWeight: '700' },
+                    ]}>
+                      {post.likes_count ?? 0}
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={s.actionBtn}
                     activeOpacity={0.7}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Ionicons name="chatbubble-outline" size={19} color={Theme.colors.textSecondary} />
-                    <Text style={s.actionCount}>{post.comments_count ?? 0}</Text>
+                    <Ionicons name="chatbubble-outline" size={19} color={colors.textSecondary} />
+                    <Text style={[s.actionCount, { color: colors.textSecondary }]}>{post.comments_count ?? 0}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -225,32 +247,46 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
           activeOpacity={1}
           onPress={() => setShowForm(false)}
         >
-          <TouchableOpacity activeOpacity={1} style={s.modal} onPress={() => {}}>
-            <View style={s.modalHandle} />
-            <Text style={s.modalTitle}>Yeni Paylaşım</Text>
-            <Text style={s.modalSubtitle}>Düşüncelerini toplulukla paylaş</Text>
+          <TouchableOpacity
+            activeOpacity={1}
+            style={[s.modal, { backgroundColor: colors.surface, borderColor: colors.borderLight }, Theme.shadows.medium]}
+            onPress={() => {}}
+          >
+            <View style={[s.modalHandle, { backgroundColor: colors.border }]} />
+            <Text style={[s.modalTitle, { color: colors.text }]}>Yeni Paylaşım</Text>
+            <Text style={[s.modalSubtitle, { color: colors.textSecondary }]}>Düşüncelerini toplulukla paylaş</Text>
 
-            <Text style={s.fieldLabel}>TÜR</Text>
+            <Text style={[s.fieldLabel, { color: colors.textTertiary }]}>TÜR</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 18 }}>
               <View style={{ flexDirection: 'row', gap: 8, paddingRight: 8 }}>
                 {POST_TYPES.filter(t => t.key !== 'all').map(t => (
                   <TouchableOpacity
                     key={t.key}
-                    style={[s.modalChip, type === t.key && s.modalChipActive]}
+                    style={[
+                      s.modalChip,
+                      { borderColor: colors.border },
+                      type === t.key && { backgroundColor: colors.primary, borderColor: colors.primary },
+                    ]}
                     onPress={() => setType(t.key)}
                     activeOpacity={0.8}
                   >
-                    <Text style={[s.modalChipText, type === t.key && s.modalChipTextActive]}>{t.label}</Text>
+                    <Text style={[
+                      s.modalChipText,
+                      { color: colors.textSecondary },
+                      type === t.key && s.modalChipTextActive,
+                    ]}>
+                      {t.label}
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </ScrollView>
 
-            <Text style={s.fieldLabel}>MESAJIN</Text>
+            <Text style={[s.fieldLabel, { color: colors.textTertiary }]}>MESAJIN</Text>
             <TextInput
-              style={s.textarea}
+              style={[s.textarea, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]}
               placeholder="Sigarasız yolculuğunu paylaş..."
-              placeholderTextColor={Theme.colors.textTertiary}
+              placeholderTextColor={colors.textTertiary}
               value={content}
               onChangeText={setContent}
               multiline
@@ -259,21 +295,25 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
             />
 
             <TouchableOpacity style={s.anonRow} onPress={() => setAnon(a => !a)} activeOpacity={0.7}>
-              <View style={[s.checkbox, anon && s.checkboxActive]}>
+              <View style={[s.checkbox, { borderColor: colors.borderLight }, anon && { backgroundColor: colors.primary, borderColor: colors.primary }]}>
                 {anon && <Ionicons name="checkmark" size={15} color="#fff" />}
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={s.anonText}>Anonim olarak paylaş</Text>
-                <Text style={s.anonHint}>İsmin gizli kalır</Text>
+                <Text style={[s.anonText, { color: colors.text }]}>Anonim olarak paylaş</Text>
+                <Text style={[s.anonHint, { color: colors.textTertiary }]}>İsmin gizli kalır</Text>
               </View>
             </TouchableOpacity>
 
             <View style={s.modalBtns}>
-              <TouchableOpacity style={s.cancelBtn} onPress={() => setShowForm(false)} activeOpacity={0.8}>
-                <Text style={s.cancelBtnText}>İptal</Text>
+              <TouchableOpacity
+                style={[s.cancelBtn, { borderColor: colors.border }]}
+                onPress={() => setShowForm(false)}
+                activeOpacity={0.8}
+              >
+                <Text style={[s.cancelBtnText, { color: colors.textSecondary }]}>İptal</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[s.postBtn, (!content.trim() || posting) && { opacity: 0.5 }]}
+                style={[s.postBtn, { backgroundColor: colors.primary }, Theme.shadows.primary, (!content.trim() || posting) && { opacity: 0.5 }]}
                 onPress={handlePost}
                 disabled={posting || !content.trim()}
                 activeOpacity={0.85}
@@ -297,8 +337,9 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Theme.colors.background },
+  container: { flex: 1 },
 
+  // Header
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -311,21 +352,27 @@ const s = StyleSheet.create({
   eyebrow: {
     fontSize: 11,
     fontWeight: '800',
-    color: Theme.colors.primary,
     letterSpacing: 1.6,
     marginBottom: 6,
   },
-  title: { fontSize: 28, fontWeight: '800', color: Theme.colors.text, letterSpacing: -0.6 },
-  subtitle: { fontSize: 14, color: Theme.colors.textSecondary, marginTop: 5 },
+  title: {
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  subtitle: {
+    fontSize: 14,
+    marginTop: 5,
+  },
   shareBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: Theme.colors.primary,
     borderRadius: Theme.rounded.full,
     paddingLeft: 14,
     paddingRight: 18,
     paddingVertical: 11,
+    minHeight: 44,
     ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
   },
   shareBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
@@ -345,14 +392,11 @@ const s = StyleSheet.create({
     borderRadius: Theme.rounded.full,
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: Theme.colors.border,
+    minHeight: 44,
+    justifyContent: 'center',
     ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
   },
-  chipActive: {
-    backgroundColor: Theme.colors.primary,
-    borderColor: Theme.colors.primary,
-  },
-  chipText: { fontSize: 13, color: Theme.colors.textSecondary, fontWeight: '600' },
+  chipText: { fontSize: 13, fontWeight: '600' },
   chipTextActive: { color: '#fff', fontWeight: '700' },
 
   // Posts list
@@ -360,63 +404,82 @@ const s = StyleSheet.create({
   sectionLabel: {
     fontSize: 11,
     fontWeight: '800',
-    color: Theme.colors.textTertiary,
     letterSpacing: 1.4,
     marginBottom: 14,
   },
-  emptyState: { alignItems: 'center', paddingVertical: 64, paddingHorizontal: 24 },
-  emptyIconWrap: {
-    width: 88, height: 88, borderRadius: 44,
-    alignItems: 'center', justifyContent: 'center',
-    marginBottom: 20,
-    backgroundColor: 'rgba(124,58,237,0.10)',
+
+  // Empty state — card format per spec
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 24,
+    borderRadius: Theme.rounded.xl,
+    borderWidth: 1,
+    marginTop: 8,
   },
-  emptyTitle: { fontSize: 19, fontWeight: '800', color: Theme.colors.text, letterSpacing: -0.3 },
-  emptyDesc: { fontSize: 14, color: Theme.colors.textTertiary, marginTop: 8, textAlign: 'center', lineHeight: 21 },
+  emptyIconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 18,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: -0.3,
+  },
+  emptyDesc: {
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+    lineHeight: 21,
+  },
   emptyBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 7,
-    marginTop: 24,
+    marginTop: 22,
     paddingHorizontal: 20,
     paddingVertical: 13,
     borderRadius: Theme.rounded.full,
-    backgroundColor: Theme.colors.primary,
+    minHeight: 44,
     ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
   },
   emptyBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
 
   // Post card
   postCard: {
-    backgroundColor: Theme.colors.card,
-    borderRadius: 20,
+    borderRadius: Theme.rounded.xl,  // 18
     borderWidth: 1,
-    borderColor: Theme.colors.border,
     padding: 18,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   postHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 13 },
   avatar: {
-    width: 42, height: 42, borderRadius: 21,
-    alignItems: 'center', justifyContent: 'center',
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  avatarText: { fontSize: 17, fontWeight: '800', color: '#fff' },
-  authorName: { fontSize: 15, fontWeight: '700', color: Theme.colors.text },
-  postTime: { fontSize: 12.5, color: Theme.colors.textTertiary, marginTop: 2 },
+  avatarText: { fontSize: 17, fontWeight: '800' },
+  authorName: { fontSize: 15, fontWeight: '700' },
+  postTime: { fontSize: 12, marginTop: 2 },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
   },
-  badgeDot: { width: 7, height: 7, borderRadius: 4 },
+  badgeDot: { width: 6, height: 6, borderRadius: 3 },
   badgeText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.1 },
 
-  postContent: { fontSize: 15, color: Theme.colors.text, opacity: 0.94, lineHeight: 23, marginBottom: 14 },
+  postContent: { fontSize: 15, lineHeight: 23, marginBottom: 14, opacity: 0.94 },
   postActions: {
     flexDirection: 'row',
     gap: 20,
     borderTopWidth: 1,
-    borderTopColor: Theme.colors.border,
     paddingTop: 13,
   },
   actionBtn: {
@@ -424,38 +487,34 @@ const s = StyleSheet.create({
     alignItems: 'center',
     gap: 7,
     paddingVertical: 4,
+    minHeight: 44,
     ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
   },
-  actionCount: { fontSize: 13.5, color: Theme.colors.textSecondary, fontWeight: '600' },
-  actionCountLiked: { color: Theme.colors.error, fontWeight: '700' },
+  actionCount: { fontSize: 13, fontWeight: '600' },
 
   // Modal
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'flex-end' },
   modal: {
-    backgroundColor: Theme.colors.surface,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     borderTopWidth: 1,
-    borderColor: Theme.colors.borderLight,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
     padding: 24,
     paddingBottom: 40,
-    ...Platform.select({
-      web: { boxShadow: '0 -12px 48px rgba(0,0,0,0.5)' } as any,
-      default: {},
-    }),
   },
   modalHandle: {
-    width: 40, height: 5, borderRadius: 3,
-    backgroundColor: 'rgba(255,255,255,0.18)',
+    width: 40,
+    height: 5,
+    borderRadius: 3,
     alignSelf: 'center',
     marginBottom: 22,
   },
-  modalTitle: { fontSize: 22, fontWeight: '800', color: Theme.colors.text, letterSpacing: -0.4 },
-  modalSubtitle: { fontSize: 14, color: Theme.colors.textSecondary, marginTop: 4, marginBottom: 22 },
+  modalTitle: { fontSize: 22, fontWeight: '800', letterSpacing: -0.4 },
+  modalSubtitle: { fontSize: 14, marginTop: 4, marginBottom: 22 },
   fieldLabel: {
     fontSize: 11,
     fontWeight: '800',
-    color: Theme.colors.textTertiary,
     marginBottom: 11,
     letterSpacing: 1.2,
   },
@@ -465,23 +524,17 @@ const s = StyleSheet.create({
     borderRadius: Theme.rounded.full,
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: Theme.colors.border,
+    minHeight: 44,
+    justifyContent: 'center',
     ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
   },
-  modalChipActive: {
-    borderColor: Theme.colors.primary,
-    backgroundColor: Theme.colors.primary,
-  },
-  modalChipText: { fontSize: 13, color: Theme.colors.textSecondary, fontWeight: '600' },
+  modalChipText: { fontSize: 13, fontWeight: '600' },
   modalChipTextActive: { color: '#fff', fontWeight: '700' },
   textarea: {
-    backgroundColor: Theme.colors.cardGlass,
     borderRadius: Theme.rounded.lg,
     borderWidth: 1,
-    borderColor: Theme.colors.border,
     padding: 15,
     fontSize: 15,
-    color: Theme.colors.text,
     lineHeight: 22,
     minHeight: 112,
     marginBottom: 20,
@@ -489,27 +542,36 @@ const s = StyleSheet.create({
   },
   anonRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 22 },
   checkbox: {
-    width: 24, height: 24, borderRadius: 7, borderWidth: 1.5,
-    borderColor: Theme.colors.borderLight,
-    alignItems: 'center', justifyContent: 'center',
+    width: 24,
+    height: 24,
+    borderRadius: 7,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  checkboxActive: { backgroundColor: Theme.colors.primary, borderColor: Theme.colors.primary },
-  anonText: { fontSize: 15, color: Theme.colors.text, fontWeight: '600' },
-  anonHint: { fontSize: 12.5, color: Theme.colors.textTertiary, marginTop: 1 },
+  anonText: { fontSize: 15, fontWeight: '600' },
+  anonHint: { fontSize: 12, marginTop: 1 },
   modalBtns: { flexDirection: 'row', gap: 12 },
   cancelBtn: {
-    flex: 1, paddingVertical: 15, borderRadius: Theme.rounded.lg, alignItems: 'center',
+    flex: 1,
+    paddingVertical: 15,
+    borderRadius: Theme.rounded.lg,
+    alignItems: 'center',
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: Theme.colors.border,
+    minHeight: 44,
     ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
   },
-  cancelBtnText: { color: Theme.colors.textSecondary, fontWeight: '700', fontSize: 15 },
+  cancelBtnText: { fontWeight: '700', fontSize: 15 },
   postBtn: {
-    flex: 2, flexDirection: 'row', gap: 8, paddingVertical: 15,
-    borderRadius: Theme.rounded.lg, alignItems: 'center',
+    flex: 2,
+    flexDirection: 'row',
+    gap: 8,
+    paddingVertical: 15,
+    borderRadius: Theme.rounded.lg,
+    alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Theme.colors.primary,
+    minHeight: 44,
     ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
   },
   postBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },

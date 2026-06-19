@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, Animated, Platform, SafeAreaView,
 } from 'react-native';
 import { supabase } from '../services/supabase';
-import { getColors } from '../theme/Theme';
+import { getColors, Theme } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -194,13 +194,9 @@ export default function BreathingModal({
     outputRange: [0.35, 0.7],
   });
 
-  const currentColor = done ? '#10B981' : running ? phase.color : (isDark ? 'rgba(255,255,255,0.45)' : 'rgba(124,58,237,0.55)');
+  const currentColor = done ? colors.success : running ? phase.color : colors.primary;
   const orbActive = done || running;
 
-  const sheetBg = isDark ? '#0B0B16' : '#FBFAFF';
-  const ambientTop = isDark ? '#1A1330' : '#F1ECFF';
-  const cardBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(124,58,237,0.05)';
-  const cardBorder = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(124,58,237,0.12)';
   const cycleLabel = lang === 'tr' ? `Döngü ${cycle + 1} / ${ex.cycles}` : `Cycle ${cycle + 1} / ${ex.cycles}`;
 
   return (
@@ -211,30 +207,15 @@ export default function BreathingModal({
     >
       <TouchableOpacity
         activeOpacity={1}
-        style={[
-          s.sheet,
-          { backgroundColor: sheetBg, borderColor: colors.border },
-          Platform.select({
-            web: {
-              backgroundImage: isDark
-                ? `linear-gradient(180deg, ${ambientTop} 0%, ${sheetBg} 55%)`
-                : `linear-gradient(180deg, ${ambientTop} 0%, ${sheetBg} 60%)`,
-            } as any,
-            default: {},
-          }),
-        ]}
+        style={[s.sheet, { backgroundColor: colors.card, borderColor: colors.border }]}
         onPress={() => {}}
       >
-        {/* Ambient blurred orbs */}
-        <View pointerEvents="none" style={[s.ambientOrb, s.ambientOrbA]} />
-        <View pointerEvents="none" style={[s.ambientOrb, s.ambientOrbB]} />
-
         {/* Drag handle */}
-        <View style={[s.dragHandle, { backgroundColor: isDark ? 'rgba(255,255,255,0.22)' : 'rgba(124,58,237,0.25)' }]} />
+        <View style={[s.dragHandle, { backgroundColor: colors.border }]} />
 
         <SafeAreaView>
           <View style={s.header}>
-            <Text style={[s.eyebrow, { color: '#06B6D4' }]}>
+            <Text style={[s.eyebrow, { color: colors.secondary }]}>
               {lang === 'tr' ? 'NEFES MOLASI' : 'BREATHE'}
             </Text>
             <Text style={[s.title, { color: colors.text }]}>{t.breathingTitle}</Text>
@@ -251,28 +232,19 @@ export default function BreathingModal({
                     style={[
                       s.exCard,
                       {
-                        backgroundColor: selected ? 'rgba(124,58,237,0.14)' : cardBg,
-                        borderColor: selected ? '#7C3AED' : cardBorder,
+                        backgroundColor: selected ? colors.primarySoft : colors.surface,
+                        borderColor: selected ? colors.primary : colors.border,
                       },
-                      selected && Platform.select({
-                        web: { boxShadow: '0 8px 28px rgba(124,58,237,0.18)' } as any,
-                        default: {
-                          shadowColor: '#7C3AED',
-                          shadowOpacity: 0.22,
-                          shadowRadius: 12,
-                          shadowOffset: { width: 0, height: 6 },
-                          elevation: 3,
-                        },
-                      }),
+                      selected && Theme.shadows.soft,
                     ]}
                     onPress={() => setExIdx(i)}
                     activeOpacity={0.8}
                   >
-                    <View style={[s.exDot, { backgroundColor: selected ? '#7C3AED' : 'transparent', borderColor: selected ? '#7C3AED' : cardBorder }]}>
+                    <View style={[s.exDot, { backgroundColor: selected ? colors.primary : 'transparent', borderColor: selected ? colors.primary : colors.border }]}>
                       {selected && <Text style={s.exDotCheck}>✓</Text>}
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={[s.exName, { color: selected ? (isDark ? '#C4B5FD' : '#6D28D9') : colors.text }]}>{e.name}</Text>
+                      <Text style={[s.exName, { color: selected ? colors.primary : colors.text }]}>{e.name}</Text>
                       <Text style={[s.exDesc, { color: colors.textSecondary }]}>{e.desc}</Text>
                     </View>
                   </TouchableOpacity>
@@ -307,17 +279,16 @@ export default function BreathingModal({
               },
               Platform.select({
                 web: {
-                  backgroundImage: `radial-gradient(circle at 35% 30%, ${currentColor}3D, ${currentColor}14 70%)`,
                   boxShadow: orbActive
-                    ? `0 0 60px ${currentColor}66, inset 0 0 30px ${currentColor}33`
-                    : `0 0 30px ${currentColor}33`,
+                    ? `0 6px 24px rgba(15,23,42,0.14)`
+                    : `0 2px 12px rgba(15,23,42,0.08)`,
                 } as any,
                 default: {
-                  shadowColor: currentColor,
-                  shadowOpacity: 0.5,
-                  shadowRadius: 24,
-                  shadowOffset: { width: 0, height: 0 },
-                  elevation: 8,
+                  shadowColor: '#0F172A',
+                  shadowOpacity: orbActive ? 0.14 : 0.08,
+                  shadowRadius: orbActive ? 20 : 10,
+                  shadowOffset: { width: 0, height: 4 },
+                  elevation: orbActive ? 6 : 2,
                 },
               }),
             ]}>
@@ -339,7 +310,7 @@ export default function BreathingModal({
             </Animated.View>
 
             {running ? (
-              <View style={[s.cyclePill, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+              <View style={[s.cyclePill, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <Text style={[s.cycleText, { color: colors.textSecondary }]}>{cycleLabel}</Text>
               </View>
             ) : (
@@ -360,7 +331,7 @@ export default function BreathingModal({
             )}
             {running && (
               <TouchableOpacity
-                style={[s.stopBtn, { backgroundColor: cardBg, borderColor: cardBorder }]}
+                style={[s.stopBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
                 onPress={stop}
                 activeOpacity={0.85}
               >
@@ -370,7 +341,7 @@ export default function BreathingModal({
             {done && (
               <>
                 <TouchableOpacity
-                  style={[s.stopBtn, { backgroundColor: cardBg, borderColor: cardBorder }]}
+                  style={[s.stopBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
                   onPress={() => {
                     setDone(false);
                     setPhaseIdx(0);
@@ -390,7 +361,7 @@ export default function BreathingModal({
             )}
             {!running && !done && (
               <TouchableOpacity
-                style={[s.closeBtn, { backgroundColor: cardBg, borderColor: cardBorder }]}
+                style={[s.closeBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
                 onPress={onClose}
                 activeOpacity={0.75}
               >
@@ -407,44 +378,32 @@ export default function BreathingModal({
 const s = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(6,4,18,0.78)',
+    backgroundColor: 'rgba(0,0,0,0.55)',
     justifyContent: 'flex-end',
   },
   sheet: {
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
     borderWidth: 1,
     paddingHorizontal: 24,
     paddingTop: 14,
     paddingBottom: 14,
     overflow: 'hidden',
-  },
-  ambientOrb: {
-    position: 'absolute',
-    borderRadius: 9999,
     ...Platform.select({
-      web: { filter: 'blur(60px)' } as any,
-      default: { opacity: 0.45 },
+      web: { boxShadow: '0 -6px 24px rgba(15,23,42,0.10)' } as any,
+      default: {
+        shadowColor: '#0F172A',
+        shadowOpacity: 0.10,
+        shadowRadius: 20,
+        shadowOffset: { width: 0, height: -4 },
+        elevation: 12,
+      },
     }),
   },
-  ambientOrbA: {
-    width: 260,
-    height: 260,
-    top: -90,
-    right: -70,
-    backgroundColor: 'rgba(124,58,237,0.35)',
-  },
-  ambientOrbB: {
-    width: 220,
-    height: 220,
-    bottom: -60,
-    left: -60,
-    backgroundColor: 'rgba(6,182,212,0.28)',
-  },
   dragHandle: {
-    width: 42,
-    height: 5,
-    borderRadius: 3,
+    width: 40,
+    height: 4,
+    borderRadius: 2,
     alignSelf: 'center',
     marginBottom: 18,
   },
@@ -518,19 +477,8 @@ const s = StyleSheet.create({
     borderRadius: 18,
     paddingVertical: 16,
     alignItems: 'center',
-    ...Platform.select({
-      web: {
-        backgroundImage: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 55%, #06B6D4 140%)',
-        boxShadow: '0 10px 30px rgba(124,58,237,0.45)',
-      } as any,
-      default: {
-        shadowColor: '#7C3AED',
-        shadowOpacity: 0.45,
-        shadowRadius: 14,
-        shadowOffset: { width: 0, height: 8 },
-        elevation: 6,
-      },
-    }),
+    ...Theme.shadows.primary,
+    ...Platform.select({ web: { cursor: 'pointer' } as any }),
   },
   startBtnText: { color: '#fff', fontWeight: '800', fontSize: 15.5, letterSpacing: 0.3 },
   stopBtn: {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, StatusBar, Modal, Platform } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Modal, Platform, ActivityIndicator } from 'react-native';
 import { supabase } from './src/services/supabase';
 import { NavigationProvider, useNavigation, ScreenType } from './src/navigation/Navigator';
 import { BottomNavBar } from './src/components/BottomNavBar';
@@ -24,6 +24,15 @@ import {
 
 const TAB_SCREENS: ScreenType[] = ['Home', 'Progress', 'Stats', 'Community', 'Profile'];
 
+const LoadingScreen = ({ isDark }: { isDark: boolean }) => (
+  <View style={[s.loading, { backgroundColor: isDark ? '#0D0E12' : '#F7F8FA' }]}>
+    <View style={s.loadingMark}>
+      <Text style={{ fontSize: 34 }}>🚭</Text>
+    </View>
+    <ActivityIndicator color="#8B5CF6" style={{ marginTop: 20 }} />
+  </View>
+);
+
 const AppContent = () => {
   const { currentScreen, navigate, reset } = useNavigation();
   const currentScreenRef = React.useRef(currentScreen);
@@ -35,6 +44,7 @@ const AppContent = () => {
   const [showCraving, setShowCraving] = useState(false);
   const [showBreathing, setShowBreathing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -44,6 +54,7 @@ const AppContent = () => {
       } else {
         setLoading(false);
       }
+      setInitializing(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
@@ -69,11 +80,21 @@ const AppContent = () => {
   }, []);
 
   const fetchJourney = async (userId: string) => {
-    const { data } = await supabase.from('quit_journeys')
+    setLoading(true);
+    const { data, error } = await supabase.from('quit_journeys')
       .select('*')
       .eq('user_id', userId)
       .eq('is_active', true)
       .maybeSingle();
+
+    // On a transient network/query error, don't wrongly send the user to
+    // Onboarding — keep them on a screen they can act on.
+    if (error) {
+      setLoading(false);
+      if (currentScreenRef.current === 'Welcome') navigate('Onboarding');
+      return;
+    }
+
     setJourney(data ?? null);
     setLoading(false);
     if (!data) {
@@ -96,7 +117,19 @@ const AppContent = () => {
   };
 
   const renderScreen = () => {
+    // Until the first getSession() resolves we don't yet know whether the user
+    // is logged in — show the loader so already-authenticated users don't see
+    // the login screen flash on every cold start.
+    if (initializing) return <LoadingScreen isDark={isDark} />;
     if (!session) return <WelcomeScreen />;
+
+    // Session exists but the journey hasn't been resolved yet (e.g. right after
+    // logging back in). Show a branded loader instead of falling through to
+    // HomeScreen with a null journey, which used to leave the user stranded on
+    // a "Journey not found" dead-end with no navigation.
+    if (loading || currentScreen === 'Welcome') {
+      return <LoadingScreen isDark={isDark} />;
+    }
 
     switch (currentScreen) {
       case 'Onboarding':
@@ -146,7 +179,7 @@ const AppContent = () => {
   };
 
   const showTabBar = !!session && TAB_SCREENS.includes(currentScreen);
-  const bgColor = isDark ? '#0A0A1A' : '#F2F0FB';
+  const bgColor = isDark ? '#0D0E12' : '#F7F8FA';
 
   return (
     <View style={[s.root, { backgroundColor: bgColor }]}>
@@ -206,6 +239,18 @@ const s = StyleSheet.create({
   },
   screen: {
     flex: 1,
+  },
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingMark: {
+    width: 76, height: 76, borderRadius: 24,
+    backgroundColor: 'rgba(124,58,237,0.18)',
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(124,58,237,0.35)',
   },
 });
 
