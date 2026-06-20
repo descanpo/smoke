@@ -6,26 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getColors, Theme } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-
-type MilestoneIcon = React.ComponentProps<typeof Ionicons>['name'];
-
-const MILESTONES: Array<{
-  id: number; minutes: number; label: string; labelEn: string;
-  desc: string; descEn: string; icon: MilestoneIcon;
-}> = [
-  { id: 1,  minutes: 20,      label: '20 Dakika', labelEn: '20 Minutes', desc: 'Nabız ve tansiyon normale döndü',                   descEn: 'Heart rate and blood pressure normalized',  icon: 'pulse-outline' },
-  { id: 2,  minutes: 480,     label: '8 Saat',    labelEn: '8 Hours',    desc: 'Kan oksijen seviyesi yükseldi',                     descEn: 'Blood oxygen levels improved',              icon: 'water-outline' },
-  { id: 3,  minutes: 1440,    label: '1 Gün',     labelEn: '1 Day',      desc: 'Nikotin vücuttan çıkmaya başladı',                  descEn: 'Nicotine begins leaving the body',          icon: 'sparkles-outline' },
-  { id: 4,  minutes: 2880,    label: '2 Gün',     labelEn: '2 Days',     desc: 'Koku ve tat alma duyusu güçlendi',                  descEn: 'Sense of smell and taste improves',         icon: 'restaurant-outline' },
-  { id: 5,  minutes: 10080,   label: '1 Hafta',   labelEn: '1 Week',     desc: 'Kan dolaşımı iyileşti',                             descEn: 'Blood circulation improves',                icon: 'walk-outline' },
-  { id: 6,  minutes: 20160,   label: '2 Hafta',   labelEn: '2 Weeks',    desc: 'Akciğer temizlenmeye başladı',                      descEn: 'Lungs begin to clear',                      icon: 'leaf-outline' },
-  { id: 7,  minutes: 43200,   label: '1 Ay',      labelEn: '1 Month',    desc: 'Öksürük ve nefes darlığı azaldı',                   descEn: 'Cough and shortness of breath reduced',     icon: 'cloud-outline' },
-  { id: 8,  minutes: 131400,  label: '3 Ay',      labelEn: '3 Months',   desc: 'Akciğer kapasitesi arttı',                          descEn: 'Lung capacity increased',                   icon: 'fitness-outline' },
-  { id: 9,  minutes: 262800,  label: '6 Ay',      labelEn: '6 Months',   desc: 'Ciddi enfeksiyon riski düştü',                      descEn: 'Risk of serious infection reduced',         icon: 'shield-checkmark-outline' },
-  { id: 10, minutes: 525600,  label: '1 Yıl',     labelEn: '1 Year',     desc: 'Kalp krizi riski yarıya indi',                      descEn: 'Heart attack risk cut in half',             icon: 'heart-outline' },
-  { id: 11, minutes: 2628000, label: '5 Yıl',     labelEn: '5 Years',    desc: 'İnme riski sigara içmeyenlerle eşitlendi',          descEn: 'Stroke risk equals a non-smoker',           icon: 'happy-outline' },
-  { id: 12, minutes: 5256000, label: '10 Yıl',    labelEn: '10 Years',   desc: 'Akciğer kanseri riski yarıya düştü',                descEn: 'Lung cancer risk halved',                   icon: 'trophy-outline' },
-];
+import { HEALTH_MILESTONES as MILESTONES } from '../../constants/milestones';
 
 function CurrentPulse({ primaryColor }: { primaryColor: string }) {
   const anim = useRef(new Animated.Value(1)).current;
@@ -235,10 +216,10 @@ export default function ProgressScreen({ session, journey }: { session: any; jou
                       s.cardTitle,
                       { color: locked ? colors.textTertiary : colors.text },
                     ]}>
-                      {lang === 'tr' ? m.label : m.labelEn}
+                      {lang === 'tr' ? m.titleTr : m.titleEn}
                     </Text>
                     <Text style={[s.cardDesc, { color: locked ? colors.textTertiary : colors.textSecondary }]}>
-                      {lang === 'tr' ? m.desc : m.descEn}
+                      {lang === 'tr' ? m.descTr : m.descEn}
                     </Text>
                   </View>
                   {achieved && (

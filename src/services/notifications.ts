@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import { HEALTH_MILESTONES } from '../../constants/milestones';
 
 // Configure how notifications appear when app is in foreground
 Notifications.setNotificationHandler({
@@ -28,15 +29,19 @@ export async function scheduleStreakReminder(lang: 'tr' | 'en') {
     ? 'Bugün de harika gidiyorsun. Streakini koru!'
     : 'You\'re doing great today. Keep your streak going!';
 
-  // Daily at 09:00
-  await Notifications.scheduleNotificationAsync({
-    content: { title, body, data: { tag: 'streak' } },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour: 9,
-      minute: 0,
-    },
-  });
+  // Cihazın yerel saatiyle her gün 09:00 (DAILY trigger yerel saati kullanır).
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: { title, body, data: { tag: 'streak' } },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        hour: 9,
+        minute: 0,
+      },
+    });
+  } catch (e) {
+    console.warn('streak reminder schedule failed:', e);
+  }
 }
 
 export async function scheduleEveningCheckIn(lang: 'tr' | 'en') {
@@ -48,14 +53,18 @@ export async function scheduleEveningCheckIn(lang: 'tr' | 'en') {
     ? 'İstek yaşadıysan kaydet, kendine iyi bak!'
     : 'Log any cravings you had today. Take care of yourself!';
 
-  await Notifications.scheduleNotificationAsync({
-    content: { title, body, data: { tag: 'evening' } },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour: 21,
-      minute: 0,
-    },
-  });
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: { title, body, data: { tag: 'evening' } },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        hour: 21,
+        minute: 0,
+      },
+    });
+  } catch (e) {
+    console.warn('evening check-in schedule failed:', e);
+  }
 }
 
 export async function scheduleMilestoneNotification(
@@ -73,14 +82,18 @@ export async function scheduleMilestoneNotification(
     ? 'Tebrikler! Yeni bir sağlık hedefine ulaştın.'
     : 'Congratulations! You\'ve reached a new health milestone.';
 
-  await Notifications.scheduleNotificationAsync({
-    content: { title, body, data: { tag: 'milestone', label: milestoneLabel } },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-      seconds: Math.ceil(triggerMs / 1000),
-      repeats: false,
-    },
-  });
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: { title, body, data: { tag: 'milestone', label: milestoneLabel } },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: Math.ceil(triggerMs / 1000),
+        repeats: false,
+      },
+    });
+  } catch (e) {
+    console.warn('milestone schedule failed:', e);
+  }
 }
 
 export async function cancelAllNotifications() {
@@ -106,24 +119,14 @@ export async function scheduleMilestoneNotifications(
   if (Platform.OS === 'web') return;
   await cancelNotificationsByTag('milestone');
 
-  const MILESTONES = [
-    { minutes: 20,      labelTr: '20 Dakika', labelEn: '20 Minutes' },
-    { minutes: 480,     labelTr: '8 Saat',    labelEn: '8 Hours' },
-    { minutes: 1440,    labelTr: '1 Gün',     labelEn: '1 Day' },
-    { minutes: 10080,   labelTr: '1 Hafta',   labelEn: '1 Week' },
-    { minutes: 43200,   labelTr: '1 Ay',      labelEn: '1 Month' },
-    { minutes: 131400,  labelTr: '3 Ay',      labelEn: '3 Months' },
-    { minutes: 525600,  labelTr: '1 Yıl',     labelEn: '1 Year' },
-  ];
-
   const quitTime = new Date(quitDateIso).getTime();
   const now = Date.now();
 
-  for (const m of MILESTONES) {
+  for (const m of HEALTH_MILESTONES) {
     const triggerAt = quitTime + m.minutes * 60000;
     const msFromNow = triggerAt - now;
     if (msFromNow > 0) {
-      const label = lang === 'tr' ? m.labelTr : m.labelEn;
+      const label = lang === 'tr' ? m.titleTr : m.titleEn;
       await scheduleMilestoneNotification(label, msFromNow, lang);
     }
   }

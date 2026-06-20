@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  Linking, Platform, Alert, SafeAreaView, Switch, Modal, TextInput, ActivityIndicator,
+  Linking, Platform, Alert, SafeAreaView, Switch, Modal, TextInput, ActivityIndicator, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../services/supabase';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { getColors, Theme } from '../theme/Theme';
+import { haptics } from '../utils/haptics';
+import { useNavigation } from '../navigation/Navigator';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -42,7 +44,7 @@ function getMotivationLabel(key: string, l: string): string {
   return l === 'tr' ? m.tr : m.en;
 }
 
-type EditField = 'quit_date' | 'cigarettes_per_day' | 'cost_per_pack' | 'motivation';
+type EditField = 'display_name' | 'quit_date' | 'cigarettes_per_day' | 'cost_per_pack' | 'motivation';
 
 export default function ProfileScreen({
   session,
@@ -57,13 +59,21 @@ export default function ProfileScreen({
 }) {
   const { mode, isDark, toggleTheme } = useThemeMode();
   const { lang, t, setLang } = useLanguage();
+  const { navigate } = useNavigation();
   const colors = getColors(mode);
 
   const [editField, setEditField] = useState<EditField | null>(null);
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
+  const [editError, setEditError] = useState('');
 
   const openEdit = (field: EditField) => {
+    setEditError('');
+    if (field === 'display_name') {
+      setDraft(displayName === 'Kahraman' ? '' : displayName);
+      setEditField(field);
+      return;
+    }
     if (!journey) return;
     if (field === 'quit_date') {
       setDraft(new Date(journey.quit_date).toISOString().slice(0, 10));
@@ -76,11 +86,41 @@ export default function ProfileScreen({
   };
 
   const saveEdit = async () => {
-    if (!editField || !journey) return;
+    if (!editField || saving) return;
+    setEditError('');
+
+    // Ad Soyad: auth metadata + profiles (yolculuktan bağımsız kaydedilir).
+    if (editField === 'display_name') {
+      const v = draft.trim();
+      if (v.length < 2) {
+        setEditError(lang === 'tr' ? 'Lütfen geçerli bir ad gir.' : 'Please enter a valid name.');
+        haptics.error();
+        return;
+      }
+      setSaving(true);
+      const { error: e1 } = await supabase.auth.updateUser({ data: { display_name: v } });
+      await supabase.from('profiles').update({ display_name: v }).eq('id', session.user.id).then(() => {}, () => {});
+      setSaving(false);
+      if (e1) {
+        setEditError(lang === 'tr' ? 'Kaydedilemedi, tekrar dene.' : 'Could not save, please retry.');
+        haptics.error();
+        return;
+      }
+      haptics.success();
+      setEditField(null);
+      onJourneyUpdate?.();
+      return;
+    }
+
+    if (!journey) return;
     let value: any;
     if (editField === 'quit_date') {
       const d = new Date(draft);
-      if (isNaN(d.getTime())) return;
+      if (isNaN(d.getTime()) || d.getTime() > Date.now()) {
+        setEditError(lang === 'tr' ? 'Geçerli, geçmiş bir tarih gir.' : 'Enter a valid past date.');
+        haptics.error();
+        return;
+      }
       value = d.toISOString();
     } else if (editField === 'cigarettes_per_day') {
       value = Math.max(0, parseInt(draft, 10) || 0);
@@ -90,16 +130,25 @@ export default function ProfileScreen({
       value = draft;
     }
     setSaving(true);
-    await supabase.from('quit_journeys').update({ [editField]: value }).eq('id', journey.id);
+    const { error } = await supabase.from('quit_journeys').update({ [editField]: value }).eq('id', journey.id);
     setSaving(false);
+    if (error) {
+      setEditError(lang === 'tr' ? 'Kaydedilemedi, tekrar dene.' : 'Could not save, please retry.');
+      haptics.error();
+      return;
+    }
+    haptics.success();
     setEditField(null);
     onJourneyUpdate?.();
   };
 
   const stats = journey ? calcStats(journey) : { days: 0, avoided: 0, saved: 0 };
-  const displayName = session.user?.user_metadata?.display_name ?? 'Kahraman';
+  const meta = session.user?.user_metadata ?? {};
+  const displayName = meta.display_name ?? meta.full_name ?? meta.name ?? 'Kahraman';
   const email = session.user?.email ?? '';
   const initials = displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+  // Google/Apple ile giriş yapanların profil fotoğrafı (varsa) — yoksa baş harf.
+  const avatarUrl: string | undefined = meta.avatar_url ?? meta.picture;
 
   const signOut = async () => { await supabase.auth.signOut(); };
 
@@ -200,13 +249,35 @@ export default function ProfileScreen({
           </Text>
         </View>
 
-        {/* User identity — avatar with primarySoft background */}
-        <View style={s.identity}>
-          <View style={[s.avatarCircle, { backgroundColor: colors.primarySoft }]}>
-            <Text style={[s.avatarText, { color: colors.primary }]}>{initials}</Text>
-          </View>
-          <Text style={[s.displayName, { color: colors.text }]}>{displayName}</Text>
-          <Text style={[s.email, { color: colors.textSecondary }]} numberOfLines={1}>{email}</Text>
+        {/* User identity — professional horizontal account card */}
+        <View style={[s.accountCard, cardStyle]}>
+          {avatarUrl ? (
+            <Image
+              source={{ uri: avatarUrl }}
+              style={[s.avatarCircle, { borderColor: colors.primarySoft }]}
+            />
+          ) : (
+            <View style={[s.avatarCircle, { backgroundColor: colors.primarySoft, borderColor: colors.primarySoft }]}>
+              <Text style={[s.avatarText, { color: colors.primary }]}>{initials}</Text>
+            </View>
+          )}
+          <TouchableOpacity
+            style={{ flex: 1, minWidth: 0 }}
+            activeOpacity={0.6}
+            onPress={() => { haptics.tapLight(); openEdit('display_name'); }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={[s.displayName, { color: colors.text, flexShrink: 1 }]} numberOfLines={1}>{displayName}</Text>
+              <Ionicons name="pencil" size={13} color={colors.textTertiary} />
+            </View>
+            <Text style={[s.email, { color: colors.textSecondary }]} numberOfLines={1}>{email}</Text>
+          </TouchableOpacity>
+          {journey && (
+            <View style={[s.streakBadge, { backgroundColor: colors.primarySoft }]}>
+              <Text style={[s.streakNum, { color: colors.primary }]}>{stats.days}</Text>
+              <Text style={[s.streakLbl, { color: colors.primary }]}>{lang === 'tr' ? 'GÜN' : 'DAYS'}</Text>
+            </View>
+          )}
         </View>
 
         {/* Stat chips card */}
@@ -302,6 +373,19 @@ export default function ProfileScreen({
         <View style={s.section}>
           <Text style={[s.eyebrow, { color: colors.textTertiary }]}>{lang === 'tr' ? 'DESTEK' : 'SUPPORT'}</Text>
           <View style={[s.groupCard, cardStyle]}>
+            <TouchableOpacity
+              style={[s.row, { borderBottomWidth: 1, borderBottomColor: dividerColor }]}
+              onPress={() => { haptics.tapLight(); navigate('Support'); }}
+              activeOpacity={0.6}
+            >
+              <View style={well(colors.primary)}>
+                <Ionicons name="heart-circle-outline" size={20} color={colors.primary} />
+              </View>
+              <Text style={[s.rowLabel, { color: colors.text, flex: 1 }]} numberOfLines={1}>
+                {lang === 'tr' ? 'Destek Merkezi' : 'Support Center'}
+              </Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
+            </TouchableOpacity>
             {supportRows.map((row, i) => (
               <TouchableOpacity
                 key={row.label}
@@ -362,7 +446,8 @@ export default function ProfileScreen({
         <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setEditField(null)}>
           <TouchableOpacity activeOpacity={1} style={[s.modalCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={[s.modalTitle, { color: colors.text }]}>
-              {editField === 'quit_date' ? t.quitDate
+              {editField === 'display_name' ? (lang === 'tr' ? 'Ad Soyad' : 'Full name')
+                : editField === 'quit_date' ? t.quitDate
                 : editField === 'cigarettes_per_day' ? t.dailyCigs
                 : editField === 'cost_per_pack' ? t.packPrice
                 : editField === 'motivation' ? t.motivation : ''}
@@ -399,8 +484,9 @@ export default function ProfileScreen({
                   }]}
                   value={draft}
                   onChangeText={setDraft}
-                  keyboardType={editField === 'quit_date' ? 'default' : 'decimal-pad'}
-                  placeholder={editField === 'quit_date' ? 'YYYY-AA-GG' : ''}
+                  keyboardType={editField === 'cigarettes_per_day' || editField === 'cost_per_pack' ? 'decimal-pad' : 'default'}
+                  autoCapitalize={editField === 'display_name' ? 'words' : 'none'}
+                  placeholder={editField === 'display_name' ? (lang === 'tr' ? 'Adın Soyadın' : 'Your full name') : editField === 'quit_date' ? 'YYYY-AA-GG' : ''}
                   placeholderTextColor={colors.textTertiary}
                   autoFocus
                 />
@@ -410,6 +496,10 @@ export default function ProfileScreen({
                   </Text>
                 )}
               </>
+            )}
+
+            {!!editError && (
+              <Text style={{ color: colors.error, fontSize: 13, fontWeight: '600', marginTop: 12 }}>{editError}</Text>
             )}
 
             <View style={s.modalActions}>
@@ -455,19 +545,38 @@ const s = StyleSheet.create({
     fontSize: 14,
   },
 
-  // User identity
-  identity: { alignItems: 'center', marginTop: 16, marginBottom: 28 },
+  // User identity — horizontal account card
+  accountCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 16,
+    marginTop: 12,
+    marginBottom: 24,
+  },
   avatarCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
+    borderWidth: 2,
   },
-  avatarText: { fontSize: 26, fontWeight: '700', letterSpacing: -0.5 },
-  displayName: { fontSize: 22, fontWeight: '700', letterSpacing: -0.4, marginBottom: 4 },
-  email: { fontSize: 13, fontWeight: '500', maxWidth: '90%' },
+  avatarText: { fontSize: 20, fontWeight: '700', letterSpacing: -0.5 },
+  displayName: { fontSize: 18, fontWeight: '700', letterSpacing: -0.3, marginBottom: 3 },
+  email: { fontSize: 13, fontWeight: '500' },
+
+  // Streak badge (right side of account card)
+  streakBadge: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    minWidth: 52,
+  },
+  streakNum: { fontSize: 19, fontWeight: '800', letterSpacing: -0.5 },
+  streakLbl: { fontSize: 9, fontWeight: '800', letterSpacing: 0.8, marginTop: 1 },
 
   // Stat chips card
   chipsCard: {

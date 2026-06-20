@@ -7,45 +7,26 @@ import { supabase } from '../services/supabase';
 import { getColors, Theme } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-
-const TRIGGERS_TR = [
-  { key: 'stress', label: 'Stres', icon: '😰' },
-  { key: 'boredom', label: 'Sıkıntı', icon: '😑' },
-  { key: 'social', label: 'Sosyal', icon: '👥' },
-  { key: 'after_meal', label: 'Yemek Sonrası', icon: '🍽️' },
-  { key: 'coffee', label: 'Kahve', icon: '☕' },
-  { key: 'alcohol', label: 'Alkol', icon: '🍺' },
-  { key: 'habit', label: 'Alışkanlık', icon: '🔄' },
-  { key: 'emotion', label: 'Duygusal', icon: '💔' },
-  { key: 'other', label: 'Diğer', icon: '❓' },
-];
-
-const TRIGGERS_EN = [
-  { key: 'stress', label: 'Stress', icon: '😰' },
-  { key: 'boredom', label: 'Boredom', icon: '😑' },
-  { key: 'social', label: 'Social', icon: '👥' },
-  { key: 'after_meal', label: 'After Meal', icon: '🍽️' },
-  { key: 'coffee', label: 'Coffee', icon: '☕' },
-  { key: 'alcohol', label: 'Alcohol', icon: '🍺' },
-  { key: 'habit', label: 'Habit', icon: '🔄' },
-  { key: 'emotion', label: 'Emotional', icon: '💔' },
-  { key: 'other', label: 'Other', icon: '❓' },
-];
+import { TRIGGER_TYPES } from '../../constants/milestones';
+import { haptics } from '../utils/haptics';
 
 export default function CravingModal({
   session,
   journey,
   onClose,
+  onRelapse,
 }: {
   session: any;
   journey: any;
   onClose: () => void;
+  onRelapse?: () => void;
 }) {
   const { mode, isDark } = useThemeMode();
   const { lang, t } = useLanguage();
   const colors = getColors(mode);
 
-  const TRIGGERS = lang === 'tr' ? TRIGGERS_TR : TRIGGERS_EN;
+  const TRIGGERS = TRIGGER_TYPES;
+  const triggerLabel = (trig: typeof TRIGGER_TYPES[number]) => (lang === 'tr' ? trig.labelTr : trig.labelEn);
 
   const [resisted, setResisted] = useState(true);
   const [intensity, setIntensity] = useState(5);
@@ -53,20 +34,34 @@ export default function CravingModal({
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState('');
 
   const save = async () => {
+    if (saving) return; // çift dokunuşa karşı koruma
     setSaving(true);
-    await supabase.from('craving_logs').insert({
+    setError('');
+    const { error: e } = await supabase.from('craving_logs').insert({
       user_id: session.user.id,
       journey_id: journey?.id ?? null,
       intensity,
       trigger_type: trigger || null,
-      trigger_notes: notes || null,
+      // not alanını mantıklı bir uzunlukta sınırla (DB şişmesini önle)
+      trigger_notes: notes ? notes.trim().slice(0, 500) : null,
       resisted,
     });
     setSaving(false);
+    if (e) {
+      haptics.error();
+      setError(lang === 'tr' ? 'Kaydedilemedi, tekrar dene.' : 'Could not save, please retry.');
+      return;
+    }
+    resisted ? haptics.success() : haptics.warning();
     setDone(true);
-    setTimeout(onClose, 1800);
+    // "İçtim" durumunda nazik relaps kurtarma akışına yönlendir.
+    setTimeout(() => {
+      if (!resisted && onRelapse) onRelapse();
+      else onClose();
+    }, 1800);
   };
 
   // ---- palette helpers (presentation only) ----
@@ -74,7 +69,7 @@ export default function CravingModal({
   const ERROR = colors.error;
   const PRIMARY = colors.primary;
 
-  const intensityColor = (v: number) => (v <= 3 ? '#10B981' : v <= 6 ? '#F59E0B' : '#EF4444');
+  const intensityColor = (v: number) => (v <= 3 ? colors.success : v <= 6 ? colors.warning : colors.sos);
   const liveColor = intensityColor(intensity);
 
   return (
@@ -214,7 +209,7 @@ export default function CravingModal({
                     >
                       <Text style={s.chipIcon}>{trig.icon}</Text>
                       <Text style={[s.chipText, { color: active ? colors.primaryLight : colors.textSecondary }]}>
-                        {trig.label}
+                        {triggerLabel(trig)}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -235,6 +230,10 @@ export default function CravingModal({
                 numberOfLines={3}
                 textAlignVertical="top"
               />
+
+              {!!error && (
+                <Text style={[s.errorText, { color: colors.error }]}>{error}</Text>
+              )}
 
               <View style={s.btnRow}>
                 <TouchableOpacity
@@ -447,4 +446,5 @@ const s = StyleSheet.create({
     ...Platform.select({ web: { cursor: 'pointer' } as any }),
   },
   saveBtnText: { color: '#fff', fontWeight: '800', fontSize: 15.5, letterSpacing: 0.3 },
+  errorText: { fontSize: 13, fontWeight: '600', textAlign: 'center', marginTop: 16 },
 });

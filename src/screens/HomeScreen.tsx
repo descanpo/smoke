@@ -8,44 +8,10 @@ import { getColors, Theme } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useNavigation } from '../navigation/Navigator';
-
-const BADGES = [
-  { id: 'first_day',    icon: '🌟', minutesNeeded: 1440,    nameTr: 'İlk Gün',         nameEn: 'First Day',      descTr: '1 gün temiz',    descEn: '1 day clean' },
-  { id: 'one_week',     icon: '💪', minutesNeeded: 10080,   nameTr: 'İlk Hafta',       nameEn: 'First Week',     descTr: '7 gün temiz',    descEn: '7 days clean' },
-  { id: 'two_weeks',    icon: '🏃', minutesNeeded: 20160,   nameTr: '2 Hafta',         nameEn: '2 Weeks',        descTr: '14 gün temiz',   descEn: '14 days clean' },
-  { id: 'one_month',    icon: '🫁', minutesNeeded: 43200,   nameTr: 'Bir Ay',          nameEn: 'One Month',      descTr: '30 gün temiz',   descEn: '30 days clean' },
-  { id: 'three_months', icon: '🧠', minutesNeeded: 131400,  nameTr: 'Üç Ay',           nameEn: 'Three Months',   descTr: '90 gün temiz',   descEn: '90 days clean' },
-  { id: 'six_months',   icon: '🛡️', minutesNeeded: 262800,  nameTr: 'Altı Ay',         nameEn: 'Six Months',     descTr: '180 gün temiz',  descEn: '180 days clean' },
-  { id: 'one_year',     icon: '🏆', minutesNeeded: 525600,  nameTr: 'Yıllık Kahraman', nameEn: 'Year Hero',      descTr: '365 gün temiz',  descEn: '365 days clean' },
-];
-
-const HEALTH_MILESTONES = [
-  { minutes: 20, title: 'Nabız Normale Döndü', icon: 'pulse-outline' },
-  { minutes: 480, title: 'Kan Oksijeni Arttı', icon: 'water-outline' },
-  { minutes: 1440, title: 'Nikotin Vücudu Terk Etti', icon: 'sparkles-outline' },
-  { minutes: 4320, title: 'Öksürük Azaldı', icon: 'medkit-outline' },
-  { minutes: 10080, title: 'Tat ve Koku Güçlendi', icon: 'restaurant-outline' },
-  { minutes: 20160, title: '2 Hafta — Kan Dolaşımı İyileşti', icon: 'fitness-outline' },
-  { minutes: 43200, title: '1 Ay — Akciğerler Temizleniyor', icon: 'leaf-outline' },
-  { minutes: 131400, title: '3 Ay — Nefes Rahatladı', icon: 'cloud-outline' },
-  { minutes: 525600, title: '1 Yıl — Kalp Krizi Riski Yarıya İndi', icon: 'heart-outline' },
-] as const;
-
-const QUOTES_TR = [
-  'Her gün sigara içmediğin, bedenine verdiğin en büyük armağandır.',
-  'Bırakma yolculuğun, yarattığın en cesur hikayedir.',
-  'Güçlü olmak, başlamakla değil devam etmekle ölçülür.',
-  'Bugün içmediğin her sigara, yarın daha derin bir nefes almanı sağlıyor.',
-  'Sigara bırakmak bir son değil, gerçek özgürlüğün başlangıcı.',
-];
-
-const QUOTES_EN = [
-  'Every smoke-free day is the greatest gift you give to your body.',
-  'Your quitting journey is the bravest story you have ever created.',
-  'Strength is measured not by starting, but by continuing.',
-  'Every cigarette you skip today means a deeper breath tomorrow.',
-  'Quitting is not an ending — it is the start of true freedom.',
-];
+import { BADGES } from '../../constants/badges';
+import { getQuotes } from '../../constants/quotes';
+import { getNextMilestone, remainingToMilestone } from '../utils/milestones';
+import { haptics } from '../utils/haptics';
 
 // Accent constants for ProgressRing — updated to theme palette, calmer teal replaces neon cyan
 const ACCENT = '#7C3AED';   // colors.primary
@@ -59,17 +25,6 @@ function calcStats(journey: any, elapsed: number) {
   const hours = Math.floor((mins % 1440) / 60);
   const minutes = Math.floor(mins % 60);
   return { avoided, saved, days, hours, minutes };
-}
-
-function getNextMilestone(elapsed: number) {
-  const mins = elapsed / 60000;
-  const next = HEALTH_MILESTONES.find(m => m.minutes > mins);
-  const prev = [...HEALTH_MILESTONES].reverse().find(m => m.minutes <= mins);
-  if (!next) return null;
-  const progress = prev
-    ? (mins - prev.minutes) / (next.minutes - prev.minutes)
-    : mins / next.minutes;
-  return { ...next, progress: Math.min(progress, 1) };
 }
 
 function ProgressRing({ days, progress, colors, dayLabel, isDark }: {
@@ -121,18 +76,20 @@ export default function HomeScreen({
   journey,
   onLogCraving,
   onBreathing,
+  onCheckIn,
 }: {
   session: any;
   journey: any;
   onLogCraving: () => void;
   onBreathing: () => void;
+  onCheckIn?: () => void;
 }) {
   const { mode, isDark } = useThemeMode();
   const { lang, t } = useLanguage();
   const { navigate } = useNavigation();
   const colors = getColors(mode);
 
-  const quotes = lang === 'tr' ? QUOTES_TR : QUOTES_EN;
+  const quotes = getQuotes(lang);
   const [elapsed, setElapsed] = useState(0);
   const [cravingCount, setCravingCount] = useState(0);
   const [resistedCount, setResistedCount] = useState(0);
@@ -242,15 +199,7 @@ export default function HomeScreen({
     { value: stats.minutes, label: t.minute },
   ];
 
-  const remainingText = nextMs
-    ? (nextMs.minutes < 1440
-        ? `${Math.round(nextMs.minutes / 60)} ${lang === 'tr' ? 'saat' : 'hours'}`
-        : nextMs.minutes < 10080
-        ? `${Math.round(nextMs.minutes / 1440)} ${lang === 'tr' ? 'gün' : 'days'}`
-        : nextMs.minutes < 43200
-        ? `${Math.round(nextMs.minutes / 10080)} ${lang === 'tr' ? 'hafta' : 'weeks'}`
-        : `${Math.round(nextMs.minutes / 43200)} ${lang === 'tr' ? 'ay' : 'months'}`)
-    : '';
+  const remainingText = nextMs ? remainingToMilestone(nextMs, elapsed, lang) : '';
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
@@ -304,6 +253,26 @@ export default function HomeScreen({
           ))}
         </View>
 
+        {/* Panik modu — erişilebilir ama sakin (alarm değil) */}
+        <TouchableOpacity
+          style={[s.sosCard, card]}
+          onPress={() => { haptics.warning(); navigate('SOS'); }}
+          activeOpacity={0.8}
+        >
+          <View style={[s.sosIconWrap, { backgroundColor: colors.sosSoft }]}>
+            <Ionicons name="alert" size={20} color={colors.sos} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.sosTitle, { color: colors.text }]}>
+              {lang === 'tr' ? 'Şu an çok istiyorum' : 'I’m craving right now'}
+            </Text>
+            <Text style={[s.sosSub, { color: colors.textSecondary }]}>
+              {lang === 'tr' ? 'Panik modunu aç — birlikte atlatalım' : 'Open panic mode — let’s get through it'}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
+        </TouchableOpacity>
+
         {/* Stats grid */}
         <Text style={[s.eyebrow, s.sectionGap, { color: colors.textTertiary }]}>
           {lang === 'tr' ? 'GENEL BAKIŞ' : 'OVERVIEW'}
@@ -331,7 +300,7 @@ export default function HomeScreen({
               <View style={[s.milestoneIconWrap, { backgroundColor: colors.primarySoft }]}>
                 <Ionicons name={nextMs.icon as any} size={22} color={colors.primary} />
               </View>
-              <Text style={[s.milestoneName, { color: colors.text }]}>{nextMs.title}</Text>
+              <Text style={[s.milestoneName, { color: colors.text }]}>{lang === 'tr' ? nextMs.titleTr : nextMs.titleEn}</Text>
             </View>
             <View style={[s.progressTrack, { backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }]}>
               <View style={[s.progressFill, { width: `${Math.round(nextMs.progress * 100)}%` as any, backgroundColor: colors.primary }]} />
@@ -378,15 +347,29 @@ export default function HomeScreen({
 
         {/* Actions */}
         <View style={s.actionsRow}>
-          <TouchableOpacity style={s.cravingBtn} onPress={onLogCraving} activeOpacity={0.9}>
+          <TouchableOpacity style={s.cravingBtn} onPress={() => { haptics.tapMedium(); onLogCraving(); }} activeOpacity={0.9}>
             <Ionicons name="flame" size={19} color="#fff" />
             <Text style={s.cravingBtnText}>{lang === 'tr' ? 'İstek Kaydet' : 'Log Craving'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[s.breathingBtn, card]} onPress={onBreathing} activeOpacity={0.9}>
+          <TouchableOpacity style={[s.breathingBtn, card]} onPress={() => { haptics.tapMedium(); onBreathing(); }} activeOpacity={0.9}>
             <Ionicons name="leaf-outline" size={19} color={colors.text} />
             <Text style={[s.breathingBtnText, { color: colors.text }]}>{lang === 'tr' ? 'Nefes' : 'Breathe'}</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Daily check-in prompt */}
+        {onCheckIn && (
+          <TouchableOpacity style={[s.checkinCard, card]} onPress={() => { haptics.tapMedium(); onCheckIn(); }} activeOpacity={0.85}>
+            <View style={[s.checkinIcon, { backgroundColor: colors.secondary + (isDark ? '22' : '14') }]}>
+              <Ionicons name="sunny-outline" size={20} color={colors.secondary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[s.checkinTitle, { color: colors.text }]}>{lang === 'tr' ? 'Günlük check-in' : 'Daily check-in'}</Text>
+              <Text style={[s.checkinSub, { color: colors.textSecondary }]}>{lang === 'tr' ? 'Bugün nasıl hissettiğini kaydet' : 'Log how you feel today'}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+          </TouchableOpacity>
+        )}
 
         {/* Quote */}
         <View style={[s.quoteCard, card]}>
@@ -403,7 +386,7 @@ export default function HomeScreen({
 }
 
 const s = StyleSheet.create({
-  content: { padding: 20, paddingTop: 16, paddingBottom: 120 },
+  content: { padding: 20, paddingTop: 8, paddingBottom: 120 },
 
   eyebrow: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.2 },
   sectionGap: { marginTop: 28, marginBottom: 12 },
@@ -467,6 +450,22 @@ const s = StyleSheet.create({
     borderRadius: 16, paddingVertical: 16, paddingHorizontal: 22,
   },
   breathingBtnText: { fontSize: 15, fontWeight: '700' },
+
+  // Panik modu — sakin, ikincil kart (hero'nun altında, alarm değil)
+  sosCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    padding: 15, marginTop: 16,
+    ...Platform.select({ web: { cursor: 'pointer' } as any }),
+  },
+  sosIconWrap: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  sosTitle: { fontSize: 15, fontWeight: '800', letterSpacing: -0.2 },
+  sosSub: { fontSize: 12.5, marginTop: 2 },
+
+  // Check-in
+  checkinCard: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, marginTop: 28 },
+  checkinIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  checkinTitle: { fontSize: 15, fontWeight: '700', letterSpacing: -0.2 },
+  checkinSub: { fontSize: 12.5, marginTop: 2 },
 
   // Quote
   quoteCard: { padding: 20, marginTop: 28, overflow: 'hidden' },

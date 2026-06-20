@@ -7,36 +7,43 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../services/supabase';
 import { Theme, getColors } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import { haptics } from '../utils/haptics';
 
-const POST_TYPES = [
-  { key: 'all', label: 'Tümü' },
-  { key: 'motivation', label: 'Motivasyon' },
-  { key: 'milestone', label: 'Kilometre Taşı' },
-  { key: 'tip', label: 'İpucu' },
-  { key: 'story', label: 'Hikaye' },
-  { key: 'question', label: 'Soru' },
+const PAGE_SIZE = 20;
+
+const POST_TYPES: { key: string; tr: string; en: string }[] = [
+  { key: 'all', tr: 'Tümü', en: 'All' },
+  { key: 'motivation', tr: 'Motivasyon', en: 'Motivation' },
+  { key: 'milestone', tr: 'Kilometre Taşı', en: 'Milestone' },
+  { key: 'tip', tr: 'İpucu', en: 'Tip' },
+  { key: 'story', tr: 'Hikaye', en: 'Story' },
+  { key: 'question', tr: 'Soru', en: 'Question' },
 ];
 
 // Badge color keys resolved at render time from live colors
-const POST_TYPE_BADGE_KEY: Record<string, { label: string; colorKey: keyof ReturnType<typeof getColors> }> = {
-  motivation: { label: 'Motivasyon', colorKey: 'primary' },
-  milestone:  { label: 'Kilometre Taşı', colorKey: 'success' },
-  tip:        { label: 'İpucu', colorKey: 'secondary' },
-  story:      { label: 'Hikaye', colorKey: 'warning' },
-  question:   { label: 'Soru', colorKey: 'textTertiary' },
+const POST_TYPE_BADGE_KEY: Record<string, { tr: string; en: string; colorKey: keyof ReturnType<typeof getColors> }> = {
+  motivation: { tr: 'Motivasyon', en: 'Motivation', colorKey: 'primary' },
+  milestone:  { tr: 'Kilometre Taşı', en: 'Milestone', colorKey: 'success' },
+  tip:        { tr: 'İpucu', en: 'Tip', colorKey: 'secondary' },
+  story:      { tr: 'Hikaye', en: 'Story', colorKey: 'warning' },
+  question:   { tr: 'Soru', en: 'Question', colorKey: 'textTertiary' },
 };
 
-function timeAgo(iso: string) {
+function timeAgo(iso: string, lang: 'tr' | 'en') {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return 'az önce';
-  if (diff < 3600) return `${Math.floor(diff / 60)} dk önce`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} sa önce`;
-  return `${Math.floor(diff / 86400)} gün önce`;
+  const L = (tr: string, en: string) => (lang === 'tr' ? tr : en);
+  if (diff < 60) return L('az önce', 'just now');
+  if (diff < 3600) return `${Math.floor(diff / 60)} ${L('dk önce', 'min ago')}`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} ${L('sa önce', 'h ago')}`;
+  return `${Math.floor(diff / 86400)} ${L('gün önce', 'd ago')}`;
 }
 
 export default function CommunityScreen({ session, journey }: { session: any; journey: any }) {
   const { mode } = useThemeMode();
+  const { lang } = useLanguage();
   const colors = getColors(mode);
+  const L = (tr: string, en: string) => (lang === 'tr' ? tr : en);
 
   const [posts, setPosts] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -46,48 +53,68 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
   const [posting, setPosting] = useState(false);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [filterType, setFilterType] = useState('all');
+  const [limit, setLimit] = useState(PAGE_SIZE);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  useEffect(() => { fetchPosts(); }, []);
+  useEffect(() => { fetchPosts(); }, [limit]);
 
   const fetchPosts = async () => {
-    setLoading(true);
-    const { data } = await supabase.from('community_posts')
+    limit === PAGE_SIZE ? setLoading(true) : setLoadingMore(true);
+    setError(false);
+    const { data, error: e } = await supabase.from('community_posts')
       .select('*, profiles(display_name)')
       .order('created_at', { ascending: false })
-      .limit(50);
-    if (data) setPosts(data);
+      .limit(limit);
+    if (e) {
+      setError(true);
+      setLoading(false);
+      setLoadingMore(false);
+      return;
+    }
+    if (data) {
+      setPosts(data);
+      setHasMore(data.length >= limit);
+    }
     const { data: likes } = await supabase.from('post_likes')
       .select('post_id')
       .eq('user_id', session.user.id);
     if (likes) setLikedIds(new Set(likes.map((l: any) => l.post_id)));
     setLoading(false);
+    setLoadingMore(false);
   };
 
   const handleLike = async (post: any) => {
+    haptics.tapLight();
     if (likedIds.has(post.id)) {
+      setLikedIds(s => { const n = new Set(s); n.delete(post.id); return n; });
+      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, likes_count: Math.max(0, (p.likes_count ?? 0) - 1) } : p));
       await supabase.from('post_likes').delete()
         .eq('user_id', session.user.id).eq('post_id', post.id);
-      setLikedIds(s => { const n = new Set(s); n.delete(post.id); return n; });
-      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, likes_count: p.likes_count - 1 } : p));
     } else {
-      await supabase.from('post_likes').insert({ user_id: session.user.id, post_id: post.id });
       setLikedIds(s => new Set([...s, post.id]));
-      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, likes_count: p.likes_count + 1 } : p));
+      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, likes_count: (p.likes_count ?? 0) + 1 } : p));
+      await supabase.from('post_likes').insert({ user_id: session.user.id, post_id: post.id });
     }
   };
 
   const handlePost = async () => {
-    if (!content.trim()) return;
+    if (posting || !content.trim()) return; // çift gönderim koruması
     setPosting(true);
-    await supabase.from('community_posts').insert({
+    const { error: e } = await supabase.from('community_posts').insert({
       user_id: session.user.id,
       journey_id: journey?.id ?? null,
-      content: content.trim(),
+      content: content.trim().slice(0, 1000),
       post_type: type,
       is_anonymous: anon,
     });
-    setContent(''); setShowForm(false); setPosting(false);
+    setPosting(false);
+    if (e) { haptics.error(); return; }
+    haptics.success();
+    setContent(''); setShowForm(false);
+    setLimit(PAGE_SIZE);
     fetchPosts();
   };
 
@@ -100,17 +127,17 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
       {/* Header */}
       <View style={s.headerRow}>
         <View style={{ flex: 1 }}>
-          <Text style={[s.eyebrow, { color: colors.primary }]}>TOPLULUK</Text>
-          <Text style={[s.title, { color: colors.text }]}>Birlikte Güçlüyüz</Text>
-          <Text style={[s.subtitle, { color: colors.textSecondary }]}>Yolculuğunu paylaş, ilham ver</Text>
+          <Text style={[s.eyebrow, { color: colors.primary }]}>{L('TOPLULUK', 'COMMUNITY')}</Text>
+          <Text style={[s.title, { color: colors.text }]}>{L('Birlikte Güçlüyüz', 'Stronger Together')}</Text>
+          <Text style={[s.subtitle, { color: colors.textSecondary }]}>{L('Yolculuğunu paylaş, ilham ver', 'Share your journey, inspire others')}</Text>
         </View>
         <TouchableOpacity
           style={[s.shareBtn, { backgroundColor: colors.primary }, Theme.shadows.primary]}
-          onPress={() => setShowForm(true)}
+          onPress={() => { haptics.tapMedium(); setShowForm(true); }}
           activeOpacity={0.85}
         >
           <Ionicons name="add" size={20} color="#fff" />
-          <Text style={s.shareBtnText}>Paylaş</Text>
+          <Text style={s.shareBtnText}>{L('Paylaş', 'Share')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -121,17 +148,17 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
         style={s.filterScroll}
         contentContainerStyle={s.filterContent}
       >
-        {POST_TYPES.map(t => {
-          const active = filterType === t.key;
+        {POST_TYPES.map(pt => {
+          const active = filterType === pt.key;
           return (
             <TouchableOpacity
-              key={t.key}
+              key={pt.key}
               style={[
                 s.chip,
                 { borderColor: colors.border },
                 active && { backgroundColor: colors.primary, borderColor: colors.primary },
               ]}
-              onPress={() => setFilterType(t.key)}
+              onPress={() => { haptics.selection(); setFilterType(pt.key); }}
               activeOpacity={0.8}
             >
               <Text style={[
@@ -139,7 +166,7 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
                 { color: colors.textSecondary },
                 active && s.chipTextActive,
               ]}>
-                {t.label}
+                {L(pt.tr, pt.en)}
               </Text>
             </TouchableOpacity>
           );
@@ -150,32 +177,46 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator color={colors.primary} size="large" />
         </View>
+      ) : error ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 14, paddingHorizontal: 32 }}>
+          <Text style={{ color: colors.textSecondary, fontSize: 15, textAlign: 'center' }}>
+            {L('Akış yüklenemedi.', 'Could not load the feed.')}
+          </Text>
+          <TouchableOpacity
+            style={[s.emptyBtn, { backgroundColor: colors.primary }, Theme.shadows.primary]}
+            onPress={() => { setLimit(PAGE_SIZE); fetchPosts(); }}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="refresh" size={18} color="#fff" />
+            <Text style={s.emptyBtnText}>{L('Tekrar dene', 'Try again')}</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <ScrollView style={{ flex: 1 }} contentContainerStyle={s.list} showsVerticalScrollIndicator={false}>
-          <Text style={[s.sectionLabel, { color: colors.textTertiary }]}>AKIŞ</Text>
+          <Text style={[s.sectionLabel, { color: colors.textTertiary }]}>{L('AKIŞ', 'FEED')}</Text>
 
           {filteredPosts.length === 0 && (
             <View style={[s.emptyState, { backgroundColor: colors.card, borderColor: colors.border }, Theme.shadows.card]}>
               <View style={[s.emptyIconWrap, { backgroundColor: colors.primarySoft }]}>
                 <Ionicons name="people-outline" size={36} color={colors.primary} />
               </View>
-              <Text style={[s.emptyTitle, { color: colors.text }]}>Henüz paylaşım yok</Text>
+              <Text style={[s.emptyTitle, { color: colors.text }]}>{L('Henüz paylaşım yok', 'No posts yet')}</Text>
               <Text style={[s.emptyDesc, { color: colors.textTertiary }]}>
-                İlk paylaşımı sen yap ve topluluğa ilham ver.
+                {L('İlk paylaşımı sen yap ve topluluğa ilham ver.', 'Be the first to post and inspire the community.')}
               </Text>
               <TouchableOpacity
                 style={[s.emptyBtn, { backgroundColor: colors.primary }, Theme.shadows.primary]}
-                onPress={() => setShowForm(true)}
+                onPress={() => { haptics.tapMedium(); setShowForm(true); }}
                 activeOpacity={0.85}
               >
                 <Ionicons name="create-outline" size={18} color="#fff" />
-                <Text style={s.emptyBtnText}>İlk paylaşımı yap</Text>
+                <Text style={s.emptyBtnText}>{L('İlk paylaşımı yap', 'Make the first post')}</Text>
               </TouchableOpacity>
             </View>
           )}
 
           {filteredPosts.map(post => {
-            const name = post.is_anonymous ? 'Anonim' : (post.profiles?.display_name ?? 'Kullanıcı');
+            const name = post.is_anonymous ? L('Anonim', 'Anonymous') : (post.profiles?.display_name?.trim() || L('Kullanıcı', 'User'));
             const initials = post.is_anonymous ? '?' : name.charAt(0).toUpperCase();
             const badgeDef = POST_TYPE_BADGE_KEY[post.post_type];
             const badgeColor = badgeDef ? colors[badgeDef.colorKey] as string : colors.textTertiary;
@@ -192,12 +233,12 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={[s.authorName, { color: colors.text }]} numberOfLines={1}>{name}</Text>
-                    <Text style={[s.postTime, { color: colors.textTertiary }]}>{timeAgo(post.created_at)}</Text>
+                    <Text style={[s.postTime, { color: colors.textTertiary }]}>{timeAgo(post.created_at, lang)}</Text>
                   </View>
                   {badgeDef && (
                     <View style={s.badge}>
                       <View style={[s.badgeDot, { backgroundColor: badgeColor }]} />
-                      <Text style={[s.badgeText, { color: badgeColor }]}>{badgeDef.label}</Text>
+                      <Text style={[s.badgeText, { color: badgeColor }]}>{L(badgeDef.tr, badgeDef.en)}</Text>
                     </View>
                   )}
                 </View>
@@ -236,6 +277,19 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
               </View>
             );
           })}
+
+          {filterType === 'all' && hasMore && filteredPosts.length > 0 && (
+            <TouchableOpacity
+              style={[s.loadMoreBtn, { borderColor: colors.border }]}
+              onPress={() => { haptics.tapLight(); setLimit(l => l + PAGE_SIZE); }}
+              disabled={loadingMore}
+              activeOpacity={0.8}
+            >
+              {loadingMore
+                ? <ActivityIndicator color={colors.primary} size="small" />
+                : <Text style={[s.loadMoreText, { color: colors.textSecondary }]}>{L('Daha fazla yükle', 'Load more')}</Text>}
+            </TouchableOpacity>
+          )}
           <View style={{ height: 110 }} />
         </ScrollView>
       )}
@@ -253,42 +307,43 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
             onPress={() => {}}
           >
             <View style={[s.modalHandle, { backgroundColor: colors.border }]} />
-            <Text style={[s.modalTitle, { color: colors.text }]}>Yeni Paylaşım</Text>
-            <Text style={[s.modalSubtitle, { color: colors.textSecondary }]}>Düşüncelerini toplulukla paylaş</Text>
+            <Text style={[s.modalTitle, { color: colors.text }]}>{L('Yeni Paylaşım', 'New Post')}</Text>
+            <Text style={[s.modalSubtitle, { color: colors.textSecondary }]}>{L('Düşüncelerini toplulukla paylaş', 'Share your thoughts with the community')}</Text>
 
-            <Text style={[s.fieldLabel, { color: colors.textTertiary }]}>TÜR</Text>
+            <Text style={[s.fieldLabel, { color: colors.textTertiary }]}>{L('TÜR', 'TYPE')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 18 }}>
               <View style={{ flexDirection: 'row', gap: 8, paddingRight: 8 }}>
-                {POST_TYPES.filter(t => t.key !== 'all').map(t => (
+                {POST_TYPES.filter(pt => pt.key !== 'all').map(pt => (
                   <TouchableOpacity
-                    key={t.key}
+                    key={pt.key}
                     style={[
                       s.modalChip,
                       { borderColor: colors.border },
-                      type === t.key && { backgroundColor: colors.primary, borderColor: colors.primary },
+                      type === pt.key && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
-                    onPress={() => setType(t.key)}
+                    onPress={() => { haptics.selection(); setType(pt.key); }}
                     activeOpacity={0.8}
                   >
                     <Text style={[
                       s.modalChipText,
                       { color: colors.textSecondary },
-                      type === t.key && s.modalChipTextActive,
+                      type === pt.key && s.modalChipTextActive,
                     ]}>
-                      {t.label}
+                      {L(pt.tr, pt.en)}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </ScrollView>
 
-            <Text style={[s.fieldLabel, { color: colors.textTertiary }]}>MESAJIN</Text>
+            <Text style={[s.fieldLabel, { color: colors.textTertiary }]}>{L('MESAJIN', 'YOUR MESSAGE')}</Text>
             <TextInput
               style={[s.textarea, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]}
-              placeholder="Sigarasız yolculuğunu paylaş..."
+              placeholder={L('Sigarasız yolculuğunu paylaş...', 'Share your smoke-free journey...')}
               placeholderTextColor={colors.textTertiary}
               value={content}
               onChangeText={setContent}
+              maxLength={1000}
               multiline
               numberOfLines={4}
               textAlignVertical="top"
@@ -299,8 +354,8 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
                 {anon && <Ionicons name="checkmark" size={15} color="#fff" />}
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[s.anonText, { color: colors.text }]}>Anonim olarak paylaş</Text>
-                <Text style={[s.anonHint, { color: colors.textTertiary }]}>İsmin gizli kalır</Text>
+                <Text style={[s.anonText, { color: colors.text }]}>{L('Anonim olarak paylaş', 'Post anonymously')}</Text>
+                <Text style={[s.anonHint, { color: colors.textTertiary }]}>{L('İsmin gizli kalır', 'Your name stays hidden')}</Text>
               </View>
             </TouchableOpacity>
 
@@ -310,7 +365,7 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
                 onPress={() => setShowForm(false)}
                 activeOpacity={0.8}
               >
-                <Text style={[s.cancelBtnText, { color: colors.textSecondary }]}>İptal</Text>
+                <Text style={[s.cancelBtnText, { color: colors.textSecondary }]}>{L('İptal', 'Cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[s.postBtn, { backgroundColor: colors.primary }, Theme.shadows.primary, (!content.trim() || posting) && { opacity: 0.5 }]}
@@ -323,7 +378,7 @@ export default function CommunityScreen({ session, journey }: { session: any; jo
                   : (
                     <>
                       <Ionicons name="paper-plane-outline" size={17} color="#fff" />
-                      <Text style={s.postBtnText}>Paylaş</Text>
+                      <Text style={s.postBtnText}>{L('Paylaş', 'Share')}</Text>
                     </>
                   )
                 }
@@ -448,6 +503,18 @@ const s = StyleSheet.create({
     ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
   },
   emptyBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+
+  loadMoreBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: Theme.rounded.lg,
+    borderWidth: 1,
+    marginTop: 4,
+    minHeight: 48,
+    ...Platform.select({ web: { cursor: 'pointer' } as any, default: {} }),
+  },
+  loadMoreText: { fontSize: 14, fontWeight: '700' },
 
   // Post card
   postCard: {

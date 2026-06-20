@@ -12,6 +12,10 @@ import ProgressScreen from './src/screens/ProgressScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import CommunityScreen from './src/screens/CommunityScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import SOSScreen from './src/screens/SOSScreen';
+import SupportScreen from './src/screens/SupportScreen';
+import CheckInModal from './src/components/CheckInModal';
+import RelapseModal from './src/components/RelapseModal';
 import { ThemeProvider, useThemeMode } from './src/context/ThemeContext';
 import { LanguageProvider, useLanguage } from './src/context/LanguageContext';
 import {
@@ -43,6 +47,8 @@ const AppContent = () => {
   const [journey, setJourney] = useState<any>(null);
   const [showCraving, setShowCraving] = useState(false);
   const [showBreathing, setShowBreathing] = useState(false);
+  const [showCheckIn, setShowCheckIn] = useState(false);
+  const [showRelapse, setShowRelapse] = useState(false);
   const [loading, setLoading] = useState(true);
   const [initializing, setInitializing] = useState(true);
 
@@ -146,8 +152,20 @@ const AppContent = () => {
             journey={journey}
             onLogCraving={() => setShowCraving(true)}
             onBreathing={() => setShowBreathing(true)}
+            onCheckIn={() => setShowCheckIn(true)}
           />
         );
+      case 'SOS':
+        return (
+          <SOSScreen
+            session={session}
+            journey={journey}
+            onBreathing={() => setShowBreathing(true)}
+            onLogCraving={() => setShowCraving(true)}
+          />
+        );
+      case 'Support':
+        return <SupportScreen />;
       case 'Progress':
         return <ProgressScreen session={session} journey={journey} />;
       case 'Stats':
@@ -205,6 +223,7 @@ const AppContent = () => {
           session={session}
           journey={journey}
           onClose={() => setShowCraving(false)}
+          onRelapse={() => { setShowCraving(false); setShowRelapse(true); }}
         />
       </Modal>
       <Modal
@@ -217,6 +236,33 @@ const AppContent = () => {
         <BreathingModal
           session={session}
           onClose={() => setShowBreathing(false)}
+        />
+      </Modal>
+      <Modal
+        visible={showCheckIn}
+        transparent
+        animationType="slide"
+        statusBarTranslucent
+        onRequestClose={() => setShowCheckIn(false)}
+      >
+        <CheckInModal
+          session={session}
+          journey={journey}
+          onClose={() => setShowCheckIn(false)}
+        />
+      </Modal>
+      <Modal
+        visible={showRelapse}
+        transparent
+        animationType="slide"
+        statusBarTranslucent
+        onRequestClose={() => setShowRelapse(false)}
+      >
+        <RelapseModal
+          session={session}
+          journey={journey}
+          onClose={() => setShowRelapse(false)}
+          onJourneyUpdate={() => session && fetchJourney(session.user.id)}
         />
       </Modal>
     </View>

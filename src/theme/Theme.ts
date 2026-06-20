@@ -44,9 +44,15 @@ export const darkColors = {
   primaryLight: '#8B5CF6',
   primarySoft: 'rgba(124,58,237,0.14)',
   secondary: '#14B8A6',
+  secondarySoft: 'rgba(20,184,166,0.14)',
   success: '#10B981',
+  successSoft: 'rgba(16,185,129,0.14)',
   warning: '#F59E0B',
+  warningSoft: 'rgba(245,158,11,0.14)',
   error: '#F87171',
+  // SOS / panik — sakin ama net kırmızı; light/dark ortak tutulur.
+  sos: '#EF4444',
+  sosSoft: 'rgba(239,68,68,0.14)',
 };
 
 export const lightColors = {
@@ -65,9 +71,14 @@ export const lightColors = {
   primaryLight: '#8B5CF6',
   primarySoft: 'rgba(124,58,237,0.08)',
   secondary: '#0D9488',
+  secondarySoft: 'rgba(13,148,136,0.10)',
   success: '#059669',
+  successSoft: 'rgba(5,150,105,0.10)',
   warning: '#D97706',
+  warningSoft: 'rgba(217,119,6,0.10)',
   error: '#DC2626',
+  sos: '#DC2626',
+  sosSoft: 'rgba(220,38,38,0.10)',
 };
 
 export type ThemeColors = typeof darkColors;
@@ -77,6 +88,11 @@ export const getColors = (mode: 'dark' | 'light'): ThemeColors =>
 
 export const Theme = {
   colors: Colors,
+  motion: {
+    fast: 150,
+    base: 250,
+    slow: 400,
+  },
   spacing: {
     xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 48,
   },

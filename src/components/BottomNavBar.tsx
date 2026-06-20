@@ -5,6 +5,7 @@ import { useNavigation, ScreenType } from '../navigation/Navigator';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { getColors, Theme } from '../theme/Theme';
+import { haptics } from '../utils/haptics';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 type TabDef = {
@@ -39,7 +40,7 @@ export const BottomNavBar = ({ onLogCraving }: { onLogCraving?: () => void }) =>
       <TouchableOpacity
         key={tab.screen}
         style={s.tab}
-        onPress={() => navigate(tab.screen)}
+        onPress={() => { haptics.selection(); navigate(tab.screen); }}
         activeOpacity={0.7}
       >
         <View style={[s.indicator, { backgroundColor: active ? colors.primary : 'transparent' }]} />
@@ -73,7 +74,7 @@ export const BottomNavBar = ({ onLogCraving }: { onLogCraving?: () => void }) =>
         <View style={s.fabSlot}>
           <TouchableOpacity
             style={[s.fab, { backgroundColor: colors.primary, ...Theme.shadows.primary }]}
-            onPress={onLogCraving}
+            onPress={() => { haptics.tapMedium(); onLogCraving?.(); }}
             activeOpacity={0.9}
           >
             <Ionicons name="add" size={30} color="#fff" />

@@ -8,7 +8,9 @@ export type ScreenType =
   | 'Progress'
   | 'Stats'
   | 'Community'
-  | 'Profile';
+  | 'Profile'
+  | 'SOS'
+  | 'Support';
 
 interface NavigationContextType {
   currentScreen: ScreenType;

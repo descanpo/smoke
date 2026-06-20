@@ -6,6 +6,7 @@ import { getColors, Theme } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useNavigation } from '../navigation/Navigator';
+import { StateView } from '../components/ui';
 
 const TRIGGER_LABELS: Record<string, { label: string; labelEn: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
   stress:     { label: 'Stres',         labelEn: 'Stress',       icon: 'thunderstorm-outline', color: '#F43F5E' },
@@ -61,20 +62,34 @@ export default function StatsScreen({ session, journey }: { session: any; journe
   const [resistedCravings, setResistedCravings] = useState(0);
   const [longestStreak, setLongestStreak] = useState(0);
   const [cleanDays, setCleanDays] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (!session?.user?.id || !journey?.id) return;
-    fetchAllData();
-    fetchTriggers();
+    load();
   }, [session?.user?.id, journey?.id]);
 
+  const load = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      await Promise.all([fetchAllData(), fetchTriggers()]);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchAllData = async () => {
-    const { data: allLogs } = await supabase
+    const { data: allLogs, error: e } = await supabase
       .from('craving_logs')
       .select('created_at, resisted')
       .eq('journey_id', journey.id)
       .order('created_at', { ascending: true });
 
+    if (e) throw e;
     if (allLogs) {
       setTotalCravings(allLogs.length);
       setResistedCravings(allLogs.filter((l: any) => l.resisted).length);
@@ -120,10 +135,11 @@ export default function StatsScreen({ session, journey }: { session: any; journe
   };
 
   const fetchTriggers = async () => {
-    const { data } = await supabase.from('craving_logs')
+    const { data, error: e } = await supabase.from('craving_logs')
       .select('trigger_type')
       .eq('journey_id', journey.id)
       .not('trigger_type', 'is', null);
+    if (e) throw e;
     if (!data) return;
     const counts: Record<string, number> = {};
     data.forEach((c: any) => {
@@ -220,6 +236,7 @@ export default function StatsScreen({ session, journey }: { session: any; journe
           </TouchableOpacity>
         </View>
 
+        <StateView loading={loading} error={error} onRetry={load}>
         {/* Weekly Bar Chart */}
         <View style={[cardStyle, s.chartCard]}>
           <View style={s.cardHead}>
@@ -335,6 +352,7 @@ export default function StatsScreen({ session, journey }: { session: any; journe
             </Text>
           </View>
         )}
+        </StateView>
       </ScrollView>
     </SafeAreaView>
   );

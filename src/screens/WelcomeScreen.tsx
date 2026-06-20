@@ -69,6 +69,24 @@ export default function WelcomeScreen() {
     setLoading(false);
   };
 
+  const handleForgotPassword = async () => {
+    setError(''); setSuccess('');
+    if (!email.trim()) {
+      setError(lang === 'tr'
+        ? 'Önce e-posta adresini gir, sonra sıfırlama bağlantısı gönderelim.'
+        : 'Enter your email first, then we’ll send a reset link.');
+      return;
+    }
+    setLoading(true);
+    const redirectTo = Platform.OS === 'web' ? (window as any).location.origin : 'smoke://auth/callback';
+    const { error: e } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo });
+    setLoading(false);
+    if (e) { setError(e.message); return; }
+    setSuccess(lang === 'tr'
+      ? 'Şifre sıfırlama bağlantısı e-postana gönderildi.'
+      : 'A password reset link has been sent to your email.');
+  };
+
   const handleGoogleSignIn = async () => {
     setError(''); setGoogleLoading(true);
     const redirectTo = Platform.OS === 'web'
@@ -252,7 +270,7 @@ export default function WelcomeScreen() {
             </View>
 
             {isLogin && (
-              <TouchableOpacity activeOpacity={0.7} style={{ alignSelf: 'flex-end' }}>
+              <TouchableOpacity activeOpacity={0.7} style={{ alignSelf: 'flex-end' }} onPress={handleForgotPassword} disabled={loading}>
                 <Text style={[s.forgotText, { color: colors.primary }]}>{t.forgotPassword}</Text>
               </TouchableOpacity>
             )}

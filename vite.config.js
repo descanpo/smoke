@@ -1,13 +1,35 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv, transformWithEsbuild } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
+
+// RN/Expo paketleri (.js içinde JSX taşıyan) production build'inde rollup'ın
+// commonjs çözücüsü JSX'i ayrıştıramıyor. Bu plugin, ilgili node_modules
+// dosyalarını commonjs'ten ÖNCE (enforce:'pre') esbuild ile JSX olarak
+// dönüştürür; böylece downstream yalnızca düz JS görür.
+const RN_JSX_IN_JS = /node_modules[\\/](@expo[\\/]vector-icons|react-native-vector-icons)[\\/].*\.js$/;
+function rnJsxInJsPlugin() {
+  return {
+    name: 'rn-jsx-in-js',
+    enforce: 'pre',
+    async transform(code, id) {
+      if (RN_JSX_IN_JS.test(id)) {
+        return transformWithEsbuild(code, id, { loader: 'jsx', jsx: 'transform' });
+      }
+      return null;
+    },
+  };
+}
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
-    plugins: [react()],
+    plugins: [rnJsxInJsPlugin(), react()],
     envPrefix: ['VITE_', 'EXPO_PUBLIC_'],
     resolve: {
       alias: {
+        // @react-native/assets-registry/registry Flow sözdizimi taşır ve
+        // esbuild/rollup altında ayrıştırılamaz; Flow'suz shim'e yönlendir.
+        '@react-native/assets-registry/registry': path.resolve(__dirname, 'shims/assets-registry.js'),
         'react-native': 'react-native-web',
       },
       extensions: [
@@ -28,6 +50,11 @@ export default defineConfig(({ mode }) => {
     },
     optimizeDeps: {
       entries: ['index.html'],
+      // Bağımlılık ön-paketlemesinde de .js dosyalarını JSX olarak çöz.
+      esbuildOptions: {
+        loader: { '.js': 'jsx' },
+        resolveExtensions: ['.web.js', '.web.ts', '.web.tsx', '.js', '.ts', '.tsx', '.jsx'],
+      },
     },
     server: {
       port: 3000,

@@ -6,6 +6,7 @@ import { supabase } from '../services/supabase';
 import { getColors, Theme } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { haptics } from '../utils/haptics';
 
 const EXERCISES_TR = [
   {
@@ -122,7 +123,8 @@ export default function BreathingModal({
     if (running) {
       Animated.timing(circleAnim, {
         toValue: phaseIdx === 0 ? 1 : 0,
-        duration: (phase?.dur ?? 4) * 900,
+        // Animasyon süresi, geri sayım tick'i (1sn) ile birebir eşleşir.
+        duration: (phase?.dur ?? 4) * 1000,
         useNativeDriver: false,
       }).start();
     }
@@ -152,6 +154,7 @@ export default function BreathingModal({
   };
 
   const start = () => {
+    haptics.tapMedium();
     setRunning(true);
     setDone(false);
     setPhaseIdx(0);
@@ -169,15 +172,16 @@ export default function BreathingModal({
   const complete = async () => {
     setRunning(false);
     setDone(true);
+    haptics.success();
     const dur = Math.round((Date.now() - startRef.current) / 1000);
-    try {
-      await supabase.from('breathing_exercise_logs').insert({
-        user_id: session.user.id,
-        exercise_type: ex.key,
-        duration_seconds: dur,
-        completed: true,
-      });
-    } catch {}
+    const { error } = await supabase.from('breathing_exercise_logs').insert({
+      user_id: session.user.id,
+      exercise_type: ex.key,
+      duration_seconds: dur,
+      completed: true,
+    });
+    // Egzersiz kaydı kritik değil; akışı bozmadan logla.
+    if (error) console.warn('breathing log failed:', error.message);
   };
 
   const circleSize = circleAnim.interpolate({
