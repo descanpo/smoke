@@ -70,9 +70,9 @@ function DateField({
       style: {
         width: '100%',
         boxSizing: 'border-box',
-        backgroundColor: colors.card,
+        backgroundColor: colors.background,
         borderRadius: 14,
-        border: `1px solid ${colors.border}`,
+        border: `1.5px solid ${colors.border}`,
         padding: '13px 16px',
         fontSize: 16,
         fontWeight: 600,
@@ -89,7 +89,7 @@ function DateField({
       <Ionicons name="calendar-outline" size={18} color={colors.textTertiary} style={{ position: 'absolute', left: 16, zIndex: 1 }} />
       <TextInput
         style={{
-          backgroundColor: colors.card, borderRadius: 14, borderWidth: 1,
+          backgroundColor: colors.background, borderRadius: 14, borderWidth: 1.5,
           borderColor: focused === focusKey ? colors.primary : colors.border,
           paddingHorizontal: 16, paddingVertical: 14, paddingLeft: 44,
           fontSize: 16, color: colors.text,
@@ -220,9 +220,9 @@ export default function OnboardingScreen({
 
   // ---- shared styles ----
   const inputStyle = (key: string) => ({
-    backgroundColor: colors.card,
+    backgroundColor: colors.background,
     borderRadius: 14,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: focused === key ? colors.primary : colors.border,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -251,14 +251,22 @@ export default function OnboardingScreen({
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <ScrollView contentContainerStyle={[s.content, { justifyContent: 'center', flexGrow: 1 }]} showsVerticalScrollIndicator={false}>
-          <View style={s.introMark}>
-            <Text style={{ fontSize: 40 }}>🚭</Text>
+          {/* Brand chip */}
+          <View style={s.brandRow}>
+            <View style={[s.brandMark, { backgroundColor: colors.primarySoft, borderColor: colors.border }]}>
+              <Text style={{ fontSize: 20 }}>🚭</Text>
+            </View>
+            <Text style={[s.brandName, { color: colors.text }]}>{t.appName}</Text>
           </View>
-          <View style={[s.iconBadge, { backgroundColor: colors.primary + '14', alignSelf: 'center', marginTop: 12 }]}>
-            <Ionicons name={s0.icon} size={28} color={colors.primary} />
+
+          {/* Hero slide */}
+          <View style={s.introHero}>
+            <View style={[s.introIcon, { backgroundColor: colors.primarySoft, borderColor: colors.primary + '22' }]}>
+              <Ionicons name={s0.icon} size={36} color={colors.primary} />
+            </View>
+            <Text style={[s.introTitle, { color: colors.text }]}>{s0.title}</Text>
+            <Text style={[s.introDesc, { color: colors.textSecondary }]}>{s0.desc}</Text>
           </View>
-          <Text style={[s.introTitle, { color: colors.text }]}>{s0.title}</Text>
-          <Text style={[s.introDesc, { color: colors.textSecondary }]}>{s0.desc}</Text>
 
           <View style={s.dots}>
             {SLIDES.map((_, i) => (
@@ -318,7 +326,7 @@ export default function OnboardingScreen({
 
         {/* Card */}
         <View style={[s.card, { backgroundColor: colors.card, borderColor: colors.border, ...Theme.shadows.card }]}>
-          <View style={[s.iconBadge, { backgroundColor: colors.primary + '14' }]}>
+          <View style={[s.iconBadge, { backgroundColor: colors.primarySoft }]}>
             <Ionicons name={meta.icon} size={26} color={colors.primary} />
           </View>
           <Text style={[s.stepTitle, { color: colors.text }]}>{meta.title}</Text>
@@ -614,14 +622,20 @@ const s = StyleSheet.create({
   content: { padding: 24, paddingTop: 64, paddingBottom: 60, maxWidth: 540, width: '100%', alignSelf: 'center' },
 
   // Intro
-  introMark: {
-    width: 84, height: 84, borderRadius: 26, alignSelf: 'center',
-    backgroundColor: 'rgba(124,58,237,0.14)', alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: 'rgba(124,58,237,0.22)',
+  brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 40 },
+  brandMark: {
+    width: 38, height: 38, borderRadius: 12,
+    alignItems: 'center', justifyContent: 'center', borderWidth: 1,
   },
-  introTitle: { fontSize: 26, fontWeight: '800', letterSpacing: -0.4, textAlign: 'center', marginTop: 24, lineHeight: 32 },
+  brandName: { fontSize: 20, fontWeight: '800', letterSpacing: 0.5 },
+  introHero: { alignItems: 'center' },
+  introIcon: {
+    width: 88, height: 88, borderRadius: 28, alignSelf: 'center',
+    alignItems: 'center', justifyContent: 'center', borderWidth: 1,
+  },
+  introTitle: { fontSize: 26, fontWeight: '800', letterSpacing: -0.4, textAlign: 'center', marginTop: 28, lineHeight: 32 },
   introDesc: { fontSize: 15, lineHeight: 22, textAlign: 'center', marginTop: 12, paddingHorizontal: 8 },
-  dots: { flexDirection: 'row', gap: 8, alignSelf: 'center', marginVertical: 30 },
+  dots: { flexDirection: 'row', gap: 8, alignSelf: 'center', marginVertical: 32 },
   dot: { height: 8, borderRadius: 4 },
 
   // Header
