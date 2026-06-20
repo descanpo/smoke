@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Linking, Image,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../services/supabase';
 import { Theme, getColors } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
@@ -110,19 +111,13 @@ export default function WelcomeScreen() {
     }
   };
 
-  const inputBase = {
-    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-    borderRadius: 14,
-    borderWidth: 1.5,
-    paddingHorizontal: 16,
-    paddingVertical: 13,
-    fontSize: 15,
-    color: colors.text,
-    ...Platform.select({ web: { outlineStyle: 'none' } as any }),
-  };
-  const borderFor = (key: string) => ({
-    borderColor: focused === key ? colors.primary : colors.border,
-  });
+  const wrapStyle = (key: string) => [
+    s.inputWrap,
+    {
+      backgroundColor: focused === key ? colors.cardElevated : colors.surface,
+      borderColor: focused === key ? colors.primary : colors.border,
+    },
+  ];
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.background }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -155,25 +150,25 @@ export default function WelcomeScreen() {
       >
         {/* Brand */}
         <View style={s.brand}>
-          <View style={s.logoMark}>
+          <View style={[s.logoMark, { backgroundColor: colors.primarySoft, borderColor: colors.border }]}>
             <Text style={s.logoEmoji}>🚭</Text>
           </View>
           <Text style={[s.appName, { color: colors.text }]}>{t.appName}</Text>
           <Text style={[s.tagline, { color: colors.textSecondary }]}>{t.appTagline}</Text>
         </View>
 
-        {/* Auth card */}
-        <View style={[s.card, {
-          backgroundColor: colors.card,
-          borderColor: colors.border,
-        }]}>
-          <Text style={[s.cardTitle, { color: colors.text }]}>
+        {/* Heading (outside the card for a calmer hierarchy) */}
+        <View style={s.heading}>
+          <Text style={[s.headingTitle, { color: colors.text }]}>
             {isLogin ? t.welcomeBack : t.createAccountTitle}
           </Text>
-          <Text style={[s.cardSubtitle, { color: colors.textTertiary }]}>
+          <Text style={[s.headingSubtitle, { color: colors.textTertiary }]}>
             {isLogin ? t.loginSubtitle : t.registerSubtitle}
           </Text>
+        </View>
 
+        {/* Auth card */}
+        <View style={[s.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           {/* Segmented toggle */}
           <View style={[s.segment, {
             backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
@@ -183,11 +178,11 @@ export default function WelcomeScreen() {
               return (
                 <TouchableOpacity
                   key={m}
-                  style={[s.segmentBtn, active && { backgroundColor: colors.primary }]}
+                  style={[s.segmentBtn, active && [{ backgroundColor: colors.card }, Theme.shadows.soft]]}
                   onPress={() => { setAuthMode(m); setError(''); setSuccess(''); }}
                   activeOpacity={0.85}
                 >
-                  <Text style={[s.segmentText, { color: active ? '#fff' : colors.textSecondary }]}>
+                  <Text style={[s.segmentText, { color: active ? colors.primary : colors.textSecondary }]}>
                     {m === 'login' ? t.signIn : t.signUp}
                   </Text>
                 </TouchableOpacity>
@@ -195,91 +190,84 @@ export default function WelcomeScreen() {
             })}
           </View>
 
-          {/* Google */}
-          <TouchableOpacity
-            style={s.googleBtn}
-            onPress={handleGoogleSignIn}
-            disabled={googleLoading}
-            activeOpacity={0.9}
-          >
-            {googleLoading ? (
-              <ActivityIndicator color="#1a1a1a" size="small" />
-            ) : (
-              <>
-                <Image source={{ uri: GOOGLE_LOGO }} style={s.googleLogo} resizeMode="contain" />
-                <Text style={s.googleBtnText}>{t.continueWithGoogle}</Text>
-              </>
-            )}
-          </TouchableOpacity>
-
-          {/* Divider */}
-          <View style={s.divider}>
-            <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
-            <Text style={[s.dividerText, { color: colors.textTertiary }]}>{t.or}</Text>
-            <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
-          </View>
-
           {/* Form */}
           <View style={s.form}>
             {!isLogin && (
-              <TextInput
-                style={[inputBase, borderFor('name')]}
-                placeholder={t.fullName}
-                placeholderTextColor={colors.textTertiary}
-                value={displayName}
-                onChangeText={setDisplayName}
-                onFocus={() => setFocused('name')}
-                onBlur={() => setFocused(null)}
-                autoCapitalize="words"
-              />
+              <View style={s.fieldGroup}>
+                <Text style={[s.fieldLabel, { color: colors.textSecondary }]}>{t.fullName}</Text>
+                <View style={wrapStyle('name')}>
+                  <TextInput
+                    style={[s.input, { color: colors.text }]}
+                    placeholder={t.fullName}
+                    placeholderTextColor={colors.textTertiary}
+                    value={displayName}
+                    onChangeText={setDisplayName}
+                    onFocus={() => setFocused('name')}
+                    onBlur={() => setFocused(null)}
+                    autoCapitalize="words"
+                  />
+                </View>
+              </View>
             )}
 
-            <TextInput
-              style={[inputBase, borderFor('email')]}
-              placeholder={t.email}
-              placeholderTextColor={colors.textTertiary}
-              value={email}
-              onChangeText={setEmail}
-              onFocus={() => setFocused('email')}
-              onBlur={() => setFocused(null)}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-            />
-
-            <View style={s.passwordWrap}>
-              <TextInput
-                style={[inputBase, borderFor('password'), { paddingRight: 64 }]}
-                placeholder={t.password}
-                placeholderTextColor={colors.textTertiary}
-                value={password}
-                onChangeText={setPassword}
-                onFocus={() => setFocused('password')}
-                onBlur={() => setFocused(null)}
-                secureTextEntry={!showPassword}
-              />
-              <TouchableOpacity
-                style={s.eyeBtn}
-                onPress={() => setShowPassword(v => !v)}
-                activeOpacity={0.7}
-              >
-                <Text style={[s.eyeText, { color: colors.primary }]}>
-                  {showPassword ? t.hide : t.show}
-                </Text>
-              </TouchableOpacity>
+            <View style={s.fieldGroup}>
+              <Text style={[s.fieldLabel, { color: colors.textSecondary }]}>{t.email}</Text>
+              <View style={wrapStyle('email')}>
+                <TextInput
+                  style={[s.input, { color: colors.text }]}
+                  placeholder="ornek@email.com"
+                  placeholderTextColor={colors.textTertiary}
+                  value={email}
+                  onChangeText={setEmail}
+                  onFocus={() => setFocused('email')}
+                  onBlur={() => setFocused(null)}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                />
+              </View>
             </View>
 
-            {isLogin && (
-              <TouchableOpacity activeOpacity={0.7} style={{ alignSelf: 'flex-end' }} onPress={handleForgotPassword} disabled={loading}>
-                <Text style={[s.forgotText, { color: colors.primary }]}>{t.forgotPassword}</Text>
-              </TouchableOpacity>
-            )}
+            <View style={s.fieldGroup}>
+              <View style={s.labelRow}>
+                <Text style={[s.fieldLabel, { color: colors.textSecondary }]}>{t.password}</Text>
+                {isLogin && (
+                  <TouchableOpacity activeOpacity={0.7} onPress={handleForgotPassword} disabled={loading}>
+                    <Text style={[s.forgotText, { color: colors.primary }]}>{t.forgotPassword}</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <View style={[wrapStyle('password'), s.passwordWrap]}>
+                <TextInput
+                  style={[s.input, { color: colors.text, flex: 1 }]}
+                  placeholder="••••••••"
+                  placeholderTextColor={colors.textTertiary}
+                  value={password}
+                  onChangeText={setPassword}
+                  onFocus={() => setFocused('password')}
+                  onBlur={() => setFocused(null)}
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity
+                  style={s.eyeBtn}
+                  onPress={() => setShowPassword(v => !v)}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={colors.textTertiary}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
 
             {!!error && <Text style={[s.errorText, { color: colors.error }]}>{error}</Text>}
             {!!success && <Text style={[s.successText, { color: colors.success }]}>{success}</Text>}
 
             <TouchableOpacity
-              style={s.submitBtn}
+              style={[s.submitBtn, { backgroundColor: colors.primary }]}
               onPress={handleSubmit}
               disabled={loading}
               activeOpacity={0.9}
@@ -288,8 +276,32 @@ export default function WelcomeScreen() {
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text style={s.submitBtnText}>
-                  {isLogin ? `${t.signIn} →` : `${t.createAccount} →`}
+                  {isLogin ? t.signIn : t.createAccount}
                 </Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Divider */}
+            <View style={s.divider}>
+              <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
+              <Text style={[s.dividerText, { color: colors.textTertiary }]}>{t.or}</Text>
+              <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
+            </View>
+
+            {/* Google */}
+            <TouchableOpacity
+              style={[s.googleBtn, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
+              onPress={handleGoogleSignIn}
+              disabled={googleLoading}
+              activeOpacity={0.9}
+            >
+              {googleLoading ? (
+                <ActivityIndicator color={colors.text} size="small" />
+              ) : (
+                <>
+                  <Image source={{ uri: GOOGLE_LOGO }} style={s.googleLogo} resizeMode="contain" />
+                  <Text style={[s.googleBtnText, { color: colors.text }]}>{t.continueWithGoogle}</Text>
+                </>
               )}
             </TouchableOpacity>
           </View>
@@ -327,34 +339,72 @@ const s = StyleSheet.create({
   },
 
   // Brand
-  brand: { alignItems: 'center', marginBottom: 28 },
+  brand: { alignItems: 'center', marginBottom: 24 },
   logoMark: {
-    width: 76, height: 76, borderRadius: 24,
-    backgroundColor: 'rgba(124,58,237,0.14)',
+    width: 72, height: 72, borderRadius: 22,
     alignItems: 'center', justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
     borderWidth: 1,
-    borderColor: 'rgba(124,58,237,0.20)',
     ...Theme.shadows.soft,
   },
-  logoEmoji: { fontSize: 36 },
-  appName: { fontSize: 34, fontWeight: '800', letterSpacing: 1, marginBottom: 4 },
+  logoEmoji: { fontSize: 34 },
+  appName: { fontSize: 30, fontWeight: '800', letterSpacing: 0.5, marginBottom: 2 },
   tagline: { fontSize: 13, textAlign: 'center' },
+
+  // Heading
+  heading: { marginBottom: 18 },
+  headingTitle: { fontSize: 24, fontWeight: '800', letterSpacing: -0.4, textAlign: 'center' },
+  headingSubtitle: { fontSize: 14, marginTop: 6, textAlign: 'center', lineHeight: 20 },
 
   // Card
   card: {
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 1,
-    padding: 22,
+    padding: 20,
     ...Theme.shadows.card,
   },
-  cardTitle: { fontSize: 21, fontWeight: '800', letterSpacing: -0.3 },
-  cardSubtitle: { fontSize: 13, marginTop: 4, marginBottom: 18 },
 
   // Segmented control
-  segment: { flexDirection: 'row', borderRadius: 13, padding: 4, marginBottom: 16 },
-  segmentBtn: { flex: 1, paddingVertical: 9, borderRadius: 10, alignItems: 'center' },
+  segment: { flexDirection: 'row', borderRadius: 13, padding: 4, marginBottom: 20 },
+  segmentBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
   segmentText: { fontSize: 14, fontWeight: '700' },
+
+  // Form
+  form: { gap: 16 },
+  fieldGroup: { gap: 8 },
+  labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  fieldLabel: { fontSize: 13, fontWeight: '600', marginLeft: 2 },
+  inputWrap: {
+    borderRadius: 14,
+    borderWidth: 1.5,
+    paddingHorizontal: 16,
+    height: 52,
+    justifyContent: 'center',
+  },
+  input: {
+    fontSize: 15,
+    paddingVertical: 0,
+    ...Platform.select({ web: { outlineStyle: 'none' } as any }),
+  },
+  passwordWrap: { flexDirection: 'row', alignItems: 'center' },
+  eyeBtn: { paddingLeft: 10 },
+  forgotText: { fontSize: 12.5, fontWeight: '600' },
+  errorText: { fontSize: 13, textAlign: 'center', fontWeight: '500', marginTop: -2 },
+  successText: { fontSize: 13, textAlign: 'center', fontWeight: '500', marginTop: -2 },
+
+  submitBtn: {
+    borderRadius: 14,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginTop: 4,
+    ...Theme.shadows.primary,
+  },
+  submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '800', letterSpacing: 0.3 },
+
+  // Divider
+  divider: { flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 2 },
+  dividerLine: { flex: 1, height: 1 },
+  dividerText: { fontSize: 12, fontWeight: '500' },
 
   // Google
   googleBtn: {
@@ -362,40 +412,13 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    backgroundColor: '#ffffff',
     borderRadius: 14,
-    paddingVertical: 13,
-    ...Platform.select({
-      web: { cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,0,0,0.12)' } as any,
-      default: { shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 3 },
-    }),
+    borderWidth: 1,
+    paddingVertical: 14,
+    ...Platform.select({ web: { cursor: 'pointer' } as any }),
   },
   googleLogo: { width: 18, height: 18 },
-  googleBtnText: { fontSize: 15, fontWeight: '700', color: '#1f1f1f' },
-
-  // Divider
-  divider: { flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 16 },
-  dividerLine: { flex: 1, height: 1 },
-  dividerText: { fontSize: 12, fontWeight: '500' },
-
-  // Form
-  form: { gap: 12 },
-  passwordWrap: { position: 'relative', justifyContent: 'center' },
-  eyeBtn: { position: 'absolute', right: 14, paddingVertical: 4, paddingHorizontal: 4 },
-  eyeText: { fontSize: 12, fontWeight: '700' },
-  forgotText: { fontSize: 12.5, fontWeight: '600', marginTop: -2 },
-  errorText: { fontSize: 13, textAlign: 'center', fontWeight: '500' },
-  successText: { fontSize: 13, textAlign: 'center', fontWeight: '500' },
-
-  submitBtn: {
-    borderRadius: 14,
-    paddingVertical: 15,
-    alignItems: 'center',
-    marginTop: 2,
-    backgroundColor: Theme.colors.primary,
-    ...Theme.shadows.primary,
-  },
-  submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '800', letterSpacing: 0.3 },
+  googleBtnText: { fontSize: 15, fontWeight: '700' },
 
   legal: { textAlign: 'center', fontSize: 11, lineHeight: 17, marginTop: 22 },
 });
