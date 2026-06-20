@@ -41,6 +41,11 @@ const AppContent = () => {
   const { currentScreen, navigate, reset } = useNavigation();
   const currentScreenRef = React.useRef(currentScreen);
   useEffect(() => { currentScreenRef.current = currentScreen; }, [currentScreen]);
+  // Hangi kullanıcının yolculuğunu zaten yüklediğimizi tutar. Supabase, başka bir
+  // sekmeye geçip dönünce (visibility/focus) onAuthStateChange'i SIGNED_IN /
+  // TOKEN_REFRESHED ile yeniden tetikler; aynı kullanıcı için tekrar fetch +
+  // tam ekran yükleyici göstermeyip "refresh atıyor" hissini önlemek için kullanılır.
+  const loadedUserIdRef = React.useRef<string | null>(null);
   const { isDark } = useThemeMode();
   const { lang } = useLanguage();
   const [session, setSession] = useState<any>(null);
@@ -56,6 +61,7 @@ const AppContent = () => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
       if (s) {
+        loadedUserIdRef.current = s.user.id;
         fetchJourney(s.user.id);
       } else {
         setLoading(false);
@@ -65,20 +71,24 @@ const AppContent = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
-      if (s) {
-        // Don't re-navigate if already on a main screen (avoids stale closure nav bug)
-        const TAB_SCREENS_SET = new Set(TAB_SCREENS);
-        if (!TAB_SCREENS_SET.has(currentScreenRef.current)) {
-          fetchJourney(s.user.id);
-        } else if (event === 'SIGNED_IN') {
-          fetchJourney(s.user.id);
-        }
-        // For TOKEN_REFRESHED, just silently update the session, no navigation
-      } else {
+
+      if (!s) {
+        // Çıkış yapıldı
+        loadedUserIdRef.current = null;
         cancelAllNotifications();
         setJourney(null);
         setLoading(false);
         reset('Welcome');
+        return;
+      }
+
+      // Yalnızca GERÇEKTEN yeni bir kullanıcı giriş yaptığında yolculuğu yükle
+      // (yükleyici + yönlendirme). Aynı kullanıcı için tekrarlanan SIGNED_IN
+      // (sekme yeniden odaklanması) veya TOKEN_REFRESHED / USER_UPDATED olaylarında
+      // sadece oturumu sessizce güncelle — yeniden fetch yok, yükleyici flaşı yok.
+      if (s.user.id !== loadedUserIdRef.current) {
+        loadedUserIdRef.current = s.user.id;
+        fetchJourney(s.user.id);
       }
     });
 
