@@ -109,6 +109,14 @@ export const Theme = {
     caption: { fontSize: 12, fontWeight: '500' as const, letterSpacing: 0.2 },
     label: { fontSize: 13, fontWeight: '600' as const },
   },
+  // Yeniden kullanılabilir gradyanlar (expo-linear-gradient `colors` prop'u için tuple).
+  gradients: {
+    brand: ['#8B5CF6', '#7C3AED'] as [string, string],
+    brandTeal: ['#8B5CF6', '#14B8A6'] as [string, string],
+    auroraDark: ['#1B1530', '#0D0E12'] as [string, string],
+    auroraLight: ['#EEF0FF', '#F7F8FA'] as [string, string],
+    glow: ['rgba(124,58,237,0.30)', 'rgba(124,58,237,0)'] as [string, string],
+  },
   // Nötr, yumuşak gölgeler — neon glow yok.
   shadows: {
     soft: Platform.select({

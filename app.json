@@ -14,7 +14,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.descanpo.smoke"
+      "bundleIdentifier": "com.descanpo.smoke",
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {
@@ -39,7 +40,8 @@
           "color": "#6C63FF"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-apple-authentication"
     ]
   }
 }

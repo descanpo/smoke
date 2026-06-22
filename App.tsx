@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, StatusBar, Modal, Platform, ActivityIndicator } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { supabase } from './src/services/supabase';
+import { Theme } from './src/theme/Theme';
 import { NavigationProvider, useNavigation, ScreenType } from './src/navigation/Navigator';
 import { BottomNavBar } from './src/components/BottomNavBar';
 import CravingModal from './src/components/CravingModal';
@@ -29,12 +31,20 @@ import {
 const TAB_SCREENS: ScreenType[] = ['Home', 'Progress', 'Stats', 'Community', 'Profile'];
 
 const LoadingScreen = ({ isDark }: { isDark: boolean }) => (
-  <View style={[s.loading, { backgroundColor: isDark ? '#0D0E12' : '#F7F8FA' }]}>
-    <View style={s.loadingMark}>
-      <Text style={{ fontSize: 34 }}>🚭</Text>
-    </View>
-    <ActivityIndicator color="#8B5CF6" style={{ marginTop: 20 }} />
-  </View>
+  <LinearGradient
+    colors={isDark ? Theme.gradients.auroraDark : Theme.gradients.auroraLight}
+    style={s.loading}
+  >
+    <LinearGradient
+      colors={Theme.gradients.brandTeal}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={s.loadingMark}
+    >
+      <Text style={{ fontSize: 38 }}>🚭</Text>
+    </LinearGradient>
+    <ActivityIndicator color={isDark ? '#8B5CF6' : '#7C3AED'} style={{ marginTop: 24 }} />
+  </LinearGradient>
 );
 
 const AppContent = () => {
@@ -302,11 +312,12 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingMark: {
-    width: 76, height: 76, borderRadius: 24,
-    backgroundColor: 'rgba(124,58,237,0.18)',
+    width: 84, height: 84, borderRadius: 26,
     alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(124,58,237,0.35)',
+    ...Platform.select({
+      web: { boxShadow: '0 12px 30px rgba(124,58,237,0.45)' } as any,
+      default: { shadowColor: '#7C3AED', shadowOpacity: 0.45, shadowRadius: 22, shadowOffset: { width: 0, height: 12 }, elevation: 10 },
+    }),
   },
 });
 

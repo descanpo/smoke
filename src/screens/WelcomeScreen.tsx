@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Linking, Image,
+  View, Text, TouchableOpacity, StyleSheet,
+  ActivityIndicator, Platform, Image, Linking, ScrollView,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { supabase } from '../services/supabase';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { Theme, getColors } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { signInWithGoogle, signInWithApple, isAppleAuthAvailable } from '../services/auth';
 
-type Mode = 'login' | 'register';
+type IconName = keyof typeof Ionicons.glyphMap;
 
 // Official 4-color Google "G" logo, embedded as an SVG data URI (no extra deps).
 const GOOGLE_LOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -21,106 +23,71 @@ const GOOGLE_LOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
   '</svg>'
 );
 
-function openURL(url: string) {
-  if (Platform.OS === 'web') {
-    (window as any).location.href = url;
-  } else {
-    Linking.openURL(url);
-  }
-}
-
 export default function WelcomeScreen() {
   const { mode, isDark } = useThemeMode();
   const { lang, t, setLang } = useLanguage();
   const colors = getColors(mode);
 
-  const [authMode, setAuthMode] = useState<Mode>('login');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [focused, setFocused] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleAvailable, setAppleAvailable] = useState(false);
+  const [loading, setLoading] = useState<null | 'google' | 'apple'>(null);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
-  const isLogin = authMode === 'login';
+  useEffect(() => {
+    isAppleAuthAvailable().then(setAppleAvailable);
+  }, []);
 
-  const handleSubmit = async () => {
-    setError(''); setSuccess('');
-    if (!email.trim() || !password.trim()) { setError(t.emailRequired); return; }
-    if (!isLogin && !displayName.trim()) { setError(t.nameRequired); return; }
-    setLoading(true);
-
-    if (isLogin) {
-      const { error: e } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-      if (e) setError(e.message === 'Invalid login credentials' ? t.invalidCredentials : e.message);
-    } else {
-      const { error: e } = await supabase.auth.signUp({
-        email: email.trim(), password,
-        options: { data: { display_name: displayName.trim() } },
-      });
-      if (e) setError(e.message);
-      else setSuccess(t.accountCreated);
-    }
-    setLoading(false);
-  };
-
-  const handleForgotPassword = async () => {
-    setError(''); setSuccess('');
-    if (!email.trim()) {
-      setError(lang === 'tr'
-        ? 'Önce e-posta adresini gir, sonra sıfırlama bağlantısı gönderelim.'
-        : 'Enter your email first, then we’ll send a reset link.');
-      return;
-    }
-    setLoading(true);
-    const redirectTo = Platform.OS === 'web' ? (window as any).location.origin : 'smoke://auth/callback';
-    const { error: e } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo });
-    setLoading(false);
-    if (e) { setError(e.message); return; }
-    setSuccess(lang === 'tr'
-      ? 'Şifre sıfırlama bağlantısı e-postana gönderildi.'
-      : 'A password reset link has been sent to your email.');
-  };
-
-  const handleGoogleSignIn = async () => {
-    setError(''); setGoogleLoading(true);
-    const redirectTo = Platform.OS === 'web'
-      ? (window as any).location.origin
-      : 'smoke://auth/callback';
-
-    const { data, error: e } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo,
-        queryParams: { prompt: 'select_account' },
-      },
-    });
-
-    if (e) {
-      setError(t.googleFailed + ': ' + e.message);
-      setGoogleLoading(false);
-    } else if (data?.url && Platform.OS !== 'web') {
-      openURL(data.url);
-      setGoogleLoading(false);
+  const handleGoogle = async () => {
+    if (loading) return;
+    setError(''); setLoading('google');
+    try {
+      await signInWithGoogle();
+      // onAuthStateChange (App.tsx) handles navigation on success.
+    } catch (e: any) {
+      setError(t.googleFailed + (e?.message ? `: ${e.message}` : ''));
+    } finally {
+      setLoading(null);
     }
   };
 
-  const wrapStyle = (key: string) => [
-    s.inputWrap,
-    {
-      backgroundColor: focused === key ? colors.cardElevated : colors.surface,
-      borderColor: focused === key ? colors.primary : colors.border,
-    },
+  const handleApple = async () => {
+    if (loading) return;
+    setError(''); setLoading('apple');
+    try {
+      await signInWithApple();
+    } catch (e: any) {
+      if (e?.code !== 'ERR_REQUEST_CANCELED' && e?.code !== 'ERR_CANCELED') {
+        setError(
+          (lang === 'tr' ? 'Apple girişi başarısız' : 'Apple sign in failed') +
+          (e?.message ? `: ${e.message}` : ''),
+        );
+      }
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const busy = loading !== null;
+
+  const VALUES: { icon: IconName; text: string; tint: string }[] = [
+    { icon: 'leaf-outline', text: t.authValue1, tint: colors.secondary },
+    { icon: 'sparkles-outline', text: t.authValue2, tint: colors.primary },
+    { icon: 'shield-checkmark-outline', text: t.authValue3, tint: colors.success },
   ];
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.background }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <LinearGradient
+      colors={isDark ? Theme.gradients.auroraDark : Theme.gradients.auroraLight}
+      style={{ flex: 1 }}
+    >
+      {/* Soft brand aura behind the logo */}
+      <LinearGradient
+        colors={Theme.gradients.glow}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={s.aura}
+        pointerEvents="none"
+      />
+
       {/* Language switcher */}
       <View style={s.langSwitcher}>
         {(['tr', 'en'] as const).map(l => (
@@ -130,7 +97,7 @@ export default function WelcomeScreen() {
               s.langBtn,
               lang === l
                 ? { backgroundColor: colors.primary }
-                : { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' },
+                : { backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)' },
             ]}
             onPress={() => setLang(l)}
             activeOpacity={0.8}
@@ -145,181 +112,105 @@ export default function WelcomeScreen() {
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={s.content}
-        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
-        {/* Brand */}
-        <View style={s.brand}>
-          <View style={[s.logoMark, { backgroundColor: colors.primarySoft, borderColor: colors.border }]}>
-            <Text style={s.logoEmoji}>🚭</Text>
-          </View>
-          <Text style={[s.appName, { color: colors.text }]}>{t.appName}</Text>
-          <Text style={[s.tagline, { color: colors.textSecondary }]}>{t.appTagline}</Text>
-        </View>
-
-        {/* Heading (outside the card for a calmer hierarchy) */}
-        <View style={s.heading}>
-          <Text style={[s.headingTitle, { color: colors.text }]}>
-            {isLogin ? t.welcomeBack : t.createAccountTitle}
-          </Text>
-          <Text style={[s.headingSubtitle, { color: colors.textTertiary }]}>
-            {isLogin ? t.loginSubtitle : t.registerSubtitle}
-          </Text>
-        </View>
-
-        {/* Auth card */}
-        <View style={[s.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          {/* Segmented toggle */}
-          <View style={[s.segment, {
-            backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-          }]}>
-            {(['login', 'register'] as Mode[]).map(m => {
-              const active = authMode === m;
-              return (
-                <TouchableOpacity
-                  key={m}
-                  style={[s.segmentBtn, active && [{ backgroundColor: colors.card }, Theme.shadows.soft]]}
-                  onPress={() => { setAuthMode(m); setError(''); setSuccess(''); }}
-                  activeOpacity={0.85}
-                >
-                  <Text style={[s.segmentText, { color: active ? colors.primary : colors.textSecondary }]}>
-                    {m === 'login' ? t.signIn : t.signUp}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+        {/* ── Top: brand + value props ── */}
+        <View>
+          <View style={s.brand}>
+            <LinearGradient
+              colors={Theme.gradients.brandTeal}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={s.logoMark}
+            >
+              <Text style={s.logoEmoji}>🚭</Text>
+            </LinearGradient>
+            <Text style={[s.appName, { color: colors.text }]}>{t.appName}</Text>
+            <Text style={[s.headline, { color: colors.text }]}>{t.authHeadline}</Text>
+            <Text style={[s.tagline, { color: colors.textSecondary }]}>{t.appTagline}</Text>
           </View>
 
-          {/* Form */}
-          <View style={s.form}>
-            {!isLogin && (
-              <View style={s.fieldGroup}>
-                <Text style={[s.fieldLabel, { color: colors.textSecondary }]}>{t.fullName}</Text>
-                <View style={wrapStyle('name')}>
-                  <TextInput
-                    style={[s.input, { color: colors.text }]}
-                    placeholder={t.fullName}
-                    placeholderTextColor={colors.textTertiary}
-                    value={displayName}
-                    onChangeText={setDisplayName}
-                    onFocus={() => setFocused('name')}
-                    onBlur={() => setFocused(null)}
-                    autoCapitalize="words"
-                  />
+          <View style={s.values}>
+            {VALUES.map(v => (
+              <View key={v.text} style={s.valueRow}>
+                <View style={[s.valueIcon, { backgroundColor: v.tint + (isDark ? '26' : '1A') }]}>
+                  <Ionicons name={v.icon} size={18} color={v.tint} />
                 </View>
+                <Text style={[s.valueText, { color: colors.textSecondary }]}>{v.text}</Text>
               </View>
-            )}
-
-            <View style={s.fieldGroup}>
-              <Text style={[s.fieldLabel, { color: colors.textSecondary }]}>{t.email}</Text>
-              <View style={wrapStyle('email')}>
-                <TextInput
-                  style={[s.input, { color: colors.text }]}
-                  placeholder="ornek@email.com"
-                  placeholderTextColor={colors.textTertiary}
-                  value={email}
-                  onChangeText={setEmail}
-                  onFocus={() => setFocused('email')}
-                  onBlur={() => setFocused(null)}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                />
-              </View>
-            </View>
-
-            <View style={s.fieldGroup}>
-              <View style={s.labelRow}>
-                <Text style={[s.fieldLabel, { color: colors.textSecondary }]}>{t.password}</Text>
-                {isLogin && (
-                  <TouchableOpacity activeOpacity={0.7} onPress={handleForgotPassword} disabled={loading}>
-                    <Text style={[s.forgotText, { color: colors.primary }]}>{t.forgotPassword}</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-              <View style={[wrapStyle('password'), s.passwordWrap]}>
-                <TextInput
-                  style={[s.input, { color: colors.text, flex: 1 }]}
-                  placeholder="••••••••"
-                  placeholderTextColor={colors.textTertiary}
-                  value={password}
-                  onChangeText={setPassword}
-                  onFocus={() => setFocused('password')}
-                  onBlur={() => setFocused(null)}
-                  secureTextEntry={!showPassword}
-                />
-                <TouchableOpacity
-                  style={s.eyeBtn}
-                  onPress={() => setShowPassword(v => !v)}
-                  activeOpacity={0.7}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <Ionicons
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color={colors.textTertiary}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {!!error && <Text style={[s.errorText, { color: colors.error }]}>{error}</Text>}
-            {!!success && <Text style={[s.successText, { color: colors.success }]}>{success}</Text>}
-
-            <TouchableOpacity
-              style={[s.submitBtn, { backgroundColor: colors.primary }]}
-              onPress={handleSubmit}
-              disabled={loading}
-              activeOpacity={0.9}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={s.submitBtnText}>
-                  {isLogin ? t.signIn : t.createAccount}
-                </Text>
-              )}
-            </TouchableOpacity>
-
-            {/* Divider */}
-            <View style={s.divider}>
-              <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
-              <Text style={[s.dividerText, { color: colors.textTertiary }]}>{t.or}</Text>
-              <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
-            </View>
-
-            {/* Google */}
-            <TouchableOpacity
-              style={[s.googleBtn, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}
-              onPress={handleGoogleSignIn}
-              disabled={googleLoading}
-              activeOpacity={0.9}
-            >
-              {googleLoading ? (
-                <ActivityIndicator color={colors.text} size="small" />
-              ) : (
-                <>
-                  <Image source={{ uri: GOOGLE_LOGO }} style={s.googleLogo} resizeMode="contain" />
-                  <Text style={[s.googleBtnText, { color: colors.text }]}>{t.continueWithGoogle}</Text>
-                </>
-              )}
-            </TouchableOpacity>
+            ))}
           </View>
         </View>
 
-        <Text style={[s.legal, { color: colors.textTertiary }]}>
-          {t.termsNotice}{' '}
-          <Text style={{ color: colors.primary }}>{t.termsLink}</Text>
-          {' '}{t.and}{' '}
-          <Text style={{ color: colors.primary }}>{t.kvkkLink}</Text>
-          {t.accepted}
-        </Text>
+        {/* ── Bottom: auth + trust + legal ── */}
+        <View style={s.bottom}>
+          {appleAvailable && (
+            loading === 'apple' ? (
+              <View style={[s.appleFallback, { backgroundColor: isDark ? '#fff' : '#000' }]}>
+                <ActivityIndicator color={isDark ? '#000' : '#fff'} />
+              </View>
+            ) : (
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
+                buttonStyle={
+                  isDark
+                    ? AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
+                    : AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+                }
+                cornerRadius={16}
+                style={s.appleBtn}
+                onPress={handleApple}
+              />
+            )
+          )}
+
+          {/* Google */}
+          <TouchableOpacity
+            style={s.googleBtn}
+            onPress={handleGoogle}
+            disabled={busy}
+            activeOpacity={0.9}
+          >
+            {loading === 'google' ? (
+              <ActivityIndicator color="#1f1f1f" size="small" />
+            ) : (
+              <>
+                <Image source={{ uri: GOOGLE_LOGO }} style={s.googleLogo} resizeMode="contain" />
+                <Text style={s.googleBtnText}>{t.continueWithGoogle}</Text>
+              </>
+            )}
+          </TouchableOpacity>
+
+          {!!error && <Text style={[s.errorText, { color: colors.error }]}>{error}</Text>}
+
+          {/* Trust line */}
+          <View style={s.trustRow}>
+            <Ionicons name="lock-closed" size={12} color={colors.textTertiary} />
+            <Text style={[s.trustText, { color: colors.textTertiary }]}>{t.authTrust}</Text>
+          </View>
+
+          {/* Legal */}
+          <Text style={[s.legal, { color: colors.textTertiary }]}>
+            {t.authLegalIntro}{' '}
+            <Text style={{ color: colors.primary }} onPress={() => Linking.openURL('https://descanpo.github.io/smoke/terms.html')}>
+              {t.termsLink}
+            </Text>
+            {' '}{t.and}{' '}
+            <Text style={{ color: colors.primary }} onPress={() => Linking.openURL('https://descanpo.github.io/smoke/kvkk.html')}>
+              {t.kvkkLink}
+            </Text>
+            {t.accepted}
+          </Text>
+        </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </LinearGradient>
   );
 }
 
 const s = StyleSheet.create({
+  aura: { position: 'absolute', top: 0, left: 0, right: 0, height: 380 },
+
   langSwitcher: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 54 : 38,
@@ -333,92 +224,61 @@ const s = StyleSheet.create({
 
   content: {
     flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 72,
+    justifyContent: 'space-between',
+    paddingHorizontal: 28,
+    paddingTop: Platform.OS === 'ios' ? 120 : 104,
+    paddingBottom: 28,
   },
 
   // Brand
-  brand: { alignItems: 'center', marginBottom: 24 },
+  brand: { alignItems: 'center' },
   logoMark: {
-    width: 72, height: 72, borderRadius: 22,
+    width: 88, height: 88, borderRadius: 27,
     alignItems: 'center', justifyContent: 'center',
-    marginBottom: 14,
-    borderWidth: 1,
-    ...Theme.shadows.soft,
+    marginBottom: 22,
+    ...Platform.select({
+      web: { boxShadow: '0 12px 30px rgba(124,58,237,0.45)' } as any,
+      default: { shadowColor: '#7C3AED', shadowOpacity: 0.45, shadowRadius: 22, shadowOffset: { width: 0, height: 12 }, elevation: 10 },
+    }),
   },
-  logoEmoji: { fontSize: 34 },
-  appName: { fontSize: 30, fontWeight: '800', letterSpacing: 0.5, marginBottom: 2 },
-  tagline: { fontSize: 13, textAlign: 'center' },
+  logoEmoji: { fontSize: 42 },
+  appName: { fontSize: 30, fontWeight: '800', letterSpacing: 2, marginBottom: 14 },
+  headline: { fontSize: 26, fontWeight: '800', letterSpacing: -0.5, textAlign: 'center', lineHeight: 32 },
+  tagline: { fontSize: 14, textAlign: 'center', lineHeight: 20, marginTop: 8 },
 
-  // Heading
-  heading: { marginBottom: 18 },
-  headingTitle: { fontSize: 24, fontWeight: '800', letterSpacing: -0.4, textAlign: 'center' },
-  headingSubtitle: { fontSize: 14, marginTop: 6, textAlign: 'center', lineHeight: 20 },
+  // Value props
+  values: { marginTop: 36, gap: 16, alignSelf: 'stretch' },
+  valueRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  valueIcon: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
+  valueText: { flex: 1, fontSize: 14.5, fontWeight: '600', lineHeight: 19 },
 
-  // Card
-  card: {
-    borderRadius: 20,
-    borderWidth: 1,
-    padding: 20,
-    ...Theme.shadows.card,
+  // Bottom group
+  bottom: { marginTop: 40 },
+  appleBtn: { width: '100%', height: 54, marginBottom: 12 },
+  appleFallback: {
+    width: '100%', height: 54, borderRadius: 16,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 12,
   },
-
-  // Segmented control
-  segment: { flexDirection: 'row', borderRadius: 13, padding: 4, marginBottom: 20 },
-  segmentBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
-  segmentText: { fontSize: 14, fontWeight: '700' },
-
-  // Form
-  form: { gap: 16 },
-  fieldGroup: { gap: 8 },
-  labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  fieldLabel: { fontSize: 13, fontWeight: '600', marginLeft: 2 },
-  inputWrap: {
-    borderRadius: 14,
-    borderWidth: 1.5,
-    paddingHorizontal: 16,
-    height: 52,
-    justifyContent: 'center',
-  },
-  input: {
-    fontSize: 15,
-    paddingVertical: 0,
-    ...Platform.select({ web: { outlineStyle: 'none' } as any }),
-  },
-  passwordWrap: { flexDirection: 'row', alignItems: 'center' },
-  eyeBtn: { paddingLeft: 10 },
-  forgotText: { fontSize: 12.5, fontWeight: '600' },
-  errorText: { fontSize: 13, textAlign: 'center', fontWeight: '500', marginTop: -2 },
-  successText: { fontSize: 13, textAlign: 'center', fontWeight: '500', marginTop: -2 },
-
-  submitBtn: {
-    borderRadius: 14,
-    paddingVertical: 15,
-    alignItems: 'center',
-    marginTop: 4,
-    ...Theme.shadows.primary,
-  },
-  submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '800', letterSpacing: 0.3 },
-
-  // Divider
-  divider: { flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 2 },
-  dividerLine: { flex: 1, height: 1 },
-  dividerText: { fontSize: 12, fontWeight: '500' },
-
-  // Google
   googleBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    borderRadius: 14,
-    borderWidth: 1,
-    paddingVertical: 14,
-    ...Platform.select({ web: { cursor: 'pointer' } as any }),
+    height: 54,
+    borderRadius: 16,
+    backgroundColor: '#ffffff',
+    ...Platform.select({
+      web: { cursor: 'pointer', boxShadow: '0 6px 18px rgba(0,0,0,0.18)' } as any,
+      default: { shadowColor: '#000', shadowOpacity: 0.16, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
+    }),
   },
-  googleLogo: { width: 18, height: 18 },
-  googleBtnText: { fontSize: 15, fontWeight: '700' },
+  googleLogo: { width: 19, height: 19 },
+  googleBtnText: { fontSize: 15.5, fontWeight: '700', color: '#1f1f1f' },
 
-  legal: { textAlign: 'center', fontSize: 11, lineHeight: 17, marginTop: 22 },
+  errorText: { fontSize: 13, textAlign: 'center', fontWeight: '500', marginTop: 14 },
+
+  trustRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 20 },
+  trustText: { fontSize: 12, fontWeight: '600', letterSpacing: 0.2 },
+
+  legal: { textAlign: 'center', fontSize: 11, lineHeight: 17, marginTop: 14, paddingHorizontal: 8 },
 });
