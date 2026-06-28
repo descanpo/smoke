@@ -69,9 +69,9 @@ npx expo start
 
 ## 🔒 Yasal
 
-- 🔗 [KVKK Aydınlatma Metni](https://descanpo.github.io/smoke/kvkk.html)
-- 🔗 [Gizlilik Politikası](https://descanpo.github.io/smoke/privacy.html)
-- 🔗 [Kullanım Koşulları](https://descanpo.github.io/smoke/terms.html)
+- 🔗 [KVKK Aydınlatma Metni](https://descanpo.github.io/smoke/legal/kvkk.html)
+- 🔗 [Gizlilik Politikası](https://descanpo.github.io/smoke/legal/privacy.html)
+- 🔗 [Kullanım Koşulları](https://descanpo.github.io/smoke/legal/terms.html)
 
 ---
 

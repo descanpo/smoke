@@ -193,11 +193,11 @@ export default function WelcomeScreen() {
           {/* Legal */}
           <Text style={[s.legal, { color: colors.textTertiary }]}>
             {t.authLegalIntro}{' '}
-            <Text style={{ color: colors.primary }} onPress={() => Linking.openURL('https://descanpo.github.io/smoke/terms.html')}>
+            <Text style={{ color: colors.primary }} onPress={() => Linking.openURL('https://descanpo.github.io/smoke/legal/terms.html')}>
               {t.termsLink}
             </Text>
             {' '}{t.and}{' '}
-            <Text style={{ color: colors.primary }} onPress={() => Linking.openURL('https://descanpo.github.io/smoke/kvkk.html')}>
+            <Text style={{ color: colors.primary }} onPress={() => Linking.openURL('https://descanpo.github.io/smoke/legal/kvkk.html')}>
               {t.kvkkLink}
             </Text>
             {t.accepted}

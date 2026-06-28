@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kullanım Koşulları / Terms of Service — Smoke</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0A0A14; --surface: #14121F; --surface2: #1C1930;
+      --text: #FFFFFF; --text-secondary: #A3A0BC; --text-tertiary: #6B6886;
+      --primary: #8B5CF6; --primary-dark: #7C3AED; --primary-glow: rgba(124,58,237,0.16);
+      --border: rgba(255,255,255,0.08); --border-active: rgba(139,92,246,0.5);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif; background-color: var(--bg); color: var(--text);
+      margin: 0; min-height: 100vh; line-height: 1.7;
+      background-image: radial-gradient(circle at 50% -10%, rgba(124,58,237,0.12), transparent 55%);
+    }
+    .header {
+      max-width: 880px; margin: 0 auto; padding: 24px; display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    }
+    .logo { display: flex; align-items: center; gap: 11px; font-family: 'Sora', sans-serif; font-size: 21px; font-weight: 800; letter-spacing: -0.5px; color: var(--text); text-decoration: none; }
+    .logo-icon {
+      width: 42px; height: 42px; border-radius: 13px; background: linear-gradient(135deg, #7C3AED, #6C63FF);
+      display: inline-flex; align-items: center; justify-content: center; font-size: 21px;
+      box-shadow: 0 0 24px var(--primary-glow);
+    }
+    .lang-toggle { display: flex; gap: 8px; }
+    .lang-btn {
+      padding: 7px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text-secondary); cursor: pointer; font-size: 13px; font-weight: 700; font-family: inherit; transition: all 0.18s;
+    }
+    .lang-btn:hover { border-color: var(--border-active); }
+    .lang-btn.active { background: var(--primary-dark); border-color: var(--primary-dark); color: #fff; }
+    .container { max-width: 760px; margin: 0 auto; padding: 32px 24px 80px; }
+    .back-link { color: var(--text-secondary); font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: color 0.18s; }
+    .back-link:hover { color: var(--primary); }
+    .eyebrow, .badge {
+      display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.4px;
+      color: var(--primary); background: var(--primary-glow); border: 1px solid var(--border-active);
+      padding: 6px 14px; border-radius: 999px; margin-bottom: 24px;
+    }
+    h1 { font-family: 'Sora', sans-serif; font-size: clamp(28px, 5vw, 36px); font-weight: 800; letter-spacing: -0.8px; margin: 18px 0 8px; line-height: 1.1; }
+    .subtitle { color: var(--text-tertiary); font-size: 14px; margin-bottom: 24px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 24px 26px; margin-bottom: 18px;
+      transition: border-color 0.18s ease;
+    }
+    .card:hover { border-color: var(--border-active); }
+    h2 { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+    h3 { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; color: var(--primary); margin: 16px 0 8px; letter-spacing: 0.2px; }
+    p { color: var(--text-secondary); line-height: 1.75; font-size: 14.5px; margin-bottom: 10px; }
+    ul { color: var(--text-secondary); line-height: 1.75; font-size: 14.5px; padding-left: 20px; margin-bottom: 6px; }
+    li { margin-bottom: 7px; }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { color: var(--primary-dark); }
+    strong { color: var(--text); }
+    .contact-badge {
+      display: inline-flex; align-items: center; gap: 8px; background: var(--primary-glow); border: 1px solid var(--border-active);
+      border-radius: 12px; padding: 12px 20px; color: var(--primary); font-weight: 600; font-size: 14px; margin-top: 8px;
+    }
+    .footer {
+      text-align: center; color: var(--text-tertiary); font-size: 13px; padding: 28px 24px 40px;
+      border-top: 1px solid var(--border); margin-top: 40px;
+    }
+    .footer a { color: var(--text-secondary); }
+    .footer a:hover { color: var(--primary); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <a href="../index.html" class="logo"><span class="logo-icon">🚭</span>Smoke</a>
+    <div class="lang-toggle">
+      <button class="lang-btn" id="btn-tr" onclick="switchLang('tr')">🇹🇷 TR</button>
+      <button class="lang-btn" id="btn-en" onclick="switchLang('en')">🇬🇧 EN</button>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- TURKISH CONTENT -->
+    <div class="tr-content">
+      <a href="../index.html" class="back-link">← Ana Sayfaya Dön</a>
+      <br><br>
+      <h1>Kullanım Koşulları</h1>
+      <p class="subtitle">Son güncelleme: Haziran 2025</p>
+
+      <div class="card">
+        <p>Smoke uygulamasını kullanarak aşağıdaki kullanım koşullarını kabul etmiş olursunuz. Lütfen dikkatlice okuyunuz.</p>
+      </div>
+
+      <div class="warning-card">
+        <p><strong>⚠️ Tıbbi Uyarı:</strong> Smoke bir destek uygulamasıdır; tıbbi tavsiye, tanı veya tedavi yerine geçemez. Sigarayı bırakmak için profesyonel destek almak isteyenler için <strong>ALO 171 Sigarayı Bırakma Hattı</strong>'nı öneririz.</p>
+      </div>
+
+      <div class="card">
+        <h2>1. Hizmetin Kapsamı</h2>
+        <p>Smoke, sigarayı bırakmak isteyen kişilere destek olmak amacıyla tasarlanmış bir mobil uygulamadır. Uygulama şu özellikleri sunar:</p>
+        <ul>
+          <li>Sigarasız geçen süreyi takip etme</li>
+          <li>Ekonomik tasarruf hesaplaması</li>
+          <li>Sağlık kilometre taşlarını gösterme</li>
+          <li>Sigara içme isteklerini kaydetme ve analiz etme</li>
+          <li>Nefes egzersizleri sunma</li>
+          <li>Topluluk desteği sağlama</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>2. Kullanıcı Yükümlülükleri</h2>
+        <ul>
+          <li>Uygulama yalnızca 18 yaşını doldurmuş kişiler tarafından kullanılabilir</li>
+          <li>Topluluk bölümünde hakaret, küçümseme, spam veya yanlış bilgi paylaşmak yasaktır</li>
+          <li>Kullanıcı adı gerçek kimliğinizle örtüşmek zorunda değildir; anonim kullanım serbesttir</li>
+          <li>Hesabınızın güvenliğinden siz sorumlusunuz</li>
+          <li>Uygulamayı kötüye kullanmak veya güvenliğini tehdit etmek yasaktır</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>3. Fikri Mülkiyet</h2>
+        <p>Uygulamadaki tüm içerik (metin, grafik, kod, tasarım) Smoke App'e aittir. Kaynak kodun bir kısmı açık kaynak lisanslar altında kullanılan kütüphaneler içerebilir. İzinsiz kopyalanması, dağıtılması veya türev eser oluşturulması yasaktır.</p>
+      </div>
+
+      <div class="card">
+        <h2>4. Hizmet Sürekliği</h2>
+        <p>Uygulamayı önceden bildirimde bulunmadan kesintiye uğratma, güncelleme veya durdurma hakkımız saklıdır. Uzun süreli kesintiler öncesinde kullanıcılara bildirim yapılmaya çalışılacaktır.</p>
+      </div>
+
+      <div class="card">
+        <h2>5. Sorumluluk Sınırlaması</h2>
+        <p>Smoke, sigarayı bırakmayı garanti etmez. Uygulamanın kullanımı sonucunda ortaya çıkabilecek dolaylı zararlardan sorumlu tutulamaz. Sağlık konularında her zaman bir sağlık profesyoneliyle görüşünüz.</p>
+      </div>
+
+      <div class="card">
+        <h2>6. Koşullardaki Değişiklikler</h2>
+        <p>Koşulları zaman zaman güncelleyebiliriz. Önemli değişiklikler uygulama içinden bildirilecektir. Uygulamayı kullanmaya devam etmeniz güncel koşulları kabul ettiğiniz anlamına gelir.</p>
+      </div>
+
+      <div class="card">
+        <h2>7. Uygulanacak Hukuk</h2>
+        <p>Bu Koşullar Türk hukukuna tabidir. Anlaşmazlık durumunda Türkiye mahkemeleri yetkilidir.</p>
+      </div>
+
+      <div class="card">
+        <h2>8. İletişim</h2>
+        <p>Koşullar hakkında sorularınız için:</p>
+        <div class="contact-badge">📧 <a href="mailto:ozgeee.od@gmail.com">ozgeee.od@gmail.com</a></div>
+      </div>
+    </div>
+
+    <!-- ENGLISH CONTENT -->
+    <div class="en-content" style="display:none">
+      <a href="../index.html" class="back-link">← Back to Home</a>
+      <br><br>
+      <h1>Terms of Service</h1>
+      <p class="subtitle">Last updated: June 2025</p>
+
+      <div class="card">
+        <p>By using the Smoke app, you agree to the following terms of service. Please read them carefully.</p>
+      </div>
+
+      <div class="warning-card">
+        <p><strong>⚠️ Medical Disclaimer:</strong> Smoke is a support application and does not replace medical advice, diagnosis, or treatment. If you need professional support to quit smoking, we recommend contacting a qualified healthcare professional.</p>
+      </div>
+
+      <div class="card">
+        <h2>1. Scope of Service</h2>
+        <p>Smoke is a mobile application designed to support people who want to quit smoking. The app provides the following features:</p>
+        <ul>
+          <li>Tracking smoke-free time</li>
+          <li>Calculating financial savings</li>
+          <li>Showing health milestones</li>
+          <li>Recording and analyzing cravings</li>
+          <li>Guided breathing exercises</li>
+          <li>Community support</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>2. User Obligations</h2>
+        <ul>
+          <li>The app may only be used by individuals aged 18 and over</li>
+          <li>Posting insults, harassment, spam, or misinformation in the community section is prohibited</li>
+          <li>Your username does not need to match your real identity; anonymous use is permitted</li>
+          <li>You are responsible for the security of your account</li>
+          <li>Misusing the app or attempting to compromise its security is prohibited</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>3. Intellectual Property</h2>
+        <p>All content within the app (text, graphics, code, design) belongs to Smoke App. Parts of the source code may include libraries under open-source licenses. Unauthorized copying, distribution, or creation of derivative works is prohibited.</p>
+      </div>
+
+      <div class="card">
+        <h2>4. Service Continuity</h2>
+        <p>We reserve the right to interrupt, update, or discontinue the app without prior notice. We will endeavor to notify users before extended interruptions.</p>
+      </div>
+
+      <div class="card">
+        <h2>5. Limitation of Liability</h2>
+        <p>Smoke does not guarantee smoking cessation. We are not liable for any indirect damages that may arise from the use of the app. Always consult a healthcare professional for health-related matters.</p>
+      </div>
+
+      <div class="card">
+        <h2>6. Changes to Terms</h2>
+        <p>We may update these terms from time to time. Significant changes will be communicated through the app. Continued use of the app constitutes your acceptance of the updated terms.</p>
+      </div>
+
+      <div class="card">
+        <h2>7. Governing Law</h2>
+        <p>These Terms are governed by Turkish law. In the event of a dispute, Turkish courts shall have jurisdiction.</p>
+      </div>
+
+      <div class="card">
+        <h2>8. Contact</h2>
+        <p>For questions about these terms:</p>
+        <div class="contact-badge">📧 <a href="mailto:ozgeee.od@gmail.com">ozgeee.od@gmail.com</a></div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <p>© 2025 Smoke App. Tüm hakları saklıdır. / All rights reserved.</p>
+    <p style="margin-top:6px"><a href="mailto:ozgeee.od@gmail.com">ozgeee.od@gmail.com</a></p>
+    <p style="margin-top:10px"><a href="../index.html">Ana Sayfa</a> &bull; <a href="kvkk.html">KVKK</a> &bull; <a href="privacy.html">Gizlilik / Privacy</a></p>
+  </footer>
+
+  <script>
+    function switchLang(lang) {
+      document.querySelectorAll('.tr-content').forEach(el => el.style.display = lang === 'tr' ? 'block' : 'none');
+      document.querySelectorAll('.en-content').forEach(el => el.style.display = lang === 'en' ? 'block' : 'none');
+      document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('btn-' + lang).classList.add('active');
+      localStorage.setItem('smoke_legal_lang', lang);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('smoke_legal_lang') || 'tr';
+      switchLang(saved);
+    });
+  </script>
+</body>
+</html>

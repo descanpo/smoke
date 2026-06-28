@@ -52,9 +52,9 @@ export default function Profile({ session, journey, onJourneyChange }: { session
       <div className="card" style={{ marginBottom: 20 }}>
         {[
           { icon: '🗓️', label: 'Yeni Yolculuk Başlat', color: 'var(--primary)', onClick: newJourney },
-          { icon: '🔒', label: 'KVKK Aydınlatma Metni', onClick: () => window.open('https://descanpo.github.io/smoke/kvkk.html', '_blank') },
-          { icon: '📧', label: 'Gizlilik Politikası', onClick: () => window.open('https://descanpo.github.io/smoke/privacy.html', '_blank') },
-          { icon: '📄', label: 'Kullanım Koşulları', onClick: () => window.open('https://descanpo.github.io/smoke/terms.html', '_blank') },
+          { icon: '🔒', label: 'KVKK Aydınlatma Metni', onClick: () => window.open('https://descanpo.github.io/smoke/legal/kvkk.html', '_blank') },
+          { icon: '📧', label: 'Gizlilik Politikası', onClick: () => window.open('https://descanpo.github.io/smoke/legal/privacy.html', '_blank') },
+          { icon: '📄', label: 'Kullanım Koşulları', onClick: () => window.open('https://descanpo.github.io/smoke/legal/terms.html', '_blank') },
           { icon: '📩', label: 'Geri Bildirim Gönder', onClick: () => window.open('mailto:descanpo2@gmail.com?subject=Smoke App Geri Bildirim', '_blank') },
         ].map((item, i, arr) => (
           <button key={i} onClick={item.onClick}

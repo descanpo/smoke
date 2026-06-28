@@ -239,8 +239,8 @@ export default function ProfileScreen({
   // DESTEK — link rows
   const supportRows: { icon: IconName; accent: string; label: string; url: string; external?: boolean }[] = [
     { icon: 'call-outline', accent: colors.success, label: t.quitHelpline, url: 'tel:171', external: true },
-    { icon: 'document-text-outline', accent: colors.textSecondary, label: t.termsLink, url: 'https://descanpo.github.io/smoke/terms.html' },
-    { icon: 'shield-checkmark-outline', accent: colors.secondary, label: t.kvkkLink, url: 'https://descanpo.github.io/smoke/kvkk.html' },
+    { icon: 'document-text-outline', accent: colors.textSecondary, label: t.termsLink, url: 'https://descanpo.github.io/smoke/legal/terms.html' },
+    { icon: 'shield-checkmark-outline', accent: colors.secondary, label: t.kvkkLink, url: 'https://descanpo.github.io/smoke/legal/kvkk.html' },
   ];
 
   // Stat chips
