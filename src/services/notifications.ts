@@ -40,7 +40,7 @@ export async function scheduleStreakReminder(lang: 'tr' | 'en') {
       },
     });
   } catch (e) {
-    console.warn('streak reminder schedule failed:', e);
+    if (__DEV__) console.warn('streak reminder schedule failed:', e);
   }
 }
 
@@ -63,7 +63,7 @@ export async function scheduleEveningCheckIn(lang: 'tr' | 'en') {
       },
     });
   } catch (e) {
-    console.warn('evening check-in schedule failed:', e);
+    if (__DEV__) console.warn('evening check-in schedule failed:', e);
   }
 }
 
@@ -92,7 +92,7 @@ export async function scheduleMilestoneNotification(
       },
     });
   } catch (e) {
-    console.warn('milestone schedule failed:', e);
+    if (__DEV__) console.warn('milestone schedule failed:', e);
   }
 }
 

@@ -66,6 +66,9 @@ export default function ProfileScreen({
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const openEdit = (field: EditField) => {
     setEditError('');
@@ -151,6 +154,24 @@ export default function ProfileScreen({
   const avatarUrl: string | undefined = meta.avatar_url ?? meta.picture;
 
   const signOut = async () => { await supabase.auth.signOut(); };
+
+  // Hesap silme (Apple App Store zorunluluğu). delete-account Edge Function'ı
+  // çağıranın JWT'sini doğrular, tüm kullanıcı verisini ve auth kaydını siler.
+  const deleteAccount = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    setDeleteError('');
+    const { error } = await supabase.functions.invoke('delete-account', { method: 'POST' });
+    if (error) {
+      setDeleting(false);
+      setDeleteError(t.deleteFailed);
+      haptics.error();
+      return;
+    }
+    haptics.success();
+    // Kullanıcı silindi; yerel oturumu kapat → onAuthStateChange Welcome'a yönlendirir.
+    await supabase.auth.signOut();
+  };
 
   const newJourney = async () => {
     const confirmMsg = lang === 'tr'
@@ -438,8 +459,59 @@ export default function ProfileScreen({
             <Ionicons name="log-out-outline" size={20} color={colors.text} />
             <Text style={[s.signOutText, { color: colors.text }]}>{t.signOut}</Text>
           </TouchableOpacity>
+
+          {/* Delete account (Apple zorunluluğu) — düşük vurgulu metin bağlantısı */}
+          <TouchableOpacity
+            style={s.deleteLink}
+            onPress={() => { haptics.tapLight(); setDeleteError(''); setShowDeleteConfirm(true); }}
+            activeOpacity={0.6}
+          >
+            <Text style={[s.deleteLinkText, { color: colors.textTertiary }]}>{t.deleteAccount}</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Hesap silme onay modalı */}
+      <Modal visible={showDeleteConfirm} transparent animationType="fade" onRequestClose={() => !deleting && setShowDeleteConfirm(false)}>
+        <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => !deleting && setShowDeleteConfirm(false)}>
+          <TouchableOpacity activeOpacity={1} style={[s.modalCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={[s.deleteIconWell, { backgroundColor: colors.error + '1A' }]}>
+              <Ionicons name="warning-outline" size={26} color={colors.error} />
+            </View>
+            <Text style={[s.modalTitle, { color: colors.text, textAlign: 'center', marginBottom: 10 }]}>
+              {t.deleteAccountTitle}
+            </Text>
+            <Text style={[s.deleteWarning, { color: colors.textSecondary }]}>
+              {t.deleteAccountWarning}
+            </Text>
+
+            {!!deleteError && (
+              <Text style={{ color: colors.error, fontSize: 13, fontWeight: '600', marginTop: 14, textAlign: 'center' }}>{deleteError}</Text>
+            )}
+
+            <View style={[s.modalActions, { flexDirection: 'column', gap: 10 }]}>
+              <TouchableOpacity
+                style={[s.modalBtn, { width: '100%', backgroundColor: colors.error, ...Theme.shadows.card }]}
+                onPress={deleteAccount}
+                disabled={deleting}
+                activeOpacity={0.85}
+              >
+                {deleting
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={{ color: '#fff', fontWeight: '800' }}>{t.deleteAccountConfirm}</Text>}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[s.modalBtn, { width: '100%', backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]}
+                onPress={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+                activeOpacity={0.7}
+              >
+                <Text style={{ color: colors.textSecondary, fontWeight: '700' }}>{t.cancel}</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Edit modal */}
       <Modal visible={editField !== null} transparent animationType="fade" onRequestClose={() => setEditField(null)}>
@@ -668,6 +740,34 @@ const s = StyleSheet.create({
     minHeight: 52,
   },
   signOutText: { fontWeight: '700', fontSize: 14 },
+
+  // Delete account link
+  deleteLink: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    marginTop: 4,
+    ...Platform.select({ web: { cursor: 'pointer' } as any }),
+  },
+  deleteLinkText: {
+    fontSize: 13,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  deleteIconWell: {
+    width: 54,
+    height: 54,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  deleteWarning: {
+    fontSize: 14,
+    lineHeight: 21,
+    textAlign: 'center',
+  },
 
   // Edit modal
   modalOverlay: {

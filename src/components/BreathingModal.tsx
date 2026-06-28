@@ -181,7 +181,7 @@ export default function BreathingModal({
       completed: true,
     });
     // Egzersiz kaydı kritik değil; akışı bozmadan logla.
-    if (error) console.warn('breathing log failed:', error.message);
+    if (error && __DEV__) console.warn('breathing log failed:', error.message);
   };
 
   const circleSize = circleAnim.interpolate({

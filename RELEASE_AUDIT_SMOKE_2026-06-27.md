@@ -7,6 +7,29 @@
 
 ---
 
+## 2026-06-28 — Güncelleme (kod tarafı düzeltmeler uygulandı)
+
+Aşağıdaki maddeler bu turda giderildi:
+
+| Madde | Durum | Yapılan |
+|---|---|---|
+| **C2** eas.json | ✅ Çözüldü | `eas.json` eklendi (development/preview/production + submit profilleri) |
+| **C3** Hesap silme | ✅ Çözüldü | `delete-account` Edge Function deploy edildi (ACTIVE); ProfileScreen'e onay modallı "Hesabımı Sil" akışı + TR/EN metinler |
+| **C4** buildNumber | ✅ Çözüldü | `app.json` → `ios.buildNumber: "1"` |
+| **O1** Bildirim izin metni | ✅ Çözüldü | `app.json` → `ios.infoPlist.NSUserNotificationsUsageDescription` |
+| **O3** Orijinal tablo RLS | ✅ Doğrulandı | Supabase'de 17 tablonun tamamında RLS aktif + politikalar mevcut (MCP ile teyit) |
+| **O4** ErrorBoundary | ✅ Çözüldü | `src/components/ErrorBoundary.tsx` eklendi, App kökü sarıldı |
+| **T1** Production console | ✅ Çözüldü | `notifications.ts` ×3 + `BreathingModal.tsx` `__DEV__` guard'ına alındı |
+
+**Kalan (kullanıcı/harici aksiyon gerekli):**
+- **C1** `assets/` ikon/splash dosyaları — gerçek görsel tasarımı gerektirir (build blocker, hâlâ açık).
+- **O2** anon key fallback — bilinçli olarak korundu (anon key herkese açık; tüm tablolarda RLS aktif; `.env` yoksa build'i ayakta tutar).
+- **O5** crash reporting (Sentry), **O6** GitHub Pages aktivasyonu, **O7** KVKK aktif onay UI, **T2–T6** (ESLint, OTA, mağaza metadata).
+
+Ayrıca `docs/reset-password.html` Smoke markasıyla (şifre sıfırlama redirect sayfası) eklendi.
+
+---
+
 ## Özet
 
 | Kategori | Durum | Not |

@@ -15,7 +15,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.descanpo.smoke",
-      "usesAppleSignIn": true
+      "buildNumber": "1",
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "NSUserNotificationsUsageDescription": "Streak hatırlatmaları ve sağlık kilometre taşı bildirimleri için bildirim iznine ihtiyacımız var."
+      }
     },
     "android": {
       "adaptiveIcon": {

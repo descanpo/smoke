@@ -18,6 +18,7 @@ import SOSScreen from './src/screens/SOSScreen';
 import SupportScreen from './src/screens/SupportScreen';
 import CheckInModal from './src/components/CheckInModal';
 import RelapseModal from './src/components/RelapseModal';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { ThemeProvider, useThemeMode } from './src/context/ThemeContext';
 import { LanguageProvider, useLanguage } from './src/context/LanguageContext';
 import {
@@ -290,13 +291,15 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <ThemeProvider>
-    <LanguageProvider>
-      <NavigationProvider initialScreen="Welcome">
-        <AppContent />
-      </NavigationProvider>
-    </LanguageProvider>
-  </ThemeProvider>
+  <ErrorBoundary>
+    <ThemeProvider>
+      <LanguageProvider>
+        <NavigationProvider initialScreen="Welcome">
+          <AppContent />
+        </NavigationProvider>
+      </LanguageProvider>
+    </ThemeProvider>
+  </ErrorBoundary>
 );
 
 const s = StyleSheet.create({

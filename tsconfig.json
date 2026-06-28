@@ -17,6 +17,7 @@
     "node_modules",
     "web",
     "dist",
-    "docs"
+    "docs",
+    "supabase/functions"
   ]
 }
