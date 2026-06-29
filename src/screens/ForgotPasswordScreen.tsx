@@ -10,6 +10,7 @@ import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useNavigation } from '../navigation/Navigator';
 import { requestPasswordReset } from '../services/auth';
+import { supabase } from '../services/supabase';
 
 export default function ForgotPasswordScreen() {
   const { mode, isDark } = useThemeMode();
@@ -31,7 +32,16 @@ export default function ForgotPasswordScreen() {
     setLoading(true);
     setError('');
     try {
+      // Check session BEFORE reset
+      const { data: sessionBefore } = await supabase.auth.getSession();
+      console.log('📧 [BEFORE reset] Session:', sessionBefore?.session ? 'EXISTS' : 'NONE');
+
       await requestPasswordReset(email);
+
+      // Check session AFTER reset
+      const { data: sessionAfter } = await supabase.auth.getSession();
+      console.log('📧 [AFTER reset] Session:', sessionAfter?.session ? 'EXISTS' : 'NONE');
+
       setSuccess(true);
     } catch (e: any) {
       setError(e.message || (lang === 'tr' ? 'Hata oluştu' : 'Error occurred'));
