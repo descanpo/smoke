@@ -150,7 +150,9 @@ const AppContent = () => {
     // is logged in — show the loader so already-authenticated users don't see
     // the login screen flash on every cold start.
     if (initializing) return <LoadingScreen isDark={isDark} />;
-    if (!session) return <WelcomeScreen />;
+    if (!session && currentScreen !== 'EmailLogin' && currentScreen !== 'ForgotPassword') {
+      return <WelcomeScreen />;
+    }
 
     // Session exists but the journey hasn't been resolved yet (e.g. right after
     // logging back in). Show a branded loader instead of falling through to
