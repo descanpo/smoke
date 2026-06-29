@@ -8,11 +8,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { Theme, getColors } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useNavigation } from '../navigation/Navigator';
 import { requestPasswordReset } from '../services/auth';
 
-export default function ForgotPasswordScreen({ navigation }: any) {
+export default function ForgotPasswordScreen() {
   const { mode, isDark } = useThemeMode();
   const { lang } = useLanguage();
+  const { goBack } = useNavigation();
   const colors = getColors(mode);
 
   const [email, setEmail] = useState('');
@@ -50,7 +52,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
         <ScrollView contentContainerStyle={s.container}>
           {/* Header */}
           <View style={s.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn}>
+            <TouchableOpacity onPress={() => goBack()} style={s.backBtn}>
               <Ionicons name="chevron-back" size={28} color={colors.text} />
             </TouchableOpacity>
             <Text style={[s.title, { color: colors.text }]}>

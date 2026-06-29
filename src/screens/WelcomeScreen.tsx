@@ -9,6 +9,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import { Theme, getColors } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useNavigation } from '../navigation/Navigator';
 import { signInWithGoogle, signInWithApple, isAppleAuthAvailable } from '../services/auth';
 
 type IconName = keyof typeof Ionicons.glyphMap;
@@ -26,6 +27,7 @@ const GOOGLE_LOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
 export default function WelcomeScreen() {
   const { mode, isDark } = useThemeMode();
   const { lang, t, setLang } = useLanguage();
+  const { navigate } = useNavigation();
   const colors = getColors(mode);
 
   const [appleAvailable, setAppleAvailable] = useState(false);
@@ -185,7 +187,7 @@ export default function WelcomeScreen() {
           {/* Email */}
           <TouchableOpacity
             style={[s.emailBtn, { backgroundColor: isDark ? 'rgba(139,92,246,0.2)' : 'rgba(124,58,237,0.15)' }]}
-            onPress={() => navigation?.navigate?.('EmailLogin')}
+            onPress={() => navigate('EmailLogin')}
             disabled={busy}
             activeOpacity={0.9}
           >

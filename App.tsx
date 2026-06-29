@@ -162,9 +162,9 @@ const AppContent = () => {
 
     switch (currentScreen) {
       case 'EmailLogin':
-        return <EmailLoginScreen navigation={{ navigate, goBack }} />;
+        return <EmailLoginScreen />;
       case 'ForgotPassword':
-        return <ForgotPasswordScreen navigation={{ navigate, goBack }} />;
+        return <ForgotPasswordScreen />;
       case 'Onboarding':
         return (
           <OnboardingScreen

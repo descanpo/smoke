@@ -8,11 +8,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { Theme, getColors } from '../theme/Theme';
 import { useThemeMode } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useNavigation } from '../navigation/Navigator';
 import { signInWithEmail, signUpWithEmail } from '../services/auth';
 
-export default function EmailLoginScreen({ navigation }: any) {
+export default function EmailLoginScreen() {
   const { mode, isDark } = useThemeMode();
   const { lang, t } = useLanguage();
+  const { navigate, goBack } = useNavigation();
   const colors = getColors(mode);
 
   const [isSignUp, setIsSignUp] = useState(false);
@@ -64,7 +66,7 @@ export default function EmailLoginScreen({ navigation }: any) {
         <ScrollView contentContainerStyle={s.container}>
           {/* Header */}
           <View style={s.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn}>
+            <TouchableOpacity onPress={() => goBack()} style={s.backBtn}>
               <Ionicons name="chevron-back" size={28} color={colors.text} />
             </TouchableOpacity>
             <Text style={[s.title, { color: colors.text }]}>
