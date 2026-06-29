@@ -102,6 +102,34 @@ export async function signInWithApple() {
   return data;
 }
 
+/** Email/password sign-up. */
+export async function signUpWithEmail(email: string, password: string, displayName?: string) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { display_name: displayName || '' } },
+  });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+/** Email/password sign-in. */
+export async function signInWithEmail(email: string, password: string) {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+/** Request password reset email. */
+export async function requestPasswordReset(email: string) {
+  const redirectUrl = Platform.OS === 'web'
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/reset-password`
+    : 'https://descanpo.github.io/smoke/reset-password';
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: redirectUrl });
+  if (error) throw new Error(error.message);
+}
+
 /** Local sign-out (clears the persisted session). */
 export async function signOut() {
   try {

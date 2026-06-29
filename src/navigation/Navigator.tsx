@@ -3,6 +3,8 @@ import { Platform, BackHandler } from 'react-native';
 
 export type ScreenType =
   | 'Welcome'
+  | 'EmailLogin'
+  | 'ForgotPassword'
   | 'Onboarding'
   | 'Home'
   | 'Progress'

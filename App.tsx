@@ -8,6 +8,8 @@ import { BottomNavBar } from './src/components/BottomNavBar';
 import CravingModal from './src/components/CravingModal';
 import BreathingModal from './src/components/BreathingModal';
 import WelcomeScreen from './src/screens/WelcomeScreen';
+import EmailLoginScreen from './src/screens/EmailLoginScreen';
+import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ProgressScreen from './src/screens/ProgressScreen';
@@ -159,6 +161,10 @@ const AppContent = () => {
     }
 
     switch (currentScreen) {
+      case 'EmailLogin':
+        return <EmailLoginScreen navigation={{ navigate, goBack }} />;
+      case 'ForgotPassword':
+        return <ForgotPasswordScreen navigation={{ navigate, goBack }} />;
       case 'Onboarding':
         return (
           <OnboardingScreen

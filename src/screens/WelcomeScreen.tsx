@@ -182,6 +182,19 @@ export default function WelcomeScreen() {
             )}
           </TouchableOpacity>
 
+          {/* Email */}
+          <TouchableOpacity
+            style={[s.emailBtn, { backgroundColor: isDark ? 'rgba(139,92,246,0.2)' : 'rgba(124,58,237,0.15)' }]}
+            onPress={() => navigation?.navigate?.('EmailLogin')}
+            disabled={busy}
+            activeOpacity={0.9}
+          >
+            <Ionicons name="mail" size={20} color={colors.primary} />
+            <Text style={[s.emailBtnText, { color: colors.primary }]}>
+              {lang === 'tr' ? 'E-posta ile Giriş' : 'Sign in with Email'}
+            </Text>
+          </TouchableOpacity>
+
           {!!error && <Text style={[s.errorText, { color: colors.error }]}>{error}</Text>}
 
           {/* Trust line */}
@@ -274,6 +287,16 @@ const s = StyleSheet.create({
   },
   googleLogo: { width: 19, height: 19 },
   googleBtnText: { fontSize: 15.5, fontWeight: '700', color: '#1f1f1f' },
+
+  emailBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    height: 54,
+    borderRadius: 16,
+  },
+  emailBtnText: { fontSize: 15.5, fontWeight: '700' },
 
   errorText: { fontSize: 13, textAlign: 'center', fontWeight: '500', marginTop: 14 },
 
