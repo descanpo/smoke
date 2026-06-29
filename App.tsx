@@ -299,7 +299,7 @@ const AppContent = () => {
 };
 
 // TESTING: Set to test password reset flow
-const TEST_MODE = true;
+const TEST_MODE = false;
 
 const App = () => (
   <ErrorBoundary>
