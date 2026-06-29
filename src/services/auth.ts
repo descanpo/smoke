@@ -122,9 +122,9 @@ export async function signInWithEmail(email: string, password: string) {
 
 /** Request password reset email. */
 export async function requestPasswordReset(email: string) {
-  const redirectUrl = Platform.OS === 'web'
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/reset-password`
-    : 'https://descanpo.github.io/smoke/reset-password';
+  // Always use GitHub Pages URL for reset password redirect
+  // (localhost:3001 won't work for Supabase email verification)
+  const redirectUrl = 'https://descanpo.github.io/smoke/reset-password.html';
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: redirectUrl });
   if (error) throw new Error(error.message);
