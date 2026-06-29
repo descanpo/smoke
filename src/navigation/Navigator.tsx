@@ -30,9 +30,13 @@ export const useNavigation = () => {
   return ctx;
 };
 
+// TESTING: Set to test password reset flow
+const TEST_MODE = true;
+const TEST_SCREEN: ScreenType = 'ForgotPassword';
+
 export const NavigationProvider = ({
   children,
-  initialScreen = 'Welcome',
+  initialScreen = TEST_MODE ? TEST_SCREEN : 'Welcome',
 }: {
   children: React.ReactNode;
   initialScreen?: ScreenType;
