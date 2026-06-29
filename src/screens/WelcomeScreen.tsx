@@ -185,17 +185,31 @@ export default function WelcomeScreen() {
           </TouchableOpacity>
 
           {/* Email */}
-          <TouchableOpacity
-            style={[s.emailBtn, { backgroundColor: isDark ? 'rgba(139,92,246,0.2)' : 'rgba(124,58,237,0.15)' }]}
-            onPress={() => navigate('EmailLogin')}
-            disabled={busy}
-            activeOpacity={0.9}
-          >
-            <Ionicons name="mail" size={20} color={colors.primary} />
-            <Text style={[s.emailBtnText, { color: colors.primary }]}>
-              {lang === 'tr' ? 'E-posta ile Giriş' : 'Sign in with Email'}
-            </Text>
-          </TouchableOpacity>
+          {Platform.OS === 'web' ? (
+            <View
+              style={[s.emailBtn, { backgroundColor: isDark ? 'rgba(139,92,246,0.2)' : 'rgba(124,58,237,0.15)' }]}
+              onTouchEnd={() => !busy && navigate('EmailLogin')}
+              accessible={true}
+              accessibilityRole="button"
+            >
+              <Ionicons name="mail" size={20} color={colors.primary} />
+              <Text style={[s.emailBtnText, { color: colors.primary }]}>
+                {lang === 'tr' ? 'E-posta ile Giriş' : 'Sign in with Email'}
+              </Text>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={[s.emailBtn, { backgroundColor: isDark ? 'rgba(139,92,246,0.2)' : 'rgba(124,58,237,0.15)' }]}
+              onPress={() => navigate('EmailLogin')}
+              disabled={busy}
+              activeOpacity={0.9}
+            >
+              <Ionicons name="mail" size={20} color={colors.primary} />
+              <Text style={[s.emailBtnText, { color: colors.primary }]}>
+                {lang === 'tr' ? 'E-posta ile Giriş' : 'Sign in with Email'}
+              </Text>
+            </TouchableOpacity>
+          )}
 
           {!!error && <Text style={[s.errorText, { color: colors.error }]}>{error}</Text>}
 
