@@ -298,11 +298,14 @@ const AppContent = () => {
   );
 };
 
+// TESTING: Set to test password reset flow
+const TEST_MODE = true;
+
 const App = () => (
   <ErrorBoundary>
     <ThemeProvider>
       <LanguageProvider>
-        <NavigationProvider initialScreen="Welcome">
+        <NavigationProvider initialScreen={TEST_MODE ? 'ForgotPassword' : 'Welcome'}>
           <AppContent />
         </NavigationProvider>
       </LanguageProvider>
