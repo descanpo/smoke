@@ -82,7 +82,7 @@ export default function ForgotPasswordScreen() {
 
               <TouchableOpacity
                 style={[s.doneBtn, { backgroundColor: colors.primary }]}
-                onPress={() => navigation.goBack()}
+                onPress={() => goBack()}
               >
                 <Text style={s.doneBtnText}>
                   {lang === 'tr' ? 'Giriş Sayfasına Dön' : 'Back to Sign In'}
@@ -139,7 +139,7 @@ export default function ForgotPasswordScreen() {
                 )}
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => navigation.goBack()}>
+              <TouchableOpacity onPress={() => goBack()}>
                 <Text style={[s.backLink, { color: colors.primary }]}>
                   {lang === 'tr' ? '← Giriş Sayfasına Dön' : '← Back to Sign In'}
                 </Text>

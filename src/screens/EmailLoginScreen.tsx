@@ -176,7 +176,7 @@ export default function EmailLoginScreen() {
 
             {!isSignUp && (
               <TouchableOpacity
-                onPress={() => navigation.navigate('ForgotPassword')}
+                onPress={() => navigate('ForgotPassword')}
                 style={s.forgotBtn}
               >
                 <Text style={[s.forgotText, { color: colors.primary }]}>
