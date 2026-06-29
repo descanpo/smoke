@@ -31,9 +31,12 @@ export default function ForgotPasswordScreen() {
     setLoading(true);
     setError('');
     try {
+      console.log('📧 ForgotPassword - handleReset called with:', email);
       await requestPasswordReset(email);
+      console.log('📧 ForgotPassword - reset successful, setting success state');
       setSuccess(true);
     } catch (e: any) {
+      console.error('📧 ForgotPassword - error:', e.message);
       setError(e.message || (lang === 'tr' ? 'Hata oluştu' : 'Error occurred'));
     } finally {
       setLoading(false);

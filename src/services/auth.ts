@@ -126,7 +126,9 @@ export async function requestPasswordReset(email: string) {
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/reset-password`
     : 'https://descanpo.github.io/smoke/reset-password';
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: redirectUrl });
+  console.log('🔐 Password reset request for:', email);
+  const { error, data } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: redirectUrl });
+  console.log('🔐 Reset response - error:', error, 'data:', data);
   if (error) throw new Error(error.message);
 }
 
